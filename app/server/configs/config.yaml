@@ -1,0 +1,21 @@
+server:
+  port: 8080
+  mode: debug
+
+database:
+  driver: mysql
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  password: ""
+  dbname: boread
+  max_idle_conns: 10
+  max_open_conns: 100
+
+jwt:
+  secret: boread-secret-key
+  expire: 7200
+
+log:
+  level: info
+  file: logs/boread.log

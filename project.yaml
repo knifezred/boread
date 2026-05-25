@@ -1,0 +1,29 @@
+spec_version: "2.1"
+app_id: com.knifezred.boread
+version: 0.1.0
+support_arch:
+  - amd64
+  - arm64
+supports:
+  - app
+  - pc
+is_docker_app: false
+start_cmd: bin/boread_server --port=26523
+port: 26523
+proxy_path: api
+open_type: inner
+tag_types:
+  - media
+depend_fw_version: 1.13.0.0000
+depend_docker_version: ""
+i18n:
+  en-US:
+    name: boread
+    description: A novel reader and manager application
+    author: knifezred
+    official: https://www.omgx.cn
+  zh-CN:
+    name: 不爱阅读
+    description: 小说管理阅读工具
+    author: 不爱思考
+    official: https://www.omgx.cn
