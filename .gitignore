@@ -1,6 +1,8 @@
 # Build outputs
 /dist/
 /build_dir/
+/bin/
 *.upk
 *.tar.gz
 *.zip
+app/server/configs/config.yaml
