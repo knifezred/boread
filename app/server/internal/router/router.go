@@ -6,49 +6,130 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 
-	_ "boread/docs"
 	v1 "boread/internal/handler/v1"
 	"boread/internal/middleware"
 	"boread/internal/repository"
 	"boread/internal/service"
 )
 
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-
+// SetupRouter 装配所有路由 + 依赖注入
+// 设计要点:
+//   - 所有写操作受 button-level 鉴权保护
+//   - 只读接口仅要求登录, 不做 button 校验
+//   - /api/auth/* 是公开或登录态接口, 不参与 manage 模块的按钮鉴权
 func SetupRouter(db *gorm.DB) *gin.Engine {
 	r := gin.New()
-
 	r.Use(middleware.Cors())
 	r.Use(middleware.RequestLogger())
 	r.Use(gin.Recovery())
 
+	// 健康检查
 	healthHandler := v1.NewHealthHandler()
 	r.GET("/ping", healthHandler.Ping)
 	r.NoRoute(healthHandler.NoRoute)
 	r.NoMethod(healthHandler.NoMethod)
 
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
-	userHandler := v1.NewUserHandler(userService)
-
+	// Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	api := r.Group("/api/v1")
+	// === Repository 层 ===
+	userRepo := repository.NewSysUserRepository(db)
+	deptRepo := repository.NewSysDeptRepository(db)
+	roleRepo := repository.NewSysRoleRepository(db)
+	menuRepo := repository.NewSysMenuRepository(db)
+	dictRepo := repository.NewSysDictRepository(db)
+	logRepo := repository.NewSysLogRepository(db)
+
+	// === Service 层 ===
+	authSvc := service.NewAuthService(userRepo, db)
+	deptSvc := service.NewDeptService(deptRepo)
+	roleSvc := service.NewRoleService(roleRepo)
+	userSvc := service.NewUserService(userRepo)
+	menuSvc := service.NewMenuService(menuRepo)
+	dictSvc := service.NewDictService(dictRepo)
+	logSvc := service.NewLogService(logRepo)
+
+	// === Handler 层 ===
+	authHandler := v1.NewAuthHandler(authSvc)
+	deptHandler := v1.NewDeptHandler(deptSvc)
+	roleHandler := v1.NewRoleHandler(roleSvc)
+	userHandler := v1.NewUserHandler(userSvc)
+	menuHandler := v1.NewMenuHandler(menuSvc)
+	dictHandler := v1.NewDictHandler(dictSvc)
+	logHandler := v1.NewLogHandler(logSvc)
+
+	api := r.Group("/api")
 	{
-		auth := api.Group("")
-		auth.Use(middleware.Auth())
+		// 公开
+		api.POST("/auth/login", authHandler.Login)
+
+		// 登录态
+		authed := api.Group("")
+		authed.Use(middleware.Auth())
 		{
-			auth.GET("/user/profile", userHandler.GetProfile)
-			auth.PUT("/user/profile", userHandler.UpdateProfile)
-			auth.DELETE("/user/:id", userHandler.Delete)
-			auth.GET("/user/:id", userHandler.GetByID)
+			authed.GET("/auth/userInfo", authHandler.GetUserInfo)
+			authed.GET("/auth/menu", authHandler.GetUserMenu)
+			authed.GET("/auth/buttons", authHandler.GetButtons)
 		}
 
-		api.POST("/user/register", userHandler.Register)
-		api.POST("/user/login", userHandler.Login)
-		api.GET("/users", userHandler.List)
+		// 受保护管理接口
+		manage := api.Group("/manage")
+		manage.Use(middleware.Auth())
+		{
+			// --- Dept ---
+			manage.GET("/dept/tree", deptHandler.Tree)
+			manage.GET("/dept/:id", deptHandler.GetByID)
+			manage.POST("/dept", middleware.RequireButton(authSvc, "dept:create"), deptHandler.Create)
+			manage.PUT("/dept/:id", middleware.RequireButton(authSvc, "dept:update"), deptHandler.Update)
+			manage.DELETE("/dept/:id", middleware.RequireButton(authSvc, "dept:delete"), deptHandler.Delete)
+
+			// --- Role ---
+			manage.GET("/role", roleHandler.Page)
+			manage.GET("/role/all", roleHandler.AllBrief)
+			manage.GET("/role/:id", roleHandler.GetByID)
+			manage.GET("/role/:id/menus", roleHandler.GetMenuIDs)
+			manage.GET("/role/:id/buttons", roleHandler.GetButtonIDs)
+			manage.POST("/role", middleware.RequireButton(authSvc, "role:create"), roleHandler.Create)
+			manage.PUT("/role/:id", middleware.RequireButton(authSvc, "role:update"), roleHandler.Update)
+			manage.DELETE("/role/:id", middleware.RequireButton(authSvc, "role:delete"), roleHandler.Delete)
+			manage.PUT("/role/:id/menus", middleware.RequireButton(authSvc, "role:grant"), roleHandler.GrantMenus)
+			manage.PUT("/role/:id/buttons", middleware.RequireButton(authSvc, "role:grant"), roleHandler.GrantButtons)
+
+			// --- User ---
+			manage.GET("/user", userHandler.Page)
+			manage.GET("/user/:id", userHandler.GetByID)
+			manage.POST("/user", middleware.RequireButton(authSvc, "user:create"), userHandler.Create)
+			manage.PUT("/user/:id", middleware.RequireButton(authSvc, "user:update"), userHandler.Update)
+			manage.DELETE("/user/:id", middleware.RequireButton(authSvc, "user:delete"), userHandler.Delete)
+			manage.PUT("/user/:id/reset-password", middleware.RequireButton(authSvc, "user:reset_pwd"), userHandler.ResetPassword)
+
+			// --- Menu ---
+			manage.GET("/menu", menuHandler.Page) // 菜单分页列表
+			manage.GET("/menu/tree", menuHandler.Tree)
+			manage.GET("/menu/:id", menuHandler.GetByID)
+			manage.POST("/menu", middleware.RequireButton(authSvc, "menu:create"), menuHandler.Create)
+			manage.PUT("/menu/:id", middleware.RequireButton(authSvc, "menu:update"), menuHandler.Update)
+			manage.DELETE("/menu/:id", middleware.RequireButton(authSvc, "menu:delete"), menuHandler.Delete)
+			manage.GET("/menu/buttons/:menuId", menuHandler.ListButtonsByMenu)
+			manage.POST("/menu/button", middleware.RequireButton(authSvc, "menu:create"), menuHandler.CreateButton)
+			manage.DELETE("/menu/button/:id", middleware.RequireButton(authSvc, "menu:delete"), menuHandler.DeleteButton)
+
+			// --- Dict ---
+			manage.GET("/dict", dictHandler.Page)
+			manage.GET("/dict/:id", dictHandler.GetByID)
+			manage.POST("/dict", middleware.RequireButton(authSvc, "dict:create"), dictHandler.Create)
+			manage.PUT("/dict/:id", middleware.RequireButton(authSvc, "dict:update"), dictHandler.Update)
+			manage.DELETE("/dict/:id", middleware.RequireButton(authSvc, "dict:delete"), dictHandler.Delete)
+			manage.GET("/dict/items/:dictId", dictHandler.ItemsByDictID)
+			manage.GET("/dict/code/:code", dictHandler.ItemsByCode) // 前端高频接口
+			manage.POST("/dict/item", middleware.RequireButton(authSvc, "dict:create"), dictHandler.CreateItem)
+			manage.PUT("/dict/item/:id", middleware.RequireButton(authSvc, "dict:update"), dictHandler.UpdateItem)
+			manage.DELETE("/dict/item/:id", middleware.RequireButton(authSvc, "dict:delete"), dictHandler.DeleteItem)
+
+			// --- Log ---
+			manage.GET("/log/login", logHandler.PageLogin)
+			manage.GET("/log/operation", logHandler.PageOperation)
+		}
 	}
 
 	return r

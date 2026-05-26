@@ -1,4 +1,4 @@
-.PHONY: run build build-local test clean lint tidy swag
+.PHONY: run build build-local test clean lint tidy swag seed
 
 APP_NAME    := boread
 BUILD_DIR   := bin
@@ -38,3 +38,6 @@ clean:
 
 swag:
 	swag init -g $(CMD_DIR)/main.go -o ./docs --parseDependency --parseInternal
+
+seed:
+	go run $(CMD_DIR)/ -seed

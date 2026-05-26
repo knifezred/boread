@@ -9,6 +9,7 @@ import (
 	"boread/pkg/response"
 )
 
+// Auth JWT 解析中间件: 校验 token 并把 user_id/username 注入 Context
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")

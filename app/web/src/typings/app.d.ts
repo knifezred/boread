@@ -758,10 +758,10 @@ declare namespace App {
 
     /** The backend service response data */
     type Response<T = unknown> = {
-      /** The backend service response code */
-      code: string;
-      /** The backend service response message */
-      msg: string;
+      /** The backend service response code (boread 后端使用数字 0=成功) */
+      code: number | string;
+      /** The backend service response message (boread 后端字段名为 message) */
+      message: string;
       /** The backend service response data */
       data: T;
     };

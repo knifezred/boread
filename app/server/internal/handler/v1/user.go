@@ -1,218 +1,183 @@
 package v1
 
 import (
-	"net/http"
-	"strconv"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
-	jwtPkg "boread/pkg/jwt"
 	"boread/pkg/response"
+	"boread/pkg/utils"
 )
 
+// 锚定 model 包符号引用, 让 swag 能解析 @Success data=model.SysUser
+var _ = model.SysUser{}
+
 type UserHandler struct {
-	userService *service.UserService
+	svc *service.UserService
 }
 
-func NewUserHandler(userService *service.UserService) *UserHandler {
-	return &UserHandler{userService: userService}
+func NewUserHandler(svc *service.UserService) *UserHandler {
+	return &UserHandler{svc: svc}
 }
 
-// @Summary     用户注册
-// @Tags        用户
-// @Accept      json
-// @Produce     json
-// @Param       body body dto.CreateUserRequest true "注册参数"
-// @Success     200 {object} response.Response{data=dto.UserResponse}
-// @Router      /api/v1/user/register [post]
-func (h *UserHandler) Register(c *gin.Context) {
-	var req dto.CreateUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
-		return
-	}
-
-	user, err := h.userService.Register(c.Request.Context(), &req)
-	if err != nil {
-		response.Error(c, 3001, err.Error())
-		return
-	}
-
-	response.Success(c, toUserResponse(user))
-}
-
-// @Summary     用户登录
-// @Tags        用户
-// @Accept      json
-// @Produce     json
-// @Param       body body dto.LoginRequest true "登录参数"
-// @Success     200 {object} response.Response{data=dto.LoginResponse}
-// @Router      /api/v1/user/login [post]
-func (h *UserHandler) Login(c *gin.Context) {
-	var req dto.LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
-		return
-	}
-
-	user, err := h.userService.Login(c.Request.Context(), &req)
-	if err != nil {
-		response.Error(c, 2001, err.Error())
-		return
-	}
-
-	token, err := jwtPkg.GenerateToken(user.ID, user.Username)
-	if err != nil {
-		response.Error(c, 5001, "failed to generate token")
-		return
-	}
-
-	response.Success(c, dto.LoginResponse{
-		Token:    token,
-		UserInfo: toUserResponse(user),
-	})
-}
-
-// @Summary     获取当前用户信息
-// @Tags        用户
-// @Security    BearerAuth
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} response.Response{data=dto.UserResponse}
-// @Router      /api/v1/user/profile [get]
-func (h *UserHandler) GetProfile(c *gin.Context) {
-	userID := c.GetUint("user_id")
-
-	user, err := h.userService.GetByID(c.Request.Context(), userID)
-	if err != nil {
-		response.Error(c, 3002, "user not found")
-		return
-	}
-
-	response.Success(c, toUserResponse(user))
-}
-
-// @Summary     更新当前用户信息
-// @Tags        用户
-// @Security    BearerAuth
-// @Accept      json
-// @Produce     json
-// @Param       body body dto.UpdateUserRequest true "更新参数"
-// @Success     200 {object} response.Response{data=dto.UserResponse}
-// @Router      /api/v1/user/profile [put]
-func (h *UserHandler) UpdateProfile(c *gin.Context) {
-	userID := c.GetUint("user_id")
-
-	var req dto.UpdateUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
-		return
-	}
-
-	user, err := h.userService.Update(c.Request.Context(), userID, &req)
-	if err != nil {
-		response.Error(c, 3003, err.Error())
-		return
-	}
-
-	response.Success(c, toUserResponse(user))
-}
-
-// @Summary     用户列表
-// @Tags        用户
-// @Accept      json
-// @Produce     json
-// @Param       page      query int    false "页码" default(1)
-// @Param       page_size query int    false "每页数量" default(10)
-// @Param       keyword   query string false "搜索关键词"
-// @Success     200 {object} response.Response{data=dto.PageResponse}
-// @Router      /api/v1/users [get]
-func (h *UserHandler) List(c *gin.Context) {
-	var req dto.PageRequest
+// Page 用户分页
+// @Summary   用户分页
+// @Tags      user
+// @Security  BearerAuth
+// @Produce   json
+// @Param    current     query  int     false  "页码"  default(1)
+// @Param    size        query  int     false  "页大小"  default(10)
+// @Param    userName    query  string  false  "用户名"
+// @Param    nickName    query  string  false  "昵称"
+// @Param    userPhone   query  string  false  "手机号"
+// @Param    userEmail   query  string  false  "邮箱"
+// @Param    userGender  query  string  false  "性别"
+// @Param    status      query  string  false  "状态"
+// @Success  200  {object}  response.Response{data=dto.PageResponse}
+// @Router   /api/manage/user [get]
+func (h *UserHandler) Page(c *gin.Context) {
+	var req dto.UserSearch
 	if err := c.ShouldBindQuery(&req); err != nil {
 		response.Error(c, 1001, err.Error())
 		return
 	}
-
-	users, total, err := h.userService.List(c.Request.Context(), &req)
+	resp, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5002, err.Error())
+		response.Error(c, 5001, err.Error())
 		return
 	}
-
-	userResponses := make([]dto.UserResponse, 0, len(users))
-	for _, u := range users {
-		userResponses = append(userResponses, toUserResponse(&u))
-	}
-
-	response.Success(c, dto.PageResponse{
-		List:     userResponses,
-		Total:    total,
-		Page:     req.Page,
-		PageSize: req.PageSize,
-	})
+	response.Success(c, resp)
 }
 
-// @Summary     删除用户
-// @Tags        用户
-// @Security    BearerAuth
-// @Accept      json
-// @Produce     json
-// @Param       id path int true "用户ID"
-// @Success     200 {object} response.Response
-// @Router      /api/v1/user/{id} [delete]
-func (h *UserHandler) Delete(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+// GetByID 用户详情
+// @Summary   用户详情
+// @Tags      user
+// @Security  BearerAuth
+// @Produce   json
+// @Param    id  path  int  true  "用户ID"
+// @Success  200  {object}  response.Response{data=model.SysUser}
+// @Router   /api/manage/user/{id} [get]
+func (h *UserHandler) GetByID(c *gin.Context) {
+	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
 		response.Error(c, 1001, "invalid id")
 		return
 	}
-
-	if err := h.userService.Delete(c.Request.Context(), uint(id)); err != nil {
-		response.Error(c, 3004, err.Error())
+	m, err := h.svc.GetByID(c.Request.Context(), id)
+	if err != nil {
+		response.Error(c, 3001, err.Error())
 		return
 	}
+	response.Success(c, m)
+}
 
+// Create 新增用户
+// @Summary   新增用户
+// @Tags      user
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    body  body  dto.UserCreateRequest  true  "用户"
+// @Success  200  {object}  response.Response{data=model.SysUser}
+// @Router   /api/manage/user [post]
+func (h *UserHandler) Create(c *gin.Context) {
+	var req dto.UserCreateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 1001, err.Error())
+		return
+	}
+	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
+	if err != nil {
+		response.Error(c, mapUserErr(err), err.Error())
+		return
+	}
+	response.Success(c, m)
+}
+
+// Update 编辑用户
+// @Summary   编辑用户
+// @Tags      user
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    id    path  int                     true  "用户ID"
+// @Param    body  body  dto.UserUpdateRequest   true  "用户"
+// @Success  200  {object}  response.Response{data=model.SysUser}
+// @Router   /api/manage/user/{id} [put]
+func (h *UserHandler) Update(c *gin.Context) {
+	id, err := utils.ParseUint64Param(c, "id")
+	if err != nil {
+		response.Error(c, 1001, "invalid id")
+		return
+	}
+	var req dto.UserUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 1001, err.Error())
+		return
+	}
+	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
+	if err != nil {
+		response.Error(c, mapUserErr(err), err.Error())
+		return
+	}
+	response.Success(c, m)
+}
+
+// Delete 删除用户
+// @Summary   删除用户
+// @Tags      user
+// @Security  BearerAuth
+// @Produce   json
+// @Param    id  path  int  true  "用户ID"
+// @Success  200  {object}  response.Response
+// @Router   /api/manage/user/{id} [delete]
+func (h *UserHandler) Delete(c *gin.Context) {
+	id, err := utils.ParseUint64Param(c, "id")
+	if err != nil {
+		response.Error(c, 1001, "invalid id")
+		return
+	}
+	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
+		response.Error(c, 5001, err.Error())
+		return
+	}
 	response.Success(c, nil)
 }
 
-// @Summary     根据ID获取用户
-// @Tags        用户
-// @Security    BearerAuth
-// @Accept      json
-// @Produce     json
-// @Param       id path int true "用户ID"
-// @Success     200 {object} response.Response{data=dto.UserResponse}
-// @Router      /api/v1/user/{id} [get]
-func (h *UserHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+// ResetPassword 重置密码
+// @Summary   重置密码
+// @Tags      user
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    id    path  int                       true  "用户ID"
+// @Param    body  body  dto.UserResetPwdRequest   true  "新密码"
+// @Success  200  {object}  response.Response
+// @Router   /api/manage/user/{id}/reset-password [put]
+func (h *UserHandler) ResetPassword(c *gin.Context) {
+	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		response.Error(c, 1001, "invalid id")
 		return
 	}
-
-	user, err := h.userService.GetByID(c.Request.Context(), uint(id))
-	if err != nil {
-		response.Error(c, 3002, "user not found")
+	var req dto.UserResetPwdRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 1001, err.Error())
 		return
 	}
-
-	response.Success(c, toUserResponse(user))
+	if err := h.svc.ResetPassword(c.Request.Context(), id, req.Password, utils.GetUserID(c)); err != nil {
+		response.Error(c, 5001, err.Error())
+		return
+	}
+	response.Success(c, nil)
 }
 
-func toUserResponse(u *model.User) dto.UserResponse {
-	return dto.UserResponse{
-		ID:       u.ID,
-		Username: u.Username,
-		Nickname: u.Nickname,
-		Email:    u.Email,
-		Phone:    u.Phone,
-		Avatar:   u.Avatar,
-		Status:   u.Status,
+func mapUserErr(err error) int {
+	if errors.Is(err, service.ErrUserExists) {
+		return 3001
 	}
+	return 5001
 }

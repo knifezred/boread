@@ -1,16 +1,88 @@
 basePath: /
 definitions:
-  boread_internal_dto.CreateUserRequest:
+  boread_internal_dto.DeptNode:
     properties:
-      email:
+      children:
+        items:
+          $ref: '#/definitions/boread_internal_dto.DeptNode'
+        type: array
+      deptCode:
         type: string
-      nickname:
+      deptName:
         type: string
+      id:
+        type: integer
+      leader:
+        type: string
+      parentId:
+        type: integer
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
+  boread_internal_dto.DeptRequest:
+    properties:
+      deptCode:
+        maxLength: 64
+        type: string
+      deptName:
+        maxLength: 64
+        type: string
+      leader:
+        type: string
+      parentId:
+        type: integer
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    required:
+    - deptCode
+    - deptName
+    type: object
+  boread_internal_dto.DictItemRequest:
+    properties:
+      dictId:
+        type: integer
+      itemDesc:
+        type: string
+      itemLabel:
+        maxLength: 128
+        type: string
+      itemValue:
+        maxLength: 128
+        type: string
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    required:
+    - dictId
+    - itemLabel
+    - itemValue
+    type: object
+  boread_internal_dto.DictRequest:
+    properties:
+      dictCode:
+        maxLength: 64
+        type: string
+      dictDesc:
+        type: string
+      dictName:
+        maxLength: 64
+        type: string
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    required:
+    - dictCode
+    - dictName
+    type: object
+  boread_internal_dto.LoginRequest:
+    properties:
       password:
         maxLength: 128
         minLength: 6
-        type: string
-      phone:
         type: string
       username:
         maxLength: 64
@@ -20,59 +92,610 @@ definitions:
     - password
     - username
     type: object
-  boread_internal_dto.LoginRequest:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    required:
-    - password
-    - username
-    type: object
   boread_internal_dto.LoginResponse:
     properties:
+      refreshToken:
+        type: string
       token:
         type: string
-      user_info:
-        $ref: '#/definitions/boread_internal_dto.UserResponse'
+    type: object
+  boread_internal_dto.MenuButtonRequest:
+    properties:
+      buttonCode:
+        maxLength: 64
+        type: string
+      buttonDesc:
+        type: string
+      menuId:
+        type: integer
+    required:
+    - buttonCode
+    - menuId
+    type: object
+  boread_internal_dto.MenuMeta:
+    properties:
+      activeMenu:
+        type: string
+      constant:
+        type: boolean
+      fixedIndexInTab:
+        type: integer
+      hideInMenu:
+        type: boolean
+      href:
+        type: string
+      i18nKey:
+        type: string
+      icon:
+        type: string
+      keepAlive:
+        type: boolean
+      localIcon:
+        type: string
+      multiTab:
+        type: boolean
+      order:
+        type: integer
+      roles:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  boread_internal_dto.MenuNode:
+    properties:
+      activeMenu:
+        type: string
+      buttons:
+        items:
+          $ref: '#/definitions/boread_internal_model.SysMenuButton'
+        type: array
+      children:
+        items:
+          $ref: '#/definitions/boread_internal_dto.MenuNode'
+        type: array
+      component:
+        type: string
+      constant:
+        type: boolean
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      fixedIndexInTab:
+        type: integer
+      hideInMenu:
+        type: boolean
+      href:
+        type: string
+      i18nKey:
+        type: string
+      icon:
+        type: string
+      iconType:
+        $ref: '#/definitions/boread_internal_model.IconType'
+      id:
+        type: integer
+      isSystem:
+        type: boolean
+      keepAlive:
+        type: boolean
+      menuName:
+        type: string
+      menuType:
+        $ref: '#/definitions/boread_internal_model.MenuType'
+      multiTab:
+        type: boolean
+      order:
+        type: integer
+      parentId:
+        type: integer
+      query:
+        $ref: '#/definitions/boread_internal_model.JSONMap'
+      routeName:
+        type: string
+      routePath:
+        type: string
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_dto.MenuRequest:
+    properties:
+      activeMenu:
+        type: string
+      component:
+        type: string
+      constant:
+        type: boolean
+      fixedIndexInTab:
+        type: integer
+      hideInMenu:
+        type: boolean
+      href:
+        type: string
+      i18nKey:
+        type: string
+      icon:
+        type: string
+      iconType:
+        $ref: '#/definitions/boread_internal_model.IconType'
+      keepAlive:
+        type: boolean
+      menuName:
+        maxLength: 64
+        type: string
+      menuType:
+        allOf:
+        - $ref: '#/definitions/boread_internal_model.MenuType'
+        enum:
+        - "1"
+        - "2"
+      multiTab:
+        type: boolean
+      order:
+        type: integer
+      parentId:
+        type: integer
+      query:
+        $ref: '#/definitions/boread_internal_model.JSONMap'
+      routeName:
+        maxLength: 128
+        type: string
+      routePath:
+        maxLength: 255
+        type: string
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    required:
+    - menuName
+    - menuType
+    - routeName
+    - routePath
+    type: object
+  boread_internal_dto.MenuResponse:
+    properties:
+      home:
+        type: string
+      routes:
+        items:
+          $ref: '#/definitions/boread_internal_dto.MenuRoute'
+        type: array
+    type: object
+  boread_internal_dto.MenuRoute:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/boread_internal_dto.MenuRoute'
+        type: array
+      component:
+        type: string
+      meta:
+        $ref: '#/definitions/boread_internal_dto.MenuMeta'
+      name:
+        type: string
+      path:
+        type: string
+      redirect:
+        type: string
     type: object
   boread_internal_dto.PageResponse:
     properties:
-      list: {}
-      page:
+      current:
         type: integer
-      page_size:
+      records: {}
+      size:
         type: integer
       total:
         type: integer
     type: object
-  boread_internal_dto.UpdateUserRequest:
+  boread_internal_dto.RoleBrief:
     properties:
-      avatar:
+      id:
+        type: integer
+      roleCode:
         type: string
-      email:
-        type: string
-      nickname:
-        type: string
-      phone:
+      roleName:
         type: string
     type: object
-  boread_internal_dto.UserResponse:
+  boread_internal_dto.RoleButtonRequest:
+    properties:
+      buttonIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  boread_internal_dto.RoleMenuRequest:
+    properties:
+      menuIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  boread_internal_dto.RoleRequest:
+    properties:
+      dataScope:
+        allOf:
+        - $ref: '#/definitions/boread_internal_model.DataScope'
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+      deptIds:
+        description: data_scope=2 时的自定义部门
+        items:
+          type: integer
+        type: array
+      roleCode:
+        maxLength: 64
+        type: string
+      roleDesc:
+        type: string
+      roleName:
+        maxLength: 64
+        type: string
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    required:
+    - dataScope
+    - roleCode
+    - roleName
+    type: object
+  boread_internal_dto.UserCreateRequest:
     properties:
       avatar:
         type: string
-      email:
+      deptId:
+        type: integer
+      nickName:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 6
+        type: string
+      roleIds:
+        items:
+          type: integer
+        type: array
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      userEmail:
+        type: string
+      userGender:
+        enum:
+        - "1"
+        - "2"
+        type: string
+      userName:
+        maxLength: 64
+        minLength: 3
+        type: string
+      userPhone:
+        type: string
+    required:
+    - password
+    - userName
+    type: object
+  boread_internal_dto.UserInfoResponse:
+    properties:
+      buttons:
+        items:
+          type: string
+        type: array
+      roles:
+        items:
+          type: string
+        type: array
+      userId:
+        type: string
+      userName:
+        type: string
+    type: object
+  boread_internal_dto.UserResetPwdRequest:
+    properties:
+      password:
+        maxLength: 64
+        minLength: 6
+        type: string
+    required:
+    - password
+    type: object
+  boread_internal_dto.UserUpdateRequest:
+    properties:
+      avatar:
+        type: string
+      deptId:
+        type: integer
+      nickName:
+        type: string
+      roleIds:
+        items:
+          type: integer
+        type: array
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      userEmail:
+        type: string
+      userGender:
+        enum:
+        - "1"
+        - "2"
+        type: string
+      userPhone:
+        type: string
+    type: object
+  boread_internal_model.DataScope:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    type: string
+    x-enum-comments:
+      DataScopeAll: 全部
+      DataScopeCustom: 自定义部门
+      DataScopeDept: 本部门
+      DataScopeDeptAndSub: 本部门及子部门
+      DataScopeSelf: 仅本人
+    x-enum-descriptions:
+    - 全部
+    - 自定义部门
+    - 本部门
+    - 本部门及子部门
+    - 仅本人
+    x-enum-varnames:
+    - DataScopeAll
+    - DataScopeCustom
+    - DataScopeDept
+    - DataScopeDeptAndSub
+    - DataScopeSelf
+  boread_internal_model.EnableStatus:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-varnames:
+    - StatusEnabled
+    - StatusDisabled
+  boread_internal_model.IconType:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-varnames:
+    - IconTypeIconify
+    - IconTypeLocal
+  boread_internal_model.JSONMap:
+    additionalProperties: {}
+    type: object
+  boread_internal_model.MenuType:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-comments:
+      MenuTypeDir: 目录
+      MenuTypeMenu: 菜单
+    x-enum-descriptions:
+    - 目录
+    - 菜单
+    x-enum-varnames:
+    - MenuTypeDir
+    - MenuTypeMenu
+  boread_internal_model.SysDept:
+    properties:
+      ancestors:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      deptCode:
+        type: string
+      deptName:
         type: string
       id:
         type: integer
-      nickname:
+      leader:
         type: string
-      phone:
+      parentId:
+        type: integer
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.SysDict:
+    properties:
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      dictCode:
+        type: string
+      dictDesc:
+        type: string
+      dictName:
+        type: string
+      id:
+        type: integer
+      isSystem:
+        type: boolean
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.SysDictItem:
+    properties:
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      dictId:
+        type: integer
+      id:
+        type: integer
+      itemDesc:
+        type: string
+      itemLabel:
+        type: string
+      itemValue:
+        type: string
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.SysMenu:
+    properties:
+      activeMenu:
+        type: string
+      component:
+        type: string
+      constant:
+        type: boolean
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      fixedIndexInTab:
+        type: integer
+      hideInMenu:
+        type: boolean
+      href:
+        type: string
+      i18nKey:
+        type: string
+      icon:
+        type: string
+      iconType:
+        $ref: '#/definitions/boread_internal_model.IconType'
+      id:
+        type: integer
+      isSystem:
+        type: boolean
+      keepAlive:
+        type: boolean
+      menuName:
+        type: string
+      menuType:
+        $ref: '#/definitions/boread_internal_model.MenuType'
+      multiTab:
+        type: boolean
+      order:
+        type: integer
+      parentId:
+        type: integer
+      query:
+        $ref: '#/definitions/boread_internal_model.JSONMap'
+      routeName:
+        type: string
+      routePath:
         type: string
       status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
         type: integer
-      username:
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.SysMenuButton:
+    properties:
+      buttonCode:
+        type: string
+      buttonDesc:
+        type: string
+      createTime:
+        type: string
+      id:
+        type: integer
+      menuId:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.SysRole:
+    properties:
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      dataScope:
+        $ref: '#/definitions/boread_internal_model.DataScope'
+      id:
+        type: integer
+      isSystem:
+        type: boolean
+      roleCode:
+        type: string
+      roleDesc:
+        type: string
+      roleName:
+        type: string
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.SysUser:
+    properties:
+      avatar:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      deptId:
+        type: integer
+      id:
+        type: integer
+      lastLoginIp:
+        type: string
+      lastLoginTime:
+        type: string
+      lockedUntil:
+        type: string
+      nickName:
+        type: string
+      pwdUpdatedAt:
+        type: string
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+      userEmail:
+        type: string
+      userGender:
+        type: string
+      userName:
+        type: string
+      userPhone:
         type: string
     type: object
   boread_pkg_response.Response:
@@ -86,41 +709,12 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: 阅读助手后端 API 服务
+  description: 小说阅读平台后端 API
   title: Boread API
   version: "1.0"
 paths:
-  /api/v1/user/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: 用户ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
-      security:
-      - BearerAuth: []
-      summary: 删除用户
-      tags:
-      - 用户
+  /api/auth/buttons:
     get:
-      consumes:
-      - application/json
-      parameters:
-      - description: 用户ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -131,14 +725,16 @@ paths:
             - $ref: '#/definitions/boread_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+                  items:
+                    type: string
+                  type: array
               type: object
       security:
       - BearerAuth: []
-      summary: 根据ID获取用户
+      summary: 当前用户按钮码集合
       tags:
-      - 用户
-  /api/v1/user/login:
+      - auth
+  /api/auth/login:
     post:
       consumes:
       - application/json
@@ -161,13 +757,11 @@ paths:
                 data:
                   $ref: '#/definitions/boread_internal_dto.LoginResponse'
               type: object
-      summary: 用户登录
+      summary: 登录
       tags:
-      - 用户
-  /api/v1/user/profile:
+      - auth
+  /api/auth/menu:
     get:
-      consumes:
-      - application/json
       produces:
       - application/json
       responses:
@@ -178,23 +772,15 @@ paths:
             - $ref: '#/definitions/boread_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+                  $ref: '#/definitions/boread_internal_dto.MenuResponse'
               type: object
       security:
       - BearerAuth: []
-      summary: 获取当前用户信息
+      summary: 当前用户菜单树
       tags:
-      - 用户
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: 更新参数
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/boread_internal_dto.UpdateUserRequest'
+      - auth
+  /api/auth/userInfo:
+    get:
       produces:
       - application/json
       responses:
@@ -205,24 +791,24 @@ paths:
             - $ref: '#/definitions/boread_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+                  $ref: '#/definitions/boread_internal_dto.UserInfoResponse'
               type: object
       security:
       - BearerAuth: []
-      summary: 更新当前用户信息
+      summary: 当前用户信息
       tags:
-      - 用户
-  /api/v1/user/register:
+      - auth
+  /api/manage/dept:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 注册参数
+      - description: 部门
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.CreateUserRequest'
+          $ref: '#/definitions/boread_internal_dto.DeptRequest'
       produces:
       - application/json
       responses:
@@ -233,29 +819,147 @@ paths:
             - $ref: '#/definitions/boread_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+                  $ref: '#/definitions/boread_internal_model.SysDept'
               type: object
-      summary: 用户注册
+      security:
+      - BearerAuth: []
+      summary: 新增部门
       tags:
-      - 用户
-  /api/v1/users:
+      - dept
+  /api/manage/dept/{id}:
+    delete:
+      parameters:
+      - description: 部门ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除部门
+      tags:
+      - dept
     get:
+      parameters:
+      - description: 部门ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDept'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 部门详情
+      tags:
+      - dept
+    put:
       consumes:
       - application/json
+      parameters:
+      - description: 部门ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 部门
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DeptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDept'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑部门
+      tags:
+      - dept
+  /api/manage/dept/tree:
+    get:
+      parameters:
+      - description: 部门名称
+        in: query
+        name: deptName
+        type: string
+      - description: 部门编码
+        in: query
+        name: deptCode
+        type: string
+      - description: '状态: 1启用 2禁用'
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/boread_internal_dto.DeptNode'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 部门树
+      tags:
+      - dept
+  /api/manage/dict:
+    get:
       parameters:
       - default: 1
         description: 页码
         in: query
-        name: page
+        name: current
         type: integer
       - default: 10
-        description: 每页数量
+        description: 页大小
         in: query
-        name: page_size
+        name: size
         type: integer
-      - description: 搜索关键词
+      - description: 字典名
         in: query
-        name: keyword
+        name: dictName
+        type: string
+      - description: 字典编码
+        in: query
+        name: dictCode
+        type: string
+      - description: 状态
+        in: query
+        name: status
         type: string
       produces:
       - application/json
@@ -269,10 +973,536 @@ paths:
                 data:
                   $ref: '#/definitions/boread_internal_dto.PageResponse'
               type: object
-      summary: 用户列表
+      security:
+      - BearerAuth: []
+      summary: 字典分页
       tags:
-      - 用户
-  /ping:
+      - dict
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 字典
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DictRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDict'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增字典
+      tags:
+      - dict
+  /api/manage/dict/{id}:
+    delete:
+      parameters:
+      - description: 字典ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除字典
+      tags:
+      - dict
+    get:
+      parameters:
+      - description: 字典ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDict'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 字典详情
+      tags:
+      - dict
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 字典ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 字典
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DictRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDict'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑字典
+      tags:
+      - dict
+  /api/manage/dict/code/{code}:
+    get:
+      parameters:
+      - description: 字典编码
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/boread_internal_model.SysDictItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 按字典 code 拉取字典项 (前端高频)
+      tags:
+      - dict
+  /api/manage/dict/item:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 字典项
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DictItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDictItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增字典项
+      tags:
+      - dict
+  /api/manage/dict/item/{id}:
+    delete:
+      parameters:
+      - description: 字典项ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除字典项
+      tags:
+      - dict
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 字典项ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 字典项
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DictItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysDictItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑字典项
+      tags:
+      - dict
+  /api/manage/dict/items/{dictId}:
+    get:
+      parameters:
+      - description: 字典ID
+        in: path
+        name: dictId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/boread_internal_model.SysDictItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 按字典ID查项
+      tags:
+      - dict
+  /api/manage/log/login:
+    get:
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: current
+        type: integer
+      - default: 10
+        description: 页大小
+        in: query
+        name: size
+        type: integer
+      - description: 用户名
+        in: query
+        name: userName
+        type: string
+      - description: 登录IP
+        in: query
+        name: loginIp
+        type: string
+      - description: '类型: 1登录 2登出'
+        in: query
+        name: loginType
+        type: string
+      - description: '结果: 1成功 2失败'
+        in: query
+        name: loginResult
+        type: string
+      - description: 开始时间
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 登录日志分页
+      tags:
+      - log
+  /api/manage/log/operation:
+    get:
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: current
+        type: integer
+      - default: 10
+        description: 页大小
+        in: query
+        name: size
+        type: integer
+      - description: 用户名
+        in: query
+        name: userName
+        type: string
+      - description: 模块
+        in: query
+        name: module
+        type: string
+      - description: 动作
+        in: query
+        name: action
+        type: string
+      - description: 客户端IP
+        in: query
+        name: clientIp
+        type: string
+      - description: 开始时间
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 操作日志分页
+      tags:
+      - log
+  /api/manage/menu:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 菜单
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.MenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysMenu'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增菜单
+      tags:
+      - menu
+  /api/manage/menu/{id}:
+    delete:
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除菜单
+      tags:
+      - menu
+    get:
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysMenu'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 菜单详情
+      tags:
+      - menu
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 菜单
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.MenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysMenu'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑菜单
+      tags:
+      - menu
+  /api/manage/menu/button:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 按钮
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.MenuButtonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysMenuButton'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增菜单按钮
+      tags:
+      - menu
+  /api/manage/menu/button/{id}:
+    delete:
+      parameters:
+      - description: 按钮ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除菜单按钮
+      tags:
+      - menu
+  /api/manage/menu/buttons/{menuId}:
+    get:
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: menuId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/boread_internal_model.SysMenuButton'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 按菜单查按钮
+      tags:
+      - menu
+  /api/manage/menu/tree:
     get:
       produces:
       - application/json
@@ -284,9 +1514,489 @@ paths:
             - $ref: '#/definitions/boread_pkg_response.Response'
             - properties:
                 data:
-                  type: object
+                  items:
+                    $ref: '#/definitions/boread_internal_dto.MenuNode'
+                  type: array
               type: object
+      security:
+      - BearerAuth: []
+      summary: 全量菜单树 (含按钮)
+      tags:
+      - menu
+  /api/manage/role:
+    get:
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: current
+        type: integer
+      - default: 10
+        description: 页大小
+        in: query
+        name: size
+        type: integer
+      - description: 角色名
+        in: query
+        name: roleName
+        type: string
+      - description: 角色编码
+        in: query
+        name: roleCode
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 角色分页
+      tags:
+      - role
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.RoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysRole'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增角色
+      tags:
+      - role
+  /api/manage/role/{id}:
+    delete:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除角色
+      tags:
+      - role
+    get:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysRole'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 角色详情
+      tags:
+      - role
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 角色
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.RoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysRole'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑角色
+      tags:
+      - role
+  /api/manage/role/{id}/buttons:
+    get:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    type: integer
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 角色已授权的按钮 IDs
+      tags:
+      - role
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 按钮 IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.RoleButtonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 角色授权按钮
+      tags:
+      - role
+  /api/manage/role/{id}/menus:
+    get:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    type: integer
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 角色已授权的菜单 IDs
+      tags:
+      - role
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 菜单 IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.RoleMenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 角色授权菜单
+      tags:
+      - role
+  /api/manage/role/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/boread_internal_dto.RoleBrief'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 全量角色 (下拉)
+      tags:
+      - role
+  /api/manage/user:
+    get:
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: current
+        type: integer
+      - default: 10
+        description: 页大小
+        in: query
+        name: size
+        type: integer
+      - description: 用户名
+        in: query
+        name: userName
+        type: string
+      - description: 昵称
+        in: query
+        name: nickName
+        type: string
+      - description: 手机号
+        in: query
+        name: userPhone
+        type: string
+      - description: 邮箱
+        in: query
+        name: userEmail
+        type: string
+      - description: 性别
+        in: query
+        name: userGender
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 用户分页
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysUser'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增用户
+      tags:
+      - user
+  /api/manage/user/{id}:
+    delete:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除用户
+      tags:
+      - user
+    get:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysUser'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 用户详情
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 用户
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.SysUser'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑用户
+      tags:
+      - user
+  /api/manage/user/{id}/reset-password:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 新密码
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.UserResetPwdRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 重置密码
+      tags:
+      - user
+  /ping:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
       summary: 健康检查
       tags:
-      - 系统
+      - system
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

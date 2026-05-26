@@ -8,4 +8,5 @@ logs/
 *.upk
 *.tar.gz
 *.zip
+*.exe
 app/server/configs/config.yaml

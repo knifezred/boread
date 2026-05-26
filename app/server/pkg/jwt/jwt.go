@@ -8,7 +8,7 @@ import (
 )
 
 type Claims struct {
-	UserID   uint   `json:"user_id"`
+	UserID   uint64 `json:"user_id"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
@@ -21,18 +21,37 @@ func Init(secret string, expire int) {
 	jwtExpire = time.Duration(expire) * time.Second
 }
 
-func GenerateToken(userID uint, username string) (string, error) {
+func GenerateToken(userID uint64, username string) (token string, expiresAt int64, err error) {
+	expiresAtTime := time.Now().Add(jwtExpire)
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtExpire)),
+			ExpiresAt: jwt.NewNumericDate(expiresAtTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err = tokenObj.SignedString(jwtSecret)
+	return token, expiresAtTime.Unix(), err
+}
+
+// GenerateRefreshToken 生成刷新token，过期时间为token的2倍
+func GenerateRefreshToken(userID uint64, username string) (token string, expiresAt int64, err error) {
+	expiresAtTime := time.Now().Add(jwtExpire * 2)
+	claims := Claims{
+		UserID:   userID,
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiresAtTime),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err = tokenObj.SignedString(jwtSecret)
+	return token, expiresAtTime.Unix(), err
 }
 
 func ParseToken(tokenString string) (*Claims, error) {
