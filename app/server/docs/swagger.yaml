@@ -1,0 +1,292 @@
+basePath: /
+definitions:
+  boread_internal_dto.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      nickname:
+        type: string
+      password:
+        maxLength: 128
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      username:
+        maxLength: 64
+        minLength: 3
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  boread_internal_dto.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  boread_internal_dto.LoginResponse:
+    properties:
+      token:
+        type: string
+      user_info:
+        $ref: '#/definitions/boread_internal_dto.UserResponse'
+    type: object
+  boread_internal_dto.PageResponse:
+    properties:
+      list: {}
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  boread_internal_dto.UpdateUserRequest:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      phone:
+        type: string
+    type: object
+  boread_internal_dto.UserResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      nickname:
+        type: string
+      phone:
+        type: string
+      status:
+        type: integer
+      username:
+        type: string
+    type: object
+  boread_pkg_response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 阅读助手后端 API 服务
+  title: Boread API
+  version: "1.0"
+paths:
+  /api/v1/user/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除用户
+      tags:
+      - 用户
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据ID获取用户
+      tags:
+      - 用户
+  /api/v1/user/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 登录参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.LoginResponse'
+              type: object
+      summary: 用户登录
+      tags:
+      - 用户
+  /api/v1/user/profile:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - 用户
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新当前用户信息
+      tags:
+      - 用户
+  /api/v1/user/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 注册参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.UserResponse'
+              type: object
+      summary: 用户注册
+      tags:
+      - 用户
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      summary: 用户列表
+      tags:
+      - 用户
+  /ping:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: 健康检查
+      tags:
+      - 系统
+swagger: "2.0"

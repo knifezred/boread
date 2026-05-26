@@ -2,6 +2,9 @@
 /dist/
 /build_dir/
 /bin/
+/logs/
+logs/
+*.log
 *.upk
 *.tar.gz
 *.zip

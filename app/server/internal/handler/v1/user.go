@@ -21,6 +21,13 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
+// @Summary     用户注册
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+// @Param       body body dto.CreateUserRequest true "注册参数"
+// @Success     200 {object} response.Response{data=dto.UserResponse}
+// @Router      /api/v1/user/register [post]
 func (h *UserHandler) Register(c *gin.Context) {
 	var req dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -37,6 +44,13 @@ func (h *UserHandler) Register(c *gin.Context) {
 	response.Success(c, toUserResponse(user))
 }
 
+// @Summary     用户登录
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+// @Param       body body dto.LoginRequest true "登录参数"
+// @Success     200 {object} response.Response{data=dto.LoginResponse}
+// @Router      /api/v1/user/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -62,6 +76,13 @@ func (h *UserHandler) Login(c *gin.Context) {
 	})
 }
 
+// @Summary     获取当前用户信息
+// @Tags        用户
+// @Security    BearerAuth
+// @Accept      json
+// @Produce     json
+// @Success     200 {object} response.Response{data=dto.UserResponse}
+// @Router      /api/v1/user/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -74,6 +95,14 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	response.Success(c, toUserResponse(user))
 }
 
+// @Summary     更新当前用户信息
+// @Tags        用户
+// @Security    BearerAuth
+// @Accept      json
+// @Produce     json
+// @Param       body body dto.UpdateUserRequest true "更新参数"
+// @Success     200 {object} response.Response{data=dto.UserResponse}
+// @Router      /api/v1/user/profile [put]
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -92,6 +121,15 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	response.Success(c, toUserResponse(user))
 }
 
+// @Summary     用户列表
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+// @Param       page      query int    false "页码" default(1)
+// @Param       page_size query int    false "每页数量" default(10)
+// @Param       keyword   query string false "搜索关键词"
+// @Success     200 {object} response.Response{data=dto.PageResponse}
+// @Router      /api/v1/users [get]
 func (h *UserHandler) List(c *gin.Context) {
 	var req dto.PageRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -118,6 +156,14 @@ func (h *UserHandler) List(c *gin.Context) {
 	})
 }
 
+// @Summary     删除用户
+// @Tags        用户
+// @Security    BearerAuth
+// @Accept      json
+// @Produce     json
+// @Param       id path int true "用户ID"
+// @Success     200 {object} response.Response
+// @Router      /api/v1/user/{id} [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -134,6 +180,14 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	response.Success(c, nil)
 }
 
+// @Summary     根据ID获取用户
+// @Tags        用户
+// @Security    BearerAuth
+// @Accept      json
+// @Produce     json
+// @Param       id path int true "用户ID"
+// @Success     200 {object} response.Response{data=dto.UserResponse}
+// @Router      /api/v1/user/{id} [get]
 func (h *UserHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)

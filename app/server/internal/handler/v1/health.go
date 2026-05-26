@@ -14,6 +14,11 @@ func NewHealthHandler() *HealthHandler {
 	return &HealthHandler{}
 }
 
+// @Summary     健康检查
+// @Tags        系统
+// @Produce     json
+// @Success     200 {object} response.Response{data=object}
+// @Router      /ping [get]
 func (h *HealthHandler) Ping(c *gin.Context) {
 	response.Success(c, gin.H{"status": "ok"})
 }

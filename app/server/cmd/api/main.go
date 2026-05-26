@@ -7,11 +7,18 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	_ "boread/docs"
 	"boread/internal/router"
 	"boread/pkg/config"
 	jwtPkg "boread/pkg/jwt"
 	"boread/pkg/logger"
 )
+
+// @title           Boread API
+// @version         1.0
+// @description     阅读助手后端 API 服务
+// @host            localhost:8080
+// @BasePath        /
 
 func main() {
 	if err := config.Load("configs/config.yaml"); err != nil {
