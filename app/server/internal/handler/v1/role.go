@@ -27,17 +27,14 @@ func NewRoleHandler(svc *service.RoleService) *RoleHandler {
 // @Summary   角色分页
 // @Tags      role
 // @Security  BearerAuth
+// @Accept    json
 // @Produce   json
-// @Param    current   query  int     false  "页码"  default(1)
-// @Param    size      query  int     false  "页大小"  default(10)
-// @Param    roleName  query  string  false  "角色名"
-// @Param    roleCode  query  string  false  "角色编码"
-// @Param    status    query  string  false  "状态"
+// @Param    body  body  dto.RoleSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/role [get]
+// @Router   /api/manage/role/page [post]
 func (h *RoleHandler) Page(c *gin.Context) {
 	var req dto.RoleSearch
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, 1001, err.Error())
 		return
 	}

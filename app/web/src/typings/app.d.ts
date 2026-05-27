@@ -2,10 +2,10 @@
 declare namespace App {
   /** Theme namespace */
   namespace Theme {
-    type ColorPaletteNumber = import('@sa/color').ColorPaletteNumber;
+    type ColorPaletteNumber = import("@sa/color").ColorPaletteNumber;
 
     /** NaiveUI theme overrides that can be specified in preset */
-    type NaiveUIThemeOverride = import('naive-ui').GlobalThemeOverrides;
+    type NaiveUIThemeOverride = import("naive-ui").GlobalThemeOverrides;
 
     /** Theme setting */
     interface ThemeSetting {
@@ -160,7 +160,7 @@ declare namespace App {
       container: string;
       layout: string;
       inverted: string;
-      'base-text': string;
+      "base-text": string;
     }
 
     interface ThemeSettingTokenBoxShadow {
@@ -185,12 +185,13 @@ declare namespace App {
 
   /** Global namespace */
   namespace Global {
-    type VNode = import('vue').VNode;
-    type RouteLocationNormalizedLoaded = import('vue-router').RouteLocationNormalizedLoaded;
-    type RouteKey = import('@elegant-router/types').RouteKey;
-    type RouteMap = import('@elegant-router/types').RouteMap;
-    type RoutePath = import('@elegant-router/types').RoutePath;
-    type LastLevelRouteKey = import('@elegant-router/types').LastLevelRouteKey;
+    type VNode = import("vue").VNode;
+    type RouteLocationNormalizedLoaded =
+      import("vue-router").RouteLocationNormalizedLoaded;
+    type RouteKey = import("@elegant-router/types").RouteKey;
+    type RouteMap = import("@elegant-router/types").RouteMap;
+    type RoutePath = import("@elegant-router/types").RoutePath;
+    type LastLevelRouteKey = import("@elegant-router/types").LastLevelRouteKey;
 
     /** The router push options */
     type RouterPushOptions = {
@@ -231,13 +232,18 @@ declare namespace App {
       children?: Menu[];
     };
 
-    type Breadcrumb = Omit<Menu, 'children'> & {
+    type Breadcrumb = Omit<Menu, "children"> & {
       options?: Breadcrumb[];
     };
 
     /** Tab route */
-    type TabRoute = Pick<RouteLocationNormalizedLoaded, 'name' | 'path' | 'meta'> &
-      Partial<Pick<RouteLocationNormalizedLoaded, 'fullPath' | 'query' | 'matched'>>;
+    type TabRoute = Pick<
+      RouteLocationNormalizedLoaded,
+      "name" | "path" | "meta"
+    > &
+      Partial<
+        Pick<RouteLocationNormalizedLoaded, "fullPath" | "query" | "matched">
+      >;
 
     /** The global tab */
     type Tab = {
@@ -282,10 +288,17 @@ declare namespace App {
     };
 
     /** Form rule */
-    type FormRule = import('naive-ui').FormItemRule;
+    type FormRule = import("naive-ui").FormItemRule;
 
     /** The global dropdown key */
-    type DropdownKey = 'closeCurrent' | 'closeOther' | 'closeLeft' | 'closeRight' | 'closeAll' | 'pin' | 'unpin';
+    type DropdownKey =
+      | "closeCurrent"
+      | "closeOther"
+      | "closeLeft"
+      | "closeRight"
+      | "closeAll"
+      | "pin"
+      | "unpin";
   }
 
   /**
@@ -294,16 +307,16 @@ declare namespace App {
    * Locales type
    */
   namespace I18n {
-    type RouteKey = import('@elegant-router/types').RouteKey;
+    type RouteKey = import("@elegant-router/types").RouteKey;
 
-    type LangType = 'en-US' | 'zh-CN';
+    type LangType = "en-US" | "zh-CN";
 
     type LangOption = {
       label: string;
       key: LangType;
     };
 
-    type I18nRouteKey = Exclude<RouteKey, 'root' | 'not-found'>;
+    type I18nRouteKey = Exclude<RouteKey, "root" | "not-found">;
 
     type FormMsg = {
       required: string;
@@ -347,6 +360,11 @@ declare namespace App {
         modifySuccess: string;
         noData: string;
         operate: string;
+        enable: string;
+        disable: string;
+        operateSuccess: string;
+        createTime: string;
+        updateTime: string;
         pleaseCheckValue: string;
         refresh: string;
         reset: string;
@@ -404,7 +422,10 @@ declare namespace App {
           };
         };
         layout: {
-          layoutMode: { title: string } & Record<UnionKey.ThemeLayoutMode, string> & {
+          layoutMode: { title: string } & Record<
+            UnionKey.ThemeLayoutMode,
+            string
+          > & {
               [K in `${UnionKey.ThemeLayoutMode}_detail`]: string;
             };
           tab: {
@@ -445,10 +466,16 @@ declare namespace App {
           };
           content: {
             title: string;
-            scrollMode: { title: string; tip: string } & Record<UnionKey.ThemeScrollMode, string>;
+            scrollMode: { title: string; tip: string } & Record<
+              UnionKey.ThemeScrollMode,
+              string
+            >;
             page: {
               animate: string;
-              mode: { title: string } & Record<UnionKey.ThemePageAnimateMode, string>;
+              mode: { title: string } & Record<
+                UnionKey.ThemePageAnimateMode,
+                string
+              >;
             };
             fixedHeaderAndTab: string;
           };
@@ -555,7 +582,7 @@ declare namespace App {
           };
           creativity: string;
         };
-        
+
         manage: {
           common: {
             status: {
@@ -574,6 +601,14 @@ declare namespace App {
               roleCode: string;
               roleStatus: string;
               roleDesc: string;
+            };
+            dataScope: {
+              title: string;
+              all: string;
+              custom: string;
+              dept: string;
+              deptAndSub: string;
+              self: string;
             };
             addRole: string;
             editRole: string;
@@ -673,6 +708,84 @@ declare namespace App {
               local: string;
             };
           };
+          dept: {
+            title: string;
+            deptId: string;
+            deptName: string;
+            deptCode: string;
+            leader: string;
+            parentId: string;
+            sortOrder: string;
+            status: string;
+            form: {
+              parentId: string;
+              deptName: string;
+              deptCode: string;
+              leader: string;
+              sortOrder: string;
+              status: string;
+            };
+            addDept: string;
+            editDept: string;
+            addChildDept: string;
+          };
+          dict: {
+            title: string;
+            dictName: string;
+            dictCode: string;
+            dictDesc: string;
+            dictStatus: string;
+            form: {
+              dictName: string;
+              dictCode: string;
+              dictDesc: string;
+              dictStatus: string;
+            };
+            addDict: string;
+            editDict: string;
+          };
+          dictItem: {
+            title: string;
+            itemLabel: string;
+            itemValue: string;
+            itemDesc: string;
+            sortOrder: string;
+            itemStatus: string;
+            form: {
+              itemLabel: string;
+              itemValue: string;
+              itemDesc: string;
+              sortOrder: string;
+              itemStatus: string;
+            };
+            addDictItem: string;
+            editDictItem: string;
+          };
+          log: {
+            title: string;
+            loginLog: string;
+            operationLog: string;
+            userName: string;
+            loginIp: string;
+            loginType: string;
+            loginResult: string;
+            module: string;
+            action: string;
+            clientIp: string;
+            startTime: string;
+            endTime: string;
+            form: {
+              userName: string;
+              loginIp: string;
+              loginType: string;
+              loginResult: string;
+              module: string;
+              action: string;
+              clientIp: string;
+              startTime: string;
+              endTime: string;
+            };
+          };
         };
       };
       form: {
@@ -707,7 +820,10 @@ declare namespace App {
       };
     };
 
-    type GetI18nKey<T extends Record<string, unknown>, K extends keyof T = keyof T> = K extends string
+    type GetI18nKey<
+      T extends Record<string, unknown>,
+      K extends keyof T = keyof T,
+    > = K extends string
       ? T[K] extends Record<string, unknown>
         ? `${K}.${GetI18nKey<T[K]>}`
         : K
@@ -715,25 +831,46 @@ declare namespace App {
 
     type I18nKey = GetI18nKey<Schema>;
 
-    type TranslateOptions<Locales extends string> = import('vue-i18n').TranslateOptions<Locales>;
+    type TranslateOptions<Locales extends string> =
+      import("vue-i18n").TranslateOptions<Locales>;
 
     interface $T {
       (key: I18nKey): string;
-      (key: I18nKey, plural: number, options?: TranslateOptions<LangType>): string;
-      (key: I18nKey, defaultMsg: string, options?: TranslateOptions<I18nKey>): string;
-      (key: I18nKey, list: unknown[], options?: TranslateOptions<I18nKey>): string;
+      (
+        key: I18nKey,
+        plural: number,
+        options?: TranslateOptions<LangType>,
+      ): string;
+      (
+        key: I18nKey,
+        defaultMsg: string,
+        options?: TranslateOptions<I18nKey>,
+      ): string;
+      (
+        key: I18nKey,
+        list: unknown[],
+        options?: TranslateOptions<I18nKey>,
+      ): string;
       (key: I18nKey, list: unknown[], plural: number): string;
       (key: I18nKey, list: unknown[], defaultMsg: string): string;
-      (key: I18nKey, named: Record<string, unknown>, options?: TranslateOptions<LangType>): string;
+      (
+        key: I18nKey,
+        named: Record<string, unknown>,
+        options?: TranslateOptions<LangType>,
+      ): string;
       (key: I18nKey, named: Record<string, unknown>, plural: number): string;
-      (key: I18nKey, named: Record<string, unknown>, defaultMsg: string): string;
+      (
+        key: I18nKey,
+        named: Record<string, unknown>,
+        defaultMsg: string,
+      ): string;
     }
   }
 
   /** Service namespace */
   namespace Service {
     /** Other baseURL key */
-    type OtherBaseURLKey = 'demo';
+    type OtherBaseURLKey = "demo";
 
     interface ServiceConfigItem {
       /** The backend service base url */
@@ -752,7 +889,7 @@ declare namespace App {
       other: OtherServiceConfigItem[];
     }
 
-    interface SimpleServiceConfig extends Pick<ServiceConfigItem, 'baseURL'> {
+    interface SimpleServiceConfig extends Pick<ServiceConfigItem, "baseURL"> {
       other: Record<OtherBaseURLKey, string>;
     }
 

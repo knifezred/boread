@@ -27,20 +27,14 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 // @Summary   用户分页
 // @Tags      user
 // @Security  BearerAuth
+// @Accept    json
 // @Produce   json
-// @Param    current     query  int     false  "页码"  default(1)
-// @Param    size        query  int     false  "页大小"  default(10)
-// @Param    userName    query  string  false  "用户名"
-// @Param    nickName    query  string  false  "昵称"
-// @Param    userPhone   query  string  false  "手机号"
-// @Param    userEmail   query  string  false  "邮箱"
-// @Param    userGender  query  string  false  "性别"
-// @Param    status      query  string  false  "状态"
+// @Param    body  body  dto.UserSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/user [get]
+// @Router   /api/manage/user/page [post]
 func (h *UserHandler) Page(c *gin.Context) {
 	var req dto.UserSearch
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, 1001, err.Error())
 		return
 	}

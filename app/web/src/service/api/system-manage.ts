@@ -11,9 +11,9 @@ import { request } from "../request";
 /** 角色分页 */
 export function fetchGetRoleList(params?: Api.SystemManage.RoleSearchParams) {
   return request<Api.SystemManage.RoleList>({
-    url: "/manage/role",
-    method: "get",
-    params,
+    url: "/manage/role/page",
+    method: "post",
+    data: params,
   });
 }
 
@@ -112,9 +112,9 @@ export function fetchGrantRoleButtons(
 /** 用户分页 */
 export function fetchGetUserList(params?: Api.SystemManage.UserSearchParams) {
   return request<Api.SystemManage.UserList>({
-    url: "/manage/user",
-    method: "get",
-    params,
+    url: "/manage/user/page",
+    method: "post",
+    data: params,
   });
 }
 
@@ -176,10 +176,11 @@ export function fetchResetUserPassword(id: string | number, password: string) {
 // -------- Menu --------
 
 /** 菜单分页列表 */
-export function fetchGetMenuList() {
+export function fetchGetMenuList(params?: Api.SystemManage.MenuSearchParams) {
   return request<Api.SystemManage.MenuList>({
-    url: "/manage/menu",
-    method: "get",
+    url: "/manage/menu/page",
+    method: "post",
+    data: params,
   });
 }
 
@@ -274,16 +275,25 @@ export function fetchGetDeptTree(params?: {
   deptCode?: string;
   status?: string;
 }) {
-  return request<any[]>({
+  return request<Api.SystemManage.Dept[]>({
     url: "/manage/dept/tree",
     method: "get",
     params,
   });
 }
 
+/** 部门分页列表 */
+export function fetchGetDeptList(params?: Api.SystemManage.DeptSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Dept>>({
+    url: "/manage/dept/page",
+    method: "post",
+    data: params,
+  });
+}
+
 /** 部门详情 */
 export function fetchGetDept(id: string | number) {
-  return request<any>({
+  return request<Api.SystemManage.Dept>({
     url: `/manage/dept/${id}`,
     method: "get",
   });
@@ -291,7 +301,7 @@ export function fetchGetDept(id: string | number) {
 
 /** 新增部门 */
 export function fetchCreateDept(data: Record<string, any>) {
-  return request({
+  return request<Api.SystemManage.Dept>({
     url: "/manage/dept",
     method: "post",
     data,
@@ -303,7 +313,7 @@ export function fetchUpdateDept(
   id: string | number,
   data: Record<string, any>,
 ) {
-  return request({
+  return request<Api.SystemManage.Dept>({
     url: `/manage/dept/${id}`,
     method: "put",
     data,
@@ -321,23 +331,17 @@ export function fetchDeleteDept(id: string | number) {
 // -------- Dict --------
 
 /** 字典分页 */
-export function fetchGetDictList(params?: {
-  current?: number;
-  size?: number;
-  dictName?: string;
-  dictCode?: string;
-  status?: string;
-}) {
-  return request({
-    url: "/manage/dict",
-    method: "get",
-    params,
+export function fetchGetDictList(params?: Api.SystemManage.DictSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Dict>>({
+    url: "/manage/dict/page",
+    method: "post",
+    data: params,
   });
 }
 
 /** 字典详情 */
 export function fetchGetDict(id: string | number) {
-  return request({
+  return request<Api.SystemManage.Dict>({
     url: `/manage/dict/${id}`,
     method: "get",
   });
@@ -345,7 +349,7 @@ export function fetchGetDict(id: string | number) {
 
 /** 新增字典 */
 export function fetchCreateDict(data: Record<string, any>) {
-  return request({
+  return request<Api.SystemManage.Dict>({
     url: "/manage/dict",
     method: "post",
     data,
@@ -357,7 +361,7 @@ export function fetchUpdateDict(
   id: string | number,
   data: Record<string, any>,
 ) {
-  return request({
+  return request<Api.SystemManage.Dict>({
     url: `/manage/dict/${id}`,
     method: "put",
     data,
@@ -374,7 +378,7 @@ export function fetchDeleteDict(id: string | number) {
 
 /** 按字典 ID 查项 */
 export function fetchGetDictItems(dictId: string | number) {
-  return request<any[]>({
+  return request<Api.SystemManage.DictItem[]>({
     url: `/manage/dict/items/${dictId}`,
     method: "get",
   });
@@ -382,15 +386,22 @@ export function fetchGetDictItems(dictId: string | number) {
 
 /** 按字典 code 拉项 (前端下拉高频) */
 export function fetchGetDictItemsByCode(code: string) {
-  return request<any[]>({
+  return request<Api.SystemManage.DictItem[]>({
     url: `/manage/dict/code/${code}`,
     method: "get",
   });
 }
 
 /** 新增字典项 */
-export function fetchCreateDictItem(data: Record<string, any>) {
-  return request({
+export function fetchCreateDictItem(data: {
+  dictId: number;
+  itemLabel: string;
+  itemValue: string;
+  itemDesc?: string;
+  sortOrder?: number;
+  status?: string;
+}) {
+  return request<Api.SystemManage.DictItem>({
     url: "/manage/dict/item",
     method: "post",
     data,
@@ -400,9 +411,16 @@ export function fetchCreateDictItem(data: Record<string, any>) {
 /** 编辑字典项 */
 export function fetchUpdateDictItem(
   id: string | number,
-  data: Record<string, any>,
+  data: {
+    dictId: number;
+    itemLabel: string;
+    itemValue: string;
+    itemDesc: string;
+    sortOrder: number;
+    status: string;
+  },
 ) {
-  return request({
+  return request<Api.SystemManage.DictItem>({
     url: `/manage/dict/item/${id}`,
     method: "put",
     data,
@@ -420,37 +438,19 @@ export function fetchDeleteDictItem(id: string | number) {
 // -------- Log --------
 
 /** 登录日志分页 */
-export function fetchGetLoginLogList(params?: {
-  current?: number;
-  size?: number;
-  userName?: string;
-  loginIp?: string;
-  loginType?: string;
-  loginResult?: string;
-  startTime?: string;
-  endTime?: string;
-}) {
-  return request({
-    url: "/manage/log/login",
-    method: "get",
-    params,
+export function fetchGetLoginLogList(params?: Api.SystemManage.LoginLogSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<any>>({
+    url: "/manage/log/login/page",
+    method: "post",
+    data: params,
   });
 }
 
 /** 操作日志分页 */
-export function fetchGetOperationLogList(params?: {
-  current?: number;
-  size?: number;
-  userName?: string;
-  module?: string;
-  action?: string;
-  clientIp?: string;
-  startTime?: string;
-  endTime?: string;
-}) {
-  return request({
-    url: "/manage/log/operation",
-    method: "get",
-    params,
+export function fetchGetOperationLogList(params?: Api.SystemManage.OperationLogSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<any>>({
+    url: "/manage/log/operation/page",
+    method: "post",
+    data: params,
   });
 }

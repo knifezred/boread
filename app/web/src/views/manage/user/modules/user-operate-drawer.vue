@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { jsonClone } from '@sa/utils';
 import { enableStatusOptions, userGenderOptions } from '@/constants/business';
-import { fetchGetAllRoles } from '@/service/api';
+import { fetchGetAllRoles, fetchCreateUser, fetchUpdateUser } from '@/service/api';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
 import { $t } from '@/locales';
 
@@ -42,14 +42,16 @@ const title = computed(() => {
 
 type Model = Pick<
   Api.SystemManage.User,
-  'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status'
+  'id' | 'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status' | 'password'
 >;
 
 const model = ref(createDefaultModel());
 
 function createDefaultModel(): Model {
   return {
+    id: 0,
     userName: '',
+    password: '',
     userGender: null,
     nickName: '',
     userPhone: '',
@@ -105,7 +107,15 @@ function closeDrawer() {
 async function handleSubmit() {
   await validate();
   // request
-  window.$message?.success($t('common.updateSuccess'));
+  let requestResult;
+  if (props.operateType === 'edit') {
+    requestResult = await fetchUpdateUser(model.value.id, { ...model.value });
+  } else {
+    requestResult = await fetchCreateUser({ ...model.value });
+  }
+  if (requestResult.error) {
+    window.$message?.error(requestResult.error.message);
+  }
   closeDrawer();
   emit('submitted');
 }
@@ -146,12 +156,8 @@ watch(visible, () => {
           </NRadioGroup>
         </NFormItem>
         <NFormItem :label="$t('page.manage.user.userRole')" path="roles">
-          <NSelect
-            v-model:value="model.userRoles"
-            multiple
-            :options="roleOptions"
-            :placeholder="$t('page.manage.user.form.userRole')"
-          />
+          <NSelect v-model:value="model.userRoles" multiple :options="roleOptions"
+            :placeholder="$t('page.manage.user.form.userRole')" />
         </NFormItem>
       </NForm>
       <template #footer>

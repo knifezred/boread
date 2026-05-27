@@ -21,15 +21,15 @@ type MenuRequest struct {
 	ActiveMenu      string             `json:"activeMenu"`
 	MultiTab        bool               `json:"multiTab"`
 	FixedIndexInTab *int               `json:"fixedIndexInTab"`
-	Query           model.JSONMap      `json:"query"`
+	Query           any                `json:"query"`
 	Status          model.EnableStatus `json:"status"`
 }
 
 // MenuSearch 菜单分页搜索 (对齐前端 Api.SystemManage.MenuSearchParams)
 type MenuSearch struct {
 	PageRequest
-	MenuName string             `form:"menuName"`
-	Status   model.EnableStatus `form:"status"`
+	MenuName string             `json:"menuName"`
+	Status   model.EnableStatus `json:"status"`
 }
 
 // MenuButtonRequest 菜单按钮请求

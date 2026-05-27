@@ -48,8 +48,13 @@ func (s *MenuService) Create(ctx context.Context, req *dto.MenuRequest, opID uin
 		HideInMenu:      req.HideInMenu,
 		MultiTab:        req.MultiTab,
 		FixedIndexInTab: req.FixedIndexInTab,
-		Query:           req.Query,
 		Status:          status,
+	}
+	// 兼容处理query字段：只有是map类型才赋值，数组/空值赋值为nil
+	if q, ok := req.Query.(map[string]any); ok && q != nil {
+		m.Query = model.JSONMap(q)
+	} else {
+		m.Query = nil
 	}
 	if req.Component != "" {
 		m.Component = &req.Component
@@ -98,7 +103,12 @@ func (s *MenuService) Update(ctx context.Context, id uint64, req *dto.MenuReques
 	m.HideInMenu = req.HideInMenu
 	m.MultiTab = req.MultiTab
 	m.FixedIndexInTab = req.FixedIndexInTab
-	m.Query = req.Query
+	// 兼容处理query字段：只有是map类型才赋值，数组/空值赋值为nil
+	if q, ok := req.Query.(map[string]any); ok && q != nil {
+		m.Query = model.JSONMap(q)
+	} else {
+		m.Query = nil
+	}
 	if req.IconType != "" {
 		m.IconType = req.IconType
 	}

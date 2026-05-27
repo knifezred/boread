@@ -79,14 +79,15 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			// --- Dept ---
 			manage.GET("/dept/tree", deptHandler.Tree)
 			manage.GET("/dept/:id", deptHandler.GetByID)
+			manage.POST("/dept/page", deptHandler.Page)
 			manage.POST("/dept", middleware.RequireButton(authSvc, "dept:create"), deptHandler.Create)
 			manage.PUT("/dept/:id", middleware.RequireButton(authSvc, "dept:update"), deptHandler.Update)
 			manage.DELETE("/dept/:id", middleware.RequireButton(authSvc, "dept:delete"), deptHandler.Delete)
 
 			// --- Role ---
-			manage.GET("/role", roleHandler.Page)
 			manage.GET("/role/all", roleHandler.AllBrief)
 			manage.GET("/role/:id", roleHandler.GetByID)
+			manage.POST("/role/page", roleHandler.Page)
 			manage.GET("/role/:id/menus", roleHandler.GetMenuIDs)
 			manage.GET("/role/:id/buttons", roleHandler.GetButtonIDs)
 			manage.POST("/role", middleware.RequireButton(authSvc, "role:create"), roleHandler.Create)
@@ -96,17 +97,17 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.PUT("/role/:id/buttons", middleware.RequireButton(authSvc, "role:grant"), roleHandler.GrantButtons)
 
 			// --- User ---
-			manage.GET("/user", userHandler.Page)
 			manage.GET("/user/:id", userHandler.GetByID)
+			manage.POST("/user/page", userHandler.Page)
 			manage.POST("/user", middleware.RequireButton(authSvc, "user:create"), userHandler.Create)
 			manage.PUT("/user/:id", middleware.RequireButton(authSvc, "user:update"), userHandler.Update)
 			manage.DELETE("/user/:id", middleware.RequireButton(authSvc, "user:delete"), userHandler.Delete)
 			manage.PUT("/user/:id/reset-password", middleware.RequireButton(authSvc, "user:reset_pwd"), userHandler.ResetPassword)
 
 			// --- Menu ---
-			manage.GET("/menu", menuHandler.Page) // 菜单分页列表
 			manage.GET("/menu/tree", menuHandler.Tree)
 			manage.GET("/menu/:id", menuHandler.GetByID)
+			manage.POST("/menu/page", menuHandler.Page) // 菜单分页列表
 			manage.POST("/menu", middleware.RequireButton(authSvc, "menu:create"), menuHandler.Create)
 			manage.PUT("/menu/:id", middleware.RequireButton(authSvc, "menu:update"), menuHandler.Update)
 			manage.DELETE("/menu/:id", middleware.RequireButton(authSvc, "menu:delete"), menuHandler.Delete)
@@ -115,8 +116,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.DELETE("/menu/button/:id", middleware.RequireButton(authSvc, "menu:delete"), menuHandler.DeleteButton)
 
 			// --- Dict ---
-			manage.GET("/dict", dictHandler.Page)
 			manage.GET("/dict/:id", dictHandler.GetByID)
+			manage.POST("/dict/page", dictHandler.Page)
 			manage.POST("/dict", middleware.RequireButton(authSvc, "dict:create"), dictHandler.Create)
 			manage.PUT("/dict/:id", middleware.RequireButton(authSvc, "dict:update"), dictHandler.Update)
 			manage.DELETE("/dict/:id", middleware.RequireButton(authSvc, "dict:delete"), dictHandler.Delete)
@@ -127,8 +128,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.DELETE("/dict/item/:id", middleware.RequireButton(authSvc, "dict:delete"), dictHandler.DeleteItem)
 
 			// --- Log ---
-			manage.GET("/log/login", logHandler.PageLogin)
-			manage.GET("/log/operation", logHandler.PageOperation)
+			manage.POST("/log/login/page", logHandler.PageLogin)
+			manage.POST("/log/operation/page", logHandler.PageOperation)
 		}
 	}
 

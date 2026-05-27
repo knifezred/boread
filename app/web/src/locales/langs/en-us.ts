@@ -35,6 +35,11 @@ const local: App.I18n.Schema = {
     modifySuccess: 'Modify Success',
     noData: 'No Data',
     operate: 'Operate',
+    enable: 'Enable',
+    disable: 'Disable',
+    operateSuccess: 'Operation successful',
+    createTime: 'Create Time',
+    updateTime: 'Update Time',
     pleaseCheckValue: 'Please check whether the value is valid',
     refresh: 'Refresh',
     reset: 'Reset',
@@ -229,7 +234,15 @@ const local: App.I18n.Schema = {
     404: 'Page Not Found',
     500: 'Server Error',
     'iframe-page': 'Iframe',
-    home: 'Home'
+    home: 'Home',
+    manage: 'Manage',
+    manage_dict: 'Dict Management',
+    manage_log: 'Log Management',
+    manage_menu: 'Menu Management',
+    manage_role: 'Role Management',
+    manage_dept: 'Department Management',
+    manage_user: 'User Management',
+    "manage_user-detail": 'User Detail'
   },
   page: {
     login: {
@@ -306,6 +319,117 @@ const local: App.I18n.Schema = {
         desc5: 'Soybean just wrote some of the workbench pages casually, and it was enough to see!'
       },
       creativity: 'Creativity'
+    },
+    manage: {
+      common: {
+        status: {
+          enable: 'Enable',
+          disable: 'Disable'
+        }
+      },      
+      role: {
+        title: 'Role List',
+        roleName: 'Role Name',
+        roleCode: 'Role Code',
+        roleStatus: 'Role Status',
+        roleDesc: 'Role Description',
+        menuAuth: 'Menu Permission',
+        buttonAuth: 'Button Permission',
+        form: {
+          roleName: 'Please enter role name',
+          roleCode: 'Please enter role code',
+          roleStatus: 'Please select role status',
+          roleDesc: 'Please enter role description'
+        },
+        addRole: 'Add Role',
+        editRole: 'Edit Role',
+        dataScope: {
+          title: 'Data Scope',
+          all: 'All',
+          custom: 'Custom Department',
+          dept: 'Current Department',
+          deptAndSub: 'Department & Sub-Departments',
+          self: 'Self Only'
+        }
+      },
+      dept: {
+        title: 'Department List',
+        deptId: 'Department ID',
+        deptName: 'Department Name',
+        deptCode: 'Department Code',
+        leader: 'Leader',
+        parentId: 'Parent Department',
+        sortOrder: 'Sort Order',
+        status: 'Status',
+        form: {
+          parentId: 'Please select parent department',
+          deptName: 'Please enter department name',
+          deptCode: 'Please enter department code',
+          leader: 'Please enter leader',
+          sortOrder: 'Please enter sort order',
+          status: 'Please select status'
+        },
+        addDept: 'Add Department',
+        editDept: 'Edit Department',
+        addChildDept: 'Add Child Department'
+      },
+      dict: {
+        title: 'Dict List',
+        dictName: 'Dict Name',
+        dictCode: 'Dict Code',
+        dictDesc: 'Dict Description',
+        dictStatus: 'Dict Status',
+        form: {
+          dictName: 'Please enter dict name',
+          dictCode: 'Please enter dict code',
+          dictDesc: 'Please enter dict description',
+          dictStatus: 'Please select dict status'
+        },
+        addDict: 'Add Dict',
+        editDict: 'Edit Dict'
+      },
+      dictItem: {
+        title: 'Dict Item List',
+        itemLabel: 'Item Label',
+        itemValue: 'Item Value',
+        itemDesc: 'Item Description',
+        sortOrder: 'Sort Order',
+        itemStatus: 'Item Status',
+        form: {
+          itemLabel: 'Please enter item label',
+          itemValue: 'Please enter item value',
+          itemDesc: 'Please enter item description',
+          sortOrder: 'Please enter sort order',
+          itemStatus: 'Please select item status'
+        },
+        addDictItem: 'Add Dict Item',
+        editDictItem: 'Edit Dict Item'
+      },
+      log: {
+        title: 'Log Management',
+        loginLog: 'Login Log',
+        operationLog: 'Operation Log',
+        userName: 'User Name',
+        loginIp: 'Login IP',
+        loginType: 'Login Type',
+        loginResult: 'Login Result',
+        module: 'Module',
+        action: 'Action',
+        clientIp: 'Client IP',
+        startTime: 'Start Time',
+        endTime: 'End Time',
+        form: {
+          userName: 'Please enter user name',
+          loginIp: 'Please enter login IP',
+          loginType: 'Please select login type',
+          loginResult: 'Please select login result',
+          module: 'Please enter module',
+          action: 'Please enter action',
+          clientIp: 'Please enter client IP',
+          startTime: 'Please select start time',
+          endTime: 'Please select end time'
+        }
+      }
     }
   },
   form: {

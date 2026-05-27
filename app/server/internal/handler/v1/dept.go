@@ -23,6 +23,36 @@ func NewDeptHandler(svc *service.DeptService) *DeptHandler {
 	return &DeptHandler{svc: svc}
 }
 
+// Page 部门分页列表
+// @Summary   部门分页列表 (平级)
+// @Tags      dept
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param     body  body  dto.DeptSearch  true  "搜索参数"
+// @Success   200      {object}  response.Response{data=dto.PageResponse{records=[]dto.DeptNode}}
+// @Router    /api/manage/dept/page [post]
+func (h *DeptHandler) Page(c *gin.Context) {
+	var req dto.DeptSearch
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 4001, err.Error())
+		return
+	}
+	// 分页参数默认值
+	if req.Current <= 0 {
+		req.Current = 1
+	}
+	if req.Size <= 0 || req.Size > 100 {
+		req.Size = 10
+	}
+	res, err := h.svc.Page(c.Request.Context(), &req)
+	if err != nil {
+		response.Error(c, 5001, err.Error())
+		return
+	}
+	response.Success(c, res)
+}
+
 // Tree 部门树
 // @Summary   部门树
 // @Tags      dept

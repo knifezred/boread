@@ -76,3 +76,48 @@ func (r *SysDeptRepository) HasUsers(ctx context.Context, id uint64) (bool, erro
 	err := r.db.WithContext(ctx).Model(&model.SysUser{}).Where("dept_id = ?", id).Count(&n).Error
 	return n > 0, err
 }
+
+// PageTop 顶级部门分页查询 (parent_id = 0)
+func (r *SysDeptRepository) PageTop(ctx context.Context, deptName string, status string, page, size int) ([]model.SysDept, int64, error) {
+	var rows []model.SysDept
+	var total int64
+	db := r.db.WithContext(ctx).Model(&model.SysDept{}).Where("parent_id = 0")
+	if deptName != "" {
+		db = db.Where("dept_name like ?", "%"+deptName+"%")
+	}
+	if status != "" {
+		db = db.Where("status = ?", status)
+	}
+	err := db.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = db.Offset((page - 1) * size).Limit(size).Order("sort_order asc, id asc").Find(&rows).Error
+	return rows, total, err
+}
+
+// ListByParentIDs 批量查询父ID下的所有子部门
+func (r *SysDeptRepository) ListByParentIDs(ctx context.Context, parentIDs []uint64) ([]model.SysDept, error) {
+	var rows []model.SysDept
+	err := r.db.WithContext(ctx).Where("parent_id IN ?", parentIDs).Order("sort_order asc, id asc").Find(&rows).Error
+	return rows, err
+}
+
+// Page 部门分页查询
+func (r *SysDeptRepository) Page(ctx context.Context, deptName string, status string, page, size int) ([]model.SysDept, int64, error) {
+	var rows []model.SysDept
+	var total int64
+	db := r.db.WithContext(ctx).Model(&model.SysDept{})
+	if deptName != "" {
+		db = db.Where("dept_name like ?", "%"+deptName+"%")
+	}
+	if status != "" {
+		db = db.Where("status = ?", status)
+	}
+	err := db.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = db.Offset((page - 1) * size).Limit(size).Order("sort_order asc, id asc").Find(&rows).Error
+	return rows, total, err
+}

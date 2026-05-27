@@ -173,3 +173,78 @@ func buildDeptTree(rows []model.SysDept) []*dto.DeptNode {
 	}
 	return roots
 }
+
+// Page 部门分页列表 (树形结构, 基于顶级部门分页)
+func (s *DeptService) Page(ctx context.Context, req *dto.DeptSearch) (*dto.PageResponse, error) {
+	req.Normalize()
+	// 1. 分页查询顶级部门（已按 sort_order asc 排序）
+	topDepts, total, err := s.repo.PageTop(ctx, req.DeptName, string(req.Status), req.Current, req.Size)
+	if err != nil {
+		return nil, err
+	}
+	if len(topDepts) == 0 {
+		return dto.NewPageResponse([]*dto.DeptNode{}, total, &req.PageRequest), nil
+	}
+	// 2. 初始化节点 map & 根节点列表（按查询顺序保持排序）
+	nodeMap := make(map[uint64]*dto.DeptNode, len(topDepts))
+	roots := make([]*dto.DeptNode, 0, len(topDepts))
+	for _, r := range topDepts {
+		leader := ""
+		if r.Leader != nil {
+			leader = *r.Leader
+		}
+		node := &dto.DeptNode{
+			ID:        r.ID,
+			ParentID:  r.ParentID,
+			DeptName:  r.DeptName,
+			DeptCode:  r.DeptCode,
+			Leader:    leader,
+			SortOrder: r.SortOrder,
+			Status:    r.Status,
+			Children:  []*dto.DeptNode{},
+		}
+		nodeMap[r.ID] = node
+		roots = append(roots, node)
+	}
+	// 3. 层级查询所有子部门，按查询顺序直接挂载（子部门查询已按 sort_order asc 排序）
+	currentParentIDs := make([]uint64, 0, len(topDepts))
+	for _, r := range topDepts {
+		currentParentIDs = append(currentParentIDs, r.ID)
+	}
+	for i := 0; i < 10; i++ { // 限制最多10级，避免循环嵌套
+		if len(currentParentIDs) == 0 {
+			break
+		}
+		children, err := s.repo.ListByParentIDs(ctx, currentParentIDs)
+		if err != nil {
+			return nil, err
+		}
+		if len(children) == 0 {
+			break
+		}
+		nextParentIDs := make([]uint64, 0, len(children))
+		for _, r := range children {
+			leader := ""
+			if r.Leader != nil {
+				leader = *r.Leader
+			}
+			node := &dto.DeptNode{
+				ID:        r.ID,
+				ParentID:  r.ParentID,
+				DeptName:  r.DeptName,
+				DeptCode:  r.DeptCode,
+				Leader:    leader,
+				SortOrder: r.SortOrder,
+				Status:    r.Status,
+				Children:  []*dto.DeptNode{},
+			}
+			nodeMap[r.ID] = node
+			if parent, ok := nodeMap[r.ParentID]; ok {
+				parent.Children = append(parent.Children, node)
+			}
+			nextParentIDs = append(nextParentIDs, r.ID)
+		}
+		currentParentIDs = nextParentIDs
+	}
+	return dto.NewPageResponse(roots, total, &req.PageRequest), nil
+}

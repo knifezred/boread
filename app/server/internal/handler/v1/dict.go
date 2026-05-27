@@ -30,17 +30,14 @@ func NewDictHandler(svc *service.DictService) *DictHandler {
 // @Summary   字典分页
 // @Tags      dict
 // @Security  BearerAuth
+// @Accept    json
 // @Produce   json
-// @Param    current   query  int     false  "页码"  default(1)
-// @Param    size      query  int     false  "页大小"  default(10)
-// @Param    dictName  query  string  false  "字典名"
-// @Param    dictCode  query  string  false  "字典编码"
-// @Param    status    query  string  false  "状态"
+// @Param    body  body  dto.DictSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/dict [get]
+// @Router   /api/manage/dict/page [post]
 func (h *DictHandler) Page(c *gin.Context) {
 	var req dto.DictSearch
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, 1001, err.Error())
 		return
 	}

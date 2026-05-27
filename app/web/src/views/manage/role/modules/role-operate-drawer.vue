@@ -2,11 +2,12 @@
 import { computed, ref, watch } from 'vue';
 import { jsonClone } from '@sa/utils';
 import { useBoolean } from '@sa/hooks';
-import { enableStatusOptions } from '@/constants/business';
+import { enableStatusOptions, dataScopeOptions } from '@/constants/business';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
 import { $t } from '@/locales';
 import MenuAuthModal from './menu-auth-modal.vue';
 import ButtonAuthModal from './button-auth-modal.vue';
+import { fetchCreateRole, fetchUpdateRole } from '@/service/api';
 
 defineOptions({
   name: 'RoleOperateDrawer'
@@ -44,7 +45,7 @@ const title = computed(() => {
   return titles[props.operateType];
 });
 
-type Model = Pick<Api.SystemManage.Role, 'roleName' | 'roleCode' | 'roleDesc' | 'status'>;
+type Model = Pick<Api.SystemManage.Role, 'roleName' | 'roleCode' | 'roleDesc' | 'status' | 'dataScope'>;
 
 const model = ref(createDefaultModel());
 
@@ -53,6 +54,7 @@ function createDefaultModel(): Model {
     roleName: '',
     roleCode: '',
     roleDesc: '',
+    dataScope: '5',
     status: null
   };
 }
@@ -62,7 +64,8 @@ type RuleKey = Exclude<keyof Model, 'roleDesc'>;
 const rules: Record<RuleKey, App.Global.FormRule> = {
   roleName: defaultRequiredRule,
   roleCode: defaultRequiredRule,
-  status: defaultRequiredRule
+  status: defaultRequiredRule,
+  dataScope: defaultRequiredRule
 };
 
 const roleId = computed(() => props.rowData?.id || -1);
@@ -84,6 +87,11 @@ function closeDrawer() {
 async function handleSubmit() {
   await validate();
   // request
+  if (isEdit.value) {
+    await fetchUpdateRole(roleId.value, { ...model.value });
+  } else {
+    await fetchCreateRole({ ...model.value });
+  }
   window.$message?.success($t('common.updateSuccess'));
   closeDrawer();
   emit('submitted');
@@ -98,7 +106,7 @@ watch(visible, () => {
 </script>
 
 <template>
-  <NDrawer v-model:show="visible" display-directive="show" :width="360">
+  <NDrawer v-model:show="visible" display-directive="show" :width="520">
     <NDrawerContent :title="title" :native-scrollbar="false" closable>
       <NForm ref="formRef" :model="model" :rules="rules">
         <NFormItem :label="$t('page.manage.role.roleName')" path="roleName">
@@ -110,6 +118,11 @@ watch(visible, () => {
         <NFormItem :label="$t('page.manage.role.roleStatus')" path="status">
           <NRadioGroup v-model:value="model.status">
             <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
+          </NRadioGroup>
+        </NFormItem>
+        <NFormItem :label="$t('page.manage.role.dataScope.title')" path="dataScope">
+          <NRadioGroup v-model:value="model.dataScope">
+            <NRadio v-for="item in dataScopeOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
           </NRadioGroup>
         </NFormItem>
         <NFormItem :label="$t('page.manage.role.roleDesc')" path="roleDesc">

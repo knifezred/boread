@@ -18,8 +18,19 @@ const { bool: visible, setTrue: openModal } = useBoolean();
 
 const wrapperRef = ref<HTMLElement | null>(null);
 
+const searchParams = ref<Api.SystemManage.MenuSearchParams>({
+  current: 1,
+  size: 10,
+  menuName: null,
+  status: null,
+});
+
 const { columns, columnChecks, data, loading, pagination, getData, getDataByPage } = useNaivePaginatedTable({
-  api: () => fetchGetMenuList(),
+  api: () => fetchGetMenuList(searchParams.value),
+  onPaginationParamsChange: params => {
+    searchParams.value.current = params.page;
+    searchParams.value.size = params.pageSize;
+  },
   transform: response => defaultTransform(response),
   columns: () => [
     {
@@ -29,8 +40,15 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'id',
-      title: $t('page.manage.menu.id'),
-      align: 'center'
+      title: $t('page.manage.menu.menuName'),
+      align: 'left',
+      render: row => {
+        const { i18nKey, menuName } = row;
+
+        const label = i18nKey ? $t(i18nKey) : menuName;
+
+        return <span>{label}</span>;
+      }
     },
     {
       key: 'menuType',
@@ -46,19 +64,6 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
         const label = $t(menuTypeRecord[row.menuType]);
 
         return <NTag type={tagMap[row.menuType]}>{label}</NTag>;
-      }
-    },
-    {
-      key: 'menuName',
-      title: $t('page.manage.menu.menuName'),
-      align: 'center',
-      minWidth: 120,
-      render: row => {
-        const { i18nKey, menuName } = row;
-
-        const label = i18nKey ? $t(i18nKey) : menuName;
-
-        return <span>{label}</span>;
       }
     },
     {
@@ -231,35 +236,14 @@ init();
   <div ref="wrapperRef" class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
     <NCard :title="$t('page.manage.menu.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
-        <TableHeaderOperation
-          v-model:columns="columnChecks"
-          :disabled-delete="checkedRowKeys.length === 0"
-          :loading="loading"
-          @add="handleAdd"
-          @delete="handleBatchDelete"
-          @refresh="getData"
-        />
+        <TableHeaderOperation v-model:columns="columnChecks" :disabled-delete="checkedRowKeys.length === 0"
+          :loading="loading" @add="handleAdd" @delete="handleBatchDelete" @refresh="getData" />
       </template>
-      <NDataTable
-        v-model:checked-row-keys="checkedRowKeys"
-        :columns="columns"
-        :data="data"
-        size="small"
-        :flex-height="!appStore.isMobile"
-        :scroll-x="1088"
-        :loading="loading"
-        :row-key="row => row.id"
-        remote
-        :pagination="pagination"
-        class="sm:h-full"
-      />
-      <MenuOperateModal
-        v-model:visible="visible"
-        :operate-type="operateType"
-        :row-data="editingData"
-        :all-pages="allPages"
-        @submitted="getDataByPage"
-      />
+      <NDataTable v-model:checked-row-keys="checkedRowKeys" :columns="columns" :data="data" size="small"
+        :flex-height="!appStore.isMobile" :scroll-x="1088" :loading="loading" :row-key="row => row.id" remote
+        :pagination="pagination" class="sm:h-full" />
+      <MenuOperateModal v-model:visible="visible" :operate-type="operateType" :row-data="editingData"
+        :all-pages="allPages" @submitted="getDataByPage" />
     </NCard>
   </div>
 </template>

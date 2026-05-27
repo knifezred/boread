@@ -30,16 +30,14 @@ func NewMenuHandler(svc *service.MenuService) *MenuHandler {
 // @Summary   菜单分页列表 (平级, 含按钮)
 // @Tags      menu
 // @Security  BearerAuth
+// @Accept    json
 // @Produce   json
-// @Param     current  query     int                                 true  "当前页" default(1)
-// @Param     size     query     int                                 true  "每页数量" default(10)
-// @Param     menuName query     string                              false "菜单名称"
-// @Param     status   query     model.EnableStatus                  false "状态"
+// @Param     body  body  dto.MenuSearch  true  "搜索参数"
 // @Success  200      {object}  response.Response{data=dto.PageResponse[dto.MenuNode]}
-// @Router   /api/manage/menu [get]
+// @Router   /api/manage/menu/page [post]
 func (h *MenuHandler) Page(c *gin.Context) {
 	var req dto.MenuSearch
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, 4001, err.Error())
 		return
 	}

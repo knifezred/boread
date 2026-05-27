@@ -221,6 +221,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/manage/dept/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dept"
+                ],
+                "summary": "部门分页列表 (平级)",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.DeptSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "records": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/boread_internal_dto.DeptNode"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/manage/dept/tree": {
             "get": {
                 "security": [
@@ -412,74 +477,6 @@ const docTemplate = `{
             }
         },
         "/api/manage/dict": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "dict"
-                ],
-                "summary": "字典分页",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "页码",
-                        "name": "current",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "页大小",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "字典名",
-                        "name": "dictName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "字典编码",
-                        "name": "dictCode",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -763,6 +760,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/manage/dict/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dict"
+                ],
+                "summary": "字典分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.DictSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/manage/dict/{id}": {
             "get": {
                 "security": [
@@ -894,12 +941,15 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/log/login": {
-            "get": {
+        "/api/manage/log/login/page": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -910,54 +960,13 @@ const docTemplate = `{
                 "summary": "登录日志分页",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "页码",
-                        "name": "current",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "页大小",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "userName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "登录IP",
-                        "name": "loginIp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "类型: 1登录 2登出",
-                        "name": "loginType",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "结果: 1成功 2失败",
-                        "name": "loginResult",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "开始时间",
-                        "name": "startTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "结束时间",
-                        "name": "endTime",
-                        "in": "query"
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.LoginLogSearch"
+                        }
                     }
                 ],
                 "responses": {
@@ -982,12 +991,15 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/log/operation": {
-            "get": {
+        "/api/manage/log/operation/page": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -998,54 +1010,13 @@ const docTemplate = `{
                 "summary": "操作日志分页",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "页码",
-                        "name": "current",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "页大小",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "userName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "模块",
-                        "name": "module",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "动作",
-                        "name": "action",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "客户端IP",
-                        "name": "clientIp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "开始时间",
-                        "name": "startTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "结束时间",
-                        "name": "endTime",
-                        "in": "query"
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.OperationLogSearch"
+                        }
                     }
                 ],
                 "responses": {
@@ -1251,6 +1222,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/manage/menu/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "menu"
+                ],
+                "summary": "菜单分页列表 (平级, 含按钮)",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.MenuSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/manage/menu/tree": {
             "get": {
                 "security": [
@@ -1422,74 +1443,6 @@ const docTemplate = `{
             }
         },
         "/api/manage/role": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "role"
-                ],
-                "summary": "角色分页",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "页码",
-                        "name": "current",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "页大小",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "角色名",
-                        "name": "roleName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "角色编码",
-                        "name": "roleCode",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -1569,6 +1522,56 @@ const docTemplate = `{
                                             "items": {
                                                 "$ref": "#/definitions/boread_internal_dto.RoleBrief"
                                             }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/manage/role/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "role"
+                ],
+                "summary": "角色分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.RoleSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
                                         }
                                     }
                                 }
@@ -1892,92 +1895,6 @@ const docTemplate = `{
             }
         },
         "/api/manage/user": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "用户分页",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "页码",
-                        "name": "current",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "页大小",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "userName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "昵称",
-                        "name": "nickName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "手机号",
-                        "name": "userPhone",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "邮箱",
-                        "name": "userEmail",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "性别",
-                        "name": "userGender",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -2018,6 +1935,56 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/boread_internal_model.SysUser"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/manage/user/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "用户分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/boread_internal_dto.UserSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
                                         }
                                     }
                                 }
@@ -2285,6 +2252,29 @@ const docTemplate = `{
                 }
             }
         },
+        "boread_internal_dto.DeptSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "deptCode": {
+                    "type": "string"
+                },
+                "deptName": {
+                    "type": "string"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                }
+            }
+        },
         "boread_internal_dto.DictItemRequest": {
             "type": "object",
             "required": [
@@ -2338,6 +2328,62 @@ const docTemplate = `{
                 }
             }
         },
+        "boread_internal_dto.DictSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "dictCode": {
+                    "type": "string"
+                },
+                "dictName": {
+                    "type": "string"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                }
+            }
+        },
+        "boread_internal_dto.LoginLogSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "loginIp": {
+                    "type": "string"
+                },
+                "loginResult": {
+                    "$ref": "#/definitions/boread_internal_model.LoginResult"
+                },
+                "loginType": {
+                    "$ref": "#/definitions/boread_internal_model.LoginType"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "description": "YYYY-MM-DD HH:MM:SS",
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
         "boread_internal_dto.LoginRequest": {
             "type": "object",
             "required": [
@@ -2360,6 +2406,12 @@ const docTemplate = `{
         "boread_internal_dto.LoginResponse": {
             "type": "object",
             "properties": {
+                "expiresAt": {
+                    "type": "integer"
+                },
+                "refreshExpiresAt": {
+                    "type": "integer"
+                },
                 "refreshToken": {
                     "type": "string"
                 },
@@ -2589,9 +2641,7 @@ const docTemplate = `{
                 "parentId": {
                     "type": "integer"
                 },
-                "query": {
-                    "$ref": "#/definitions/boread_internal_model.JSONMap"
-                },
+                "query": {},
                 "routeName": {
                     "type": "string",
                     "maxLength": 128
@@ -2641,6 +2691,58 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "redirect": {
+                    "type": "string"
+                }
+            }
+        },
+        "boread_internal_dto.MenuSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "menuName": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                }
+            }
+        },
+        "boread_internal_dto.OperationLogSearch": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "clientIp": {
+                    "type": "string"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "module": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "userName": {
                     "type": "string"
                 }
             }
@@ -2744,6 +2846,29 @@ const docTemplate = `{
                 }
             }
         },
+        "boread_internal_dto.RoleSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "roleCode": {
+                    "type": "string"
+                },
+                "roleName": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                }
+            }
+        },
         "boread_internal_dto.UserCreateRequest": {
             "type": "object",
             "required": [
@@ -2827,6 +2952,38 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64,
                     "minLength": 6
+                }
+            }
+        },
+        "boread_internal_dto.UserSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "nickName": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                },
+                "userEmail": {
+                    "type": "string"
+                },
+                "userGender": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "userPhone": {
+                    "type": "string"
                 }
             }
         },
@@ -2922,6 +3079,28 @@ const docTemplate = `{
         "boread_internal_model.JSONMap": {
             "type": "object",
             "additionalProperties": {}
+        },
+        "boread_internal_model.LoginResult": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2"
+            ],
+            "x-enum-varnames": [
+                "LoginResultSuccess",
+                "LoginResultFail"
+            ]
+        },
+        "boread_internal_model.LoginType": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2"
+            ],
+            "x-enum-varnames": [
+                "LoginTypeLogin",
+                "LoginTypeLogout"
+            ]
         },
         "boread_internal_model.MenuType": {
             "type": "string",

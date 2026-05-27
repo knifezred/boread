@@ -44,7 +44,7 @@ declare namespace Api {
       /** record update time */
       updateTime: string;
       /** record status */
-      status: EnableStatus | null;
+      status: EnableStatus;
     } & T;
   }
 }

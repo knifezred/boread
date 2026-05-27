@@ -16,9 +16,9 @@ type RoleRequest struct {
 // RoleSearch 角色列表搜索 (对齐前端 Api.SystemManage.RoleSearchParams)
 type RoleSearch struct {
 	PageRequest
-	RoleName string             `form:"roleName"`
-	RoleCode string             `form:"roleCode"`
-	Status   model.EnableStatus `form:"status"`
+	RoleName string             `json:"roleName"`
+	RoleCode string             `json:"roleCode"`
+	Status   model.EnableStatus `json:"status"`
 }
 
 // RoleMenuRequest 授权菜单

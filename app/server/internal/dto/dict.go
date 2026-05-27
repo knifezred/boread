@@ -13,9 +13,9 @@ type DictRequest struct {
 // DictSearch 字典分页搜索
 type DictSearch struct {
 	PageRequest
-	DictName string             `form:"dictName"`
-	DictCode string             `form:"dictCode"`
-	Status   model.EnableStatus `form:"status"`
+	DictName string             `json:"dictName"`
+	DictCode string             `json:"dictCode"`
+	Status   model.EnableStatus `json:"status"`
 }
 
 // DictItemRequest 字典项请求

@@ -31,12 +31,12 @@ type UserUpdateRequest struct {
 // UserSearch 用户分页搜索
 type UserSearch struct {
 	PageRequest
-	UserName   string             `form:"userName"`
-	NickName   string             `form:"nickName"`
-	UserPhone  string             `form:"userPhone"`
-	UserEmail  string             `form:"userEmail"`
-	UserGender string             `form:"userGender"`
-	Status     model.EnableStatus `form:"status"`
+	UserName   string             `json:"userName"`
+	NickName   string             `json:"nickName"`
+	UserPhone  string             `json:"userPhone"`
+	UserEmail  string             `json:"userEmail"`
+	UserGender string             `json:"userGender"`
+	Status     model.EnableStatus `json:"status"`
 }
 
 // UserResetPwdRequest 重置密码

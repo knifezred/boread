@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { ref } from 'vue';
 import { NButton, NPopconfirm, NTag } from 'naive-ui';
-import { enableStatusRecord } from '@/constants/business';
+import { enableStatusRecord, dataScopeRecord } from '@/constants/business';
 import { fetchGetRoleList } from '@/service/api';
 import { useAppStore } from '@/store/modules/app';
 import { defaultTransform, useNaivePaginatedTable, useTableOperate } from '@/hooks/common/table';
@@ -55,6 +55,28 @@ const { columns, columnChecks, data, loading, getData, getDataByPage, mobilePagi
       key: 'roleDesc',
       title: $t('page.manage.role.roleDesc'),
       minWidth: 120
+    },
+    {
+      key: 'dataScope',
+      title: $t('page.manage.role.dataScope.title'),
+      minWidth: 120,
+      render: row => {
+        if (row.dataScope === null) {
+          return null;
+        }
+
+        const tagMap: Record<Api.SystemManage.DataScope, NaiveUI.ThemeColor> = {
+          1: 'error',
+          2: 'warning',
+          3: 'info',
+          4: 'primary',
+          5: 'default'
+        };
+
+        const label = $t(dataScopeRecord[row.dataScope]);
+
+        return <NTag type={tagMap[row.dataScope]}>{label}</NTag>;
+      }
     },
     {
       key: 'status',
@@ -138,34 +160,14 @@ function edit(id: number) {
     <RoleSearch v-model:model="searchParams" @search="getDataByPage" />
     <NCard :title="$t('page.manage.role.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
-        <TableHeaderOperation
-          v-model:columns="columnChecks"
-          :disabled-delete="checkedRowKeys.length === 0"
-          :loading="loading"
-          @add="handleAdd"
-          @delete="handleBatchDelete"
-          @refresh="getData"
-        />
+        <TableHeaderOperation v-model:columns="columnChecks" :disabled-delete="checkedRowKeys.length === 0"
+          :loading="loading" @add="handleAdd" @delete="handleBatchDelete" @refresh="getData" />
       </template>
-      <NDataTable
-        v-model:checked-row-keys="checkedRowKeys"
-        :columns="columns"
-        :data="data"
-        size="small"
-        :flex-height="!appStore.isMobile"
-        :scroll-x="702"
-        :loading="loading"
-        remote
-        :row-key="row => row.id"
-        :pagination="mobilePagination"
-        class="sm:h-full"
-      />
-      <RoleOperateDrawer
-        v-model:visible="drawerVisible"
-        :operate-type="operateType"
-        :row-data="editingData"
-        @submitted="getDataByPage"
-      />
+      <NDataTable v-model:checked-row-keys="checkedRowKeys" :columns="columns" :data="data" size="small"
+        :flex-height="!appStore.isMobile" :scroll-x="702" :loading="loading" remote :row-key="row => row.id"
+        :pagination="mobilePagination" class="sm:h-full" />
+      <RoleOperateDrawer v-model:visible="drawerVisible" :operate-type="operateType" :row-data="editingData"
+        @submitted="getDataByPage" />
     </NCard>
   </div>
 </template>

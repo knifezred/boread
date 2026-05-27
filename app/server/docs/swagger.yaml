@@ -41,6 +41,21 @@ definitions:
     - deptCode
     - deptName
     type: object
+  boread_internal_dto.DeptSearch:
+    properties:
+      current:
+        type: integer
+      deptCode:
+        type: string
+      deptName:
+        type: string
+      keyword:
+        type: string
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
   boread_internal_dto.DictItemRequest:
     properties:
       dictId:
@@ -78,6 +93,43 @@ definitions:
     - dictCode
     - dictName
     type: object
+  boread_internal_dto.DictSearch:
+    properties:
+      current:
+        type: integer
+      dictCode:
+        type: string
+      dictName:
+        type: string
+      keyword:
+        type: string
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
+  boread_internal_dto.LoginLogSearch:
+    properties:
+      current:
+        type: integer
+      endTime:
+        type: string
+      keyword:
+        type: string
+      loginIp:
+        type: string
+      loginResult:
+        $ref: '#/definitions/boread_internal_model.LoginResult'
+      loginType:
+        $ref: '#/definitions/boread_internal_model.LoginType'
+      size:
+        type: integer
+      startTime:
+        description: YYYY-MM-DD HH:MM:SS
+        type: string
+      userName:
+        type: string
+    type: object
   boread_internal_dto.LoginRequest:
     properties:
       password:
@@ -94,6 +146,10 @@ definitions:
     type: object
   boread_internal_dto.LoginResponse:
     properties:
+      expiresAt:
+        type: integer
+      refreshExpiresAt:
+        type: integer
       refreshToken:
         type: string
       token:
@@ -241,8 +297,7 @@ definitions:
         type: integer
       parentId:
         type: integer
-      query:
-        $ref: '#/definitions/boread_internal_model.JSONMap'
+      query: {}
       routeName:
         maxLength: 128
         type: string
@@ -281,6 +336,40 @@ definitions:
       path:
         type: string
       redirect:
+        type: string
+    type: object
+  boread_internal_dto.MenuSearch:
+    properties:
+      current:
+        type: integer
+      keyword:
+        type: string
+      menuName:
+        type: string
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
+  boread_internal_dto.OperationLogSearch:
+    properties:
+      action:
+        type: string
+      clientIp:
+        type: string
+      current:
+        type: integer
+      endTime:
+        type: string
+      keyword:
+        type: string
+      module:
+        type: string
+      size:
+        type: integer
+      startTime:
+        type: string
+      userName:
         type: string
     type: object
   boread_internal_dto.PageResponse:
@@ -349,6 +438,21 @@ definitions:
     - roleCode
     - roleName
     type: object
+  boread_internal_dto.RoleSearch:
+    properties:
+      current:
+        type: integer
+      keyword:
+        type: string
+      roleCode:
+        type: string
+      roleName:
+        type: string
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
   boread_internal_dto.UserCreateRequest:
     properties:
       avatar:
@@ -407,6 +511,27 @@ definitions:
         type: string
     required:
     - password
+    type: object
+  boread_internal_dto.UserSearch:
+    properties:
+      current:
+        type: integer
+      keyword:
+        type: string
+      nickName:
+        type: string
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      userEmail:
+        type: string
+      userGender:
+        type: string
+      userName:
+        type: string
+      userPhone:
+        type: string
     type: object
   boread_internal_dto.UserUpdateRequest:
     properties:
@@ -477,6 +602,22 @@ definitions:
   boread_internal_model.JSONMap:
     additionalProperties: {}
     type: object
+  boread_internal_model.LoginResult:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-varnames:
+    - LoginResultSuccess
+    - LoginResultFail
+  boread_internal_model.LoginType:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-varnames:
+    - LoginTypeLogin
+    - LoginTypeLogout
   boread_internal_model.MenuType:
     enum:
     - "1"
@@ -902,6 +1043,41 @@ paths:
       summary: 编辑部门
       tags:
       - dept
+  /api/manage/dept/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DeptSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  - properties:
+                      records:
+                        items:
+                          $ref: '#/definitions/boread_internal_dto.DeptNode'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 部门分页列表 (平级)
+      tags:
+      - dept
   /api/manage/dept/tree:
     get:
       parameters:
@@ -937,47 +1113,6 @@ paths:
       tags:
       - dept
   /api/manage/dict:
-    get:
-      parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: current
-        type: integer
-      - default: 10
-        description: 页大小
-        in: query
-        name: size
-        type: integer
-      - description: 字典名
-        in: query
-        name: dictName
-        type: string
-      - description: 字典编码
-        in: query
-        name: dictCode
-        type: string
-      - description: 状态
-        in: query
-        name: status
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 字典分页
-      tags:
-      - dict
     post:
       consumes:
       - application/json
@@ -1215,43 +1350,45 @@ paths:
       summary: 按字典ID查项
       tags:
       - dict
-  /api/manage/log/login:
-    get:
+  /api/manage/dict/page:
+    post:
+      consumes:
+      - application/json
       parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: current
-        type: integer
-      - default: 10
-        description: 页大小
-        in: query
-        name: size
-        type: integer
-      - description: 用户名
-        in: query
-        name: userName
-        type: string
-      - description: 登录IP
-        in: query
-        name: loginIp
-        type: string
-      - description: '类型: 1登录 2登出'
-        in: query
-        name: loginType
-        type: string
-      - description: '结果: 1成功 2失败'
-        in: query
-        name: loginResult
-        type: string
-      - description: 开始时间
-        in: query
-        name: startTime
-        type: string
-      - description: 结束时间
-        in: query
-        name: endTime
-        type: string
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.DictSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 字典分页
+      tags:
+      - dict
+  /api/manage/log/login/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.LoginLogSearch'
       produces:
       - application/json
       responses:
@@ -1269,43 +1406,17 @@ paths:
       summary: 登录日志分页
       tags:
       - log
-  /api/manage/log/operation:
-    get:
+  /api/manage/log/operation/page:
+    post:
+      consumes:
+      - application/json
       parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: current
-        type: integer
-      - default: 10
-        description: 页大小
-        in: query
-        name: size
-        type: integer
-      - description: 用户名
-        in: query
-        name: userName
-        type: string
-      - description: 模块
-        in: query
-        name: module
-        type: string
-      - description: 动作
-        in: query
-        name: action
-        type: string
-      - description: 客户端IP
-        in: query
-        name: clientIp
-        type: string
-      - description: 开始时间
-        in: query
-        name: startTime
-        type: string
-      - description: 结束时间
-        in: query
-        name: endTime
-        type: string
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.OperationLogSearch'
       produces:
       - application/json
       responses:
@@ -1502,6 +1613,34 @@ paths:
       summary: 按菜单查按钮
       tags:
       - menu
+  /api/manage/menu/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.MenuSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 菜单分页列表 (平级, 含按钮)
+      tags:
+      - menu
   /api/manage/menu/tree:
     get:
       produces:
@@ -1524,47 +1663,6 @@ paths:
       tags:
       - menu
   /api/manage/role:
-    get:
-      parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: current
-        type: integer
-      - default: 10
-        description: 页大小
-        in: query
-        name: size
-        type: integer
-      - description: 角色名
-        in: query
-        name: roleName
-        type: string
-      - description: 角色编码
-        in: query
-        name: roleCode
-        type: string
-      - description: 状态
-        in: query
-        name: status
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 角色分页
-      tags:
-      - role
     post:
       consumes:
       - application/json
@@ -1797,43 +1895,17 @@ paths:
       summary: 全量角色 (下拉)
       tags:
       - role
-  /api/manage/user:
-    get:
+  /api/manage/role/page:
+    post:
+      consumes:
+      - application/json
       parameters:
-      - default: 1
-        description: 页码
-        in: query
-        name: current
-        type: integer
-      - default: 10
-        description: 页大小
-        in: query
-        name: size
-        type: integer
-      - description: 用户名
-        in: query
-        name: userName
-        type: string
-      - description: 昵称
-        in: query
-        name: nickName
-        type: string
-      - description: 手机号
-        in: query
-        name: userPhone
-        type: string
-      - description: 邮箱
-        in: query
-        name: userEmail
-        type: string
-      - description: 性别
-        in: query
-        name: userGender
-        type: string
-      - description: 状态
-        in: query
-        name: status
-        type: string
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.RoleSearch'
       produces:
       - application/json
       responses:
@@ -1848,9 +1920,10 @@ paths:
               type: object
       security:
       - BearerAuth: []
-      summary: 用户分页
+      summary: 角色分页
       tags:
-      - user
+      - role
+  /api/manage/user:
     post:
       consumes:
       - application/json
@@ -1980,6 +2053,34 @@ paths:
       security:
       - BearerAuth: []
       summary: 重置密码
+      tags:
+      - user
+  /api/manage/user/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.UserSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 用户分页
       tags:
       - user
   /ping:

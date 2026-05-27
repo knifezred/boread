@@ -1,8 +1,8 @@
 import { transformRecordToOption } from '@/utils/common';
 
 export const enableStatusRecord: Record<Api.Common.EnableStatus, App.I18n.I18nKey> = {
-  '1': 'page.manage.common.status.enable',
-  '2': 'page.manage.common.status.disable'
+  '1': 'common.enable',
+  '2': 'common.disable'
 };
 
 export const enableStatusOptions = transformRecordToOption(enableStatusRecord);
@@ -27,3 +27,13 @@ export const menuIconTypeRecord: Record<Api.SystemManage.IconType, App.I18n.I18n
 };
 
 export const menuIconTypeOptions = transformRecordToOption(menuIconTypeRecord);
+
+export const dataScopeRecord: Record<Api.SystemManage.DataScope, App.I18n.I18nKey> = {
+  '1': 'page.manage.role.dataScope.all',
+  '2': 'page.manage.role.dataScope.custom',
+  '3': 'page.manage.role.dataScope.dept',
+  '4': 'page.manage.role.dataScope.deptAndSub',
+  '5': 'page.manage.role.dataScope.self'
+};
+
+export const dataScopeOptions = transformRecordToOption(dataScopeRecord);
