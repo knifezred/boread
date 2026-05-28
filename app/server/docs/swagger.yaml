@@ -1,5 +1,57 @@
 basePath: /
 definitions:
+  boread_internal_dto.CategoryNode:
+    properties:
+      categoryCode:
+        type: string
+      categoryName:
+        type: string
+      children:
+        items:
+          $ref: '#/definitions/boread_internal_dto.CategoryNode'
+        type: array
+      id:
+        type: integer
+      parentId:
+        type: integer
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
+  boread_internal_dto.CategoryRequest:
+    properties:
+      categoryCode:
+        maxLength: 64
+        type: string
+      categoryName:
+        maxLength: 64
+        type: string
+      parentId:
+        type: integer
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    required:
+    - categoryCode
+    - categoryName
+    type: object
+  boread_internal_dto.CategorySearch:
+    properties:
+      categoryCode:
+        type: string
+      categoryName:
+        type: string
+      current:
+        type: integer
+      keyword:
+        type: string
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+    type: object
   boread_internal_dto.DeptNode:
     properties:
       children:
@@ -453,6 +505,25 @@ definitions:
       status:
         $ref: '#/definitions/boread_internal_model.EnableStatus'
     type: object
+  boread_internal_dto.TagRequest:
+    properties:
+      tagName:
+        maxLength: 64
+        type: string
+    required:
+    - tagName
+    type: object
+  boread_internal_dto.TagSearch:
+    properties:
+      current:
+        type: integer
+      keyword:
+        type: string
+      size:
+        type: integer
+      tagName:
+        type: string
+    type: object
   boread_internal_dto.UserCreateRequest:
     properties:
       avatar:
@@ -556,6 +627,42 @@ definitions:
         type: string
       userPhone:
         type: string
+    type: object
+  boread_internal_model.BookCategory:
+    properties:
+      ancestors:
+        type: string
+      categoryCode:
+        type: string
+      categoryName:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      id:
+        type: integer
+      parentId:
+        type: integer
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/boread_internal_model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  boread_internal_model.BookTag:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: integer
+      tagName:
+        type: string
+      usageCount:
+        type: integer
     type: object
   boread_internal_model.DataScope:
     enum:
@@ -939,6 +1046,298 @@ paths:
       summary: 当前用户信息
       tags:
       - auth
+  /api/manage/book-category:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分类
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.BookCategory'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增分类
+      tags:
+      - book-category
+  /api/manage/book-category/{id}:
+    delete:
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除分类
+      tags:
+      - book-category
+    get:
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.BookCategory'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分类详情
+      tags:
+      - book-category
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 分类
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.BookCategory'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑分类
+      tags:
+      - book-category
+  /api/manage/book-category/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.CategorySearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  - properties:
+                      records:
+                        items:
+                          $ref: '#/definitions/boread_internal_dto.CategoryNode'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分类分页列表 (树形)
+      tags:
+      - book-category
+  /api/manage/book-category/tree:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/boread_internal_dto.CategoryNode'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分类树
+      tags:
+      - book-category
+  /api/manage/book-tag:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 标签
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.TagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.BookTag'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增标签
+      tags:
+      - book-tag
+  /api/manage/book-tag/{id}:
+    delete:
+      parameters:
+      - description: 标签ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/boread_pkg_response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除标签
+      tags:
+      - book-tag
+    get:
+      parameters:
+      - description: 标签ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.BookTag'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 标签详情
+      tags:
+      - book-tag
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 标签ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 标签
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.TagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_model.BookTag'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑标签
+      tags:
+      - book-tag
+  /api/manage/book-tag/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/boread_internal_dto.TagSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/boread_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 标签分页
+      tags:
+      - book-tag
   /api/manage/dept:
     post:
       consumes:

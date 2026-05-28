@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { jsonClone } from '@sa/utils';
-import { useBoolean } from '@sa/hooks';
 import { enableStatusOptions, dataScopeOptions } from '@/constants/business';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
 import { $t } from '@/locales';
-import MenuAuthModal from './menu-auth-modal.vue';
-import ButtonAuthModal from './button-auth-modal.vue';
 import { fetchCreateRole, fetchUpdateRole } from '@/service/api';
 
-defineOptions({
-  name: 'RoleOperateDrawer'
-});
+defineOptions({ name: 'RoleOperateDrawer' });
 
 interface Props {
   /** the type of operation */
@@ -28,14 +23,10 @@ interface Emits {
 
 const emit = defineEmits<Emits>();
 
-const visible = defineModel<boolean>('visible', {
-  default: false
-});
+const visible = defineModel<boolean>('visible', { default: false });
 
 const { formRef, validate, restoreValidation } = useNaiveForm();
 const { defaultRequiredRule } = useFormRules();
-const { bool: menuAuthVisible, setTrue: openMenuAuthModal } = useBoolean();
-const { bool: buttonAuthVisible, setTrue: openButtonAuthModal } = useBoolean();
 
 const title = computed(() => {
   const titles: Record<NaiveUI.TableOperateType, string> = {
@@ -55,7 +46,7 @@ function createDefaultModel(): Model {
     roleCode: '',
     roleDesc: '',
     dataScope: '5',
-    status: null
+    status: '1'
   };
 }
 
@@ -129,20 +120,14 @@ watch(visible, () => {
           <NInput v-model:value="model.roleDesc" :placeholder="$t('page.manage.role.form.roleDesc')" />
         </NFormItem>
       </NForm>
-      <NSpace v-if="isEdit">
-        <NButton @click="openMenuAuthModal">{{ $t('page.manage.role.menuAuth') }}</NButton>
-        <MenuAuthModal v-model:visible="menuAuthVisible" :role-id="roleId" />
-        <NButton @click="openButtonAuthModal">{{ $t('page.manage.role.buttonAuth') }}</NButton>
-        <ButtonAuthModal v-model:visible="buttonAuthVisible" :role-id="roleId" />
+    <template #footer>
+      <NSpace :size="16">
+        <NButton @click="closeDrawer">{{ $t('common.cancel') }}</NButton>
+        <NButton type="primary" @click="handleSubmit">{{ $t('common.confirm') }}</NButton>
       </NSpace>
-      <template #footer>
-        <NSpace :size="16">
-          <NButton @click="closeDrawer">{{ $t('common.cancel') }}</NButton>
-          <NButton type="primary" @click="handleSubmit">{{ $t('common.confirm') }}</NButton>
-        </NSpace>
-      </template>
-    </NDrawerContent>
-  </NDrawer>
+    </template>
+  </NDrawerContent>
+</NDrawer>
 </template>
 
 <style scoped></style>

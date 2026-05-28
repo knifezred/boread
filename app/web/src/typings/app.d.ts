@@ -761,6 +761,33 @@ declare namespace App {
             addDictItem: string;
             editDictItem: string;
           };
+          bookCategory: {
+            title: string;
+            categoryName: string;
+            categoryCode: string;
+            parentId: string;
+            sortOrder: string;
+            categoryStatus: string;
+            form: {
+              categoryName: string;
+              categoryCode: string;
+              sortOrder: string;
+              categoryStatus: string;
+            };
+            addCategory: string;
+            addChildCategory: string;
+            editCategory: string;
+          };
+          bookTag: {
+            title: string;
+            tagName: string;
+            usageCount: string;
+            form: {
+              tagName: string;
+            };
+            addTag: string;
+            editTag: string;
+          };
           log: {
             title: string;
             loginLog: string;

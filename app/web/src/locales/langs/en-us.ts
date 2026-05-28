@@ -234,15 +234,19 @@ const local: App.I18n.Schema = {
     404: 'Page Not Found',
     500: 'Server Error',
     'iframe-page': 'Iframe',
-    home: 'Home',
-    manage: 'Manage',
-    manage_dict: 'Dict Management',
-    manage_log: 'Log Management',
-    manage_menu: 'Menu Management',
-    manage_role: 'Role Management',
-    manage_dept: 'Department Management',
-    manage_user: 'User Management',
-    "manage_user-detail": 'User Detail'
+    admin_dashboard: 'Dashboard',
+    admin: 'System',
+    admin_system: 'System',
+    admin_system_dict: 'Dict Management',
+    admin_system_log: 'Log Management',
+    admin_system_menu: 'Menu Management',
+    admin_system_role: 'Role Management',
+    admin_system_dept: 'Department Management',
+    admin_system_user: 'User Management',
+    "admin_system_user-detail": 'User Detail',
+    admin_book: 'Book Management',
+    admin_book_category: 'Book Categories',
+    admin_book_tag: 'Book Tags'
   },
   page: {
     login: {
@@ -320,93 +324,183 @@ const local: App.I18n.Schema = {
       },
       creativity: 'Creativity'
     },
-    manage: {
+  manage: {
       common: {
         status: {
           enable: 'Enable',
           disable: 'Disable'
         }
-      },      
+      },
       role: {
-        title: 'Role List',
+        title: 'Roles',
         roleName: 'Role Name',
         roleCode: 'Role Code',
-        roleStatus: 'Role Status',
-        roleDesc: 'Role Description',
-        menuAuth: 'Menu Permission',
-        buttonAuth: 'Button Permission',
+        roleStatus: 'Status',
+        roleDesc: 'Description',
+        menuAuth: 'Menu Permissions',
+        buttonAuth: 'Button Permissions',
+        menuName: 'Menu Name',
+        buttonName: 'Permission Name',
+        expandOrCollapse: 'Expand/Collapse All',
         form: {
           roleName: 'Please enter role name',
           roleCode: 'Please enter role code',
-          roleStatus: 'Please select role status',
-          roleDesc: 'Please enter role description'
+          roleStatus: 'Please select status',
+          roleDesc: 'Please enter description'
         },
-        addRole: 'Add Role',
-        editRole: 'Edit Role',
         dataScope: {
           title: 'Data Scope',
           all: 'All',
-          custom: 'Custom Department',
-          dept: 'Current Department',
-          deptAndSub: 'Department & Sub-Departments',
+          custom: 'Custom Dept',
+          dept: 'Current Dept',
+          deptAndSub: 'Dept & Sub',
           self: 'Self Only'
-        }
+        },
+        addRole: 'Add Role',
+        editRole: 'Edit Role'
       },
       dept: {
-        title: 'Department List',
-        deptId: 'Department ID',
-        deptName: 'Department Name',
-        deptCode: 'Department Code',
+        title: 'Departments',
+        deptName: 'Dept Name',
+        deptCode: 'Dept Code',
+        parentId: 'Parent ID',
         leader: 'Leader',
-        parentId: 'Parent Department',
         sortOrder: 'Sort Order',
         status: 'Status',
         form: {
-          parentId: 'Please select parent department',
-          deptName: 'Please enter department name',
-          deptCode: 'Please enter department code',
+          parentId: 'Please select parent dept',
+          deptName: 'Please enter dept name',
+          deptCode: 'Please enter dept code',
           leader: 'Please enter leader',
           sortOrder: 'Please enter sort order',
           status: 'Please select status'
         },
-        addDept: 'Add Department',
-        editDept: 'Edit Department',
-        addChildDept: 'Add Child Department'
+        addDept: 'Add Dept',
+        addChildDept: 'Add Child Dept',
+        editDept: 'Edit Dept'
+      },
+      user: {
+        title: 'Users',
+        userName: 'User Name',
+        userGender: 'Gender',
+        nickName: 'Nick Name',
+        userPhone: 'Phone',
+        userEmail: 'Email',
+        userStatus: 'Status',
+        userRole: 'Role',
+        form: {
+          userName: 'Please enter user name',
+          userGender: 'Please select gender',
+          nickName: 'Please enter nick name',
+          userPhone: 'Please enter phone',
+          userEmail: 'Please enter email',
+          userStatus: 'Please select status',
+          userRole: 'Please select role'
+        },
+        addUser: 'Add User',
+        editUser: 'Edit User'
+      },
+      menu: {
+        title: 'Menus',
+        menuName: 'Menu Name',
+        menuType: 'Menu Type',
+        routeName: 'Route Name',
+        routePath: 'Route Path',
+        icon: 'Icon',
+        iconType: 'Icon Type',
+        status: 'Status',
+        sortOrder: 'Sort Order',
+        permission: 'Permission',
+        form: {
+          home: 'Home',
+          menuType: 'Please select menu type',
+          menuName: 'Please enter menu name',
+          routeName: 'Please enter route name',
+          routePath: 'Please enter route path',
+          pathParam: 'Path Param',
+          layout: 'Layout',
+          page: 'Page',
+          i18nKey: 'I18n Key',
+          icon: 'Please select icon',
+          localIcon: 'Please select local icon',
+          order: 'Order',
+          keepAlive: 'Keep Alive',
+          hideInMenu: 'Hide In Menu',
+          href: 'External Link',
+          multiTab: 'Multi Tab',
+          fixedIndexInTab: 'Fixed Tab Index',
+           button: 'Button',
+          buttonDesc: 'Button Description',
+          menuStatus: 'Status'
+        },
+        addMenu: 'Add Menu',
+        addChildMenu: 'Add Child Menu',
+        editMenu: 'Edit Menu',
+        directory: 'Directory',
+        menu: 'Menu',
+        button: 'Button'
       },
       dict: {
-        title: 'Dict List',
+        title: 'Dict',
         dictName: 'Dict Name',
         dictCode: 'Dict Code',
-        dictDesc: 'Dict Description',
-        dictStatus: 'Dict Status',
+        dictDesc: 'Description',
+        dictStatus: 'Status',
         form: {
           dictName: 'Please enter dict name',
           dictCode: 'Please enter dict code',
-          dictDesc: 'Please enter dict description',
-          dictStatus: 'Please select dict status'
+          dictDesc: 'Please enter description',
+          dictStatus: 'Please select status'
         },
         addDict: 'Add Dict',
         editDict: 'Edit Dict'
       },
       dictItem: {
-        title: 'Dict Item List',
-        itemLabel: 'Item Label',
-        itemValue: 'Item Value',
-        itemDesc: 'Item Description',
+        title: 'Dict Items',
+        itemLabel: 'Label',
+        itemValue: 'Value',
+        itemDesc: 'Description',
         sortOrder: 'Sort Order',
-        itemStatus: 'Item Status',
+        itemStatus: 'Status',
         form: {
-          itemLabel: 'Please enter item label',
-          itemValue: 'Please enter item value',
-          itemDesc: 'Please enter item description',
+          itemLabel: 'Please enter label',
+          itemValue: 'Please enter value',
+          itemDesc: 'Please enter description',
           sortOrder: 'Please enter sort order',
-          itemStatus: 'Please select item status'
+          itemStatus: 'Please select status'
         },
         addDictItem: 'Add Dict Item',
         editDictItem: 'Edit Dict Item'
       },
+      bookCategory: {
+        title: 'Book Categories',
+        categoryName: 'Category Name',
+        categoryCode: 'Category Code',
+        parentId: 'Parent ID',
+        sortOrder: 'Sort Order',
+        categoryStatus: 'Status',
+        form: {
+          categoryName: 'Please enter category name',
+          categoryCode: 'Please enter category code',
+          sortOrder: 'Please enter sort order',
+          categoryStatus: 'Please select status'
+        },
+        addCategory: 'Add Category',
+        addChildCategory: 'Add Child Category',
+        editCategory: 'Edit Category'
+      },
+      bookTag: {
+        title: 'Book Tags',
+        tagName: 'Tag Name',
+        usageCount: 'Usage Count',
+        form: {
+          tagName: 'Please enter tag name'
+        },
+        addTag: 'Add Tag',
+        editTag: 'Edit Tag'
+      },
       log: {
-        title: 'Log Management',
+        title: 'Logs',
         loginLog: 'Login Log',
         operationLog: 'Operation Log',
         userName: 'User Name',
@@ -420,14 +514,14 @@ const local: App.I18n.Schema = {
         endTime: 'End Time',
         form: {
           userName: 'Please enter user name',
-          loginIp: 'Please enter login IP',
+          loginIp: 'Please enter IP',
           loginType: 'Please select login type',
-          loginResult: 'Please select login result',
+          loginResult: 'Please select result',
           module: 'Please enter module',
           action: 'Please enter action',
           clientIp: 'Please enter client IP',
-          startTime: 'Please select start time',
-          endTime: 'Please select end time'
+          startTime: 'Please enter start time',
+          endTime: 'Please enter end time'
         }
       }
     }

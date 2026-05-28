@@ -50,8 +50,7 @@ async function search() {
               <NInput v-model:value="model.dictCode" :placeholder="$t('page.manage.dict.form.dictCode')" />
             </NFormItemGi>
             <NFormItemGi span="24 s:12 m:6" :label="$t('page.manage.dict.dictStatus')" path="status" class="pr-24px">
-              <NSelect v-model:value="model.status" :placeholder="$t('page.manage.dict.form.dictStatus')"
-                :options="translateOptions(enableStatusOptions)" clearable />
+              <NSelect v-model:value="model.status" :placeholder="$t('page.manage.dict.form.dictStatus')" :options="translateOptions(enableStatusOptions)" clearable />
             </NFormItemGi>
             <NFormItemGi span="24 m:6" class="pr-24px">
               <NSpace class="w-full" justify="end">

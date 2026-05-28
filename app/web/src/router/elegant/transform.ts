@@ -166,17 +166,21 @@ const routeMap: RouteMap = {
   "403": "/403",
   "404": "/404",
   "500": "/500",
-  "home": "/home",
+  "admin": "/admin",
+  "admin_book": "/admin/book",
+  "admin_book_category": "/admin/book/category",
+  "admin_book_tag": "/admin/book/tag",
+  "admin_dashboard": "/admin/dashboard",
+  "admin_system": "/admin/system",
+  "admin_system_dept": "/admin/system/dept",
+  "admin_system_dict": "/admin/system/dict",
+  "admin_system_log": "/admin/system/log",
+  "admin_system_menu": "/admin/system/menu",
+  "admin_system_role": "/admin/system/role",
+  "admin_system_user": "/admin/system/user",
+  "admin_system_user-detail": "/admin/system/user-detail/:id",
   "iframe-page": "/iframe-page/:url",
-  "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?",
-  "manage": "/manage",
-  "manage_dept": "/manage/dept",
-  "manage_dict": "/manage/dict",
-  "manage_log": "/manage/log",
-  "manage_menu": "/manage/menu",
-  "manage_role": "/manage/role",
-  "manage_user": "/manage/user",
-  "manage_user-detail": "/manage/user-detail/:id"
+  "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?"
 };
 
 /**

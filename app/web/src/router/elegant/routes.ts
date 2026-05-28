@@ -40,15 +40,126 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
-    name: 'home',
-    path: '/home',
-    component: 'layout.base$view.home',
+    name: 'admin',
+    path: '/admin',
+    component: 'layout.base',
     meta: {
-      title: 'home',
-      i18nKey: 'route.home',
-      icon: 'mdi:monitor-dashboard',
-      order: 1
-    }
+      title: 'admin',
+      i18nKey: 'route.admin'
+    },
+    children: [
+      {
+        name: 'admin_book',
+        path: '/admin/book',
+        meta: {
+          title: 'admin_book',
+          i18nKey: 'route.admin_book'
+        },
+        children: [
+          {
+            name: 'admin_book_category',
+            path: '/admin/book/category',
+            component: 'view.admin_book_category',
+            meta: {
+              title: 'admin_book_category',
+              i18nKey: 'route.admin_book_category'
+            }
+          },
+          {
+            name: 'admin_book_tag',
+            path: '/admin/book/tag',
+            component: 'view.admin_book_tag',
+            meta: {
+              title: 'admin_book_tag',
+              i18nKey: 'route.admin_book_tag'
+            }
+          }
+        ]
+      },
+      {
+        name: 'admin_dashboard',
+        path: '/admin/dashboard',
+        component: 'view.admin_dashboard',
+        meta: {
+          title: 'admin_dashboard',
+          i18nKey: 'route.admin_dashboard'
+        }
+      },
+      {
+        name: 'admin_system',
+        path: '/admin/system',
+        meta: {
+          title: 'admin_system',
+          i18nKey: 'route.admin_system'
+        },
+        children: [
+          {
+            name: 'admin_system_dept',
+            path: '/admin/system/dept',
+            component: 'view.admin_system_dept',
+            meta: {
+              title: 'admin_system_dept',
+              i18nKey: 'route.admin_system_dept'
+            }
+          },
+          {
+            name: 'admin_system_dict',
+            path: '/admin/system/dict',
+            component: 'view.admin_system_dict',
+            meta: {
+              title: 'admin_system_dict',
+              i18nKey: 'route.admin_system_dict'
+            }
+          },
+          {
+            name: 'admin_system_log',
+            path: '/admin/system/log',
+            component: 'view.admin_system_log',
+            meta: {
+              title: 'admin_system_log',
+              i18nKey: 'route.admin_system_log'
+            }
+          },
+          {
+            name: 'admin_system_menu',
+            path: '/admin/system/menu',
+            component: 'view.admin_system_menu',
+            meta: {
+              title: 'admin_system_menu',
+              i18nKey: 'route.admin_system_menu'
+            }
+          },
+          {
+            name: 'admin_system_role',
+            path: '/admin/system/role',
+            component: 'view.admin_system_role',
+            meta: {
+              title: 'admin_system_role',
+              i18nKey: 'route.admin_system_role'
+            }
+          },
+          {
+            name: 'admin_system_user',
+            path: '/admin/system/user',
+            component: 'view.admin_system_user',
+            meta: {
+              title: 'admin_system_user',
+              i18nKey: 'route.admin_system_user'
+            }
+          },
+          {
+            name: 'admin_system_user-detail',
+            path: '/admin/system/user-detail/:id',
+            component: 'view.admin_system_user-detail',
+            meta: {
+              title: 'admin_system_user-detail',
+              i18nKey: 'route.admin_system_user-detail',
+              hideInMenu: true
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     name: 'iframe-page',
@@ -74,81 +185,5 @@ export const generatedRoutes: GeneratedRoute[] = [
       constant: true,
       hideInMenu: true
     }
-  },
-  {
-    name: 'manage',
-    path: '/manage',
-    component: 'layout.base',
-    meta: {
-      title: 'manage',
-      i18nKey: 'route.manage',
-      order: 99
-    },
-    children: [
-      {
-        name: 'manage_dept',
-        path: '/manage/dept',
-        component: 'view.manage_dept',
-        meta: {
-          title: 'manage_dept',
-          i18nKey: 'route.manage_dept'
-        }
-      },
-      {
-        name: 'manage_dict',
-        path: '/manage/dict',
-        component: 'view.manage_dict',
-        meta: {
-          title: 'manage_dict',
-          i18nKey: 'route.manage_dict'
-        }
-      },
-      {
-        name: 'manage_log',
-        path: '/manage/log',
-        component: 'view.manage_log',
-        meta: {
-          title: 'manage_log',
-          i18nKey: 'route.manage_log'
-        }
-      },
-      {
-        name: 'manage_menu',
-        path: '/manage/menu',
-        component: 'view.manage_menu',
-        meta: {
-          title: 'manage_menu',
-          i18nKey: 'route.manage_menu'
-        }
-      },
-      {
-        name: 'manage_role',
-        path: '/manage/role',
-        component: 'view.manage_role',
-        meta: {
-          title: 'manage_role',
-          i18nKey: 'route.manage_role'
-        }
-      },
-      {
-        name: 'manage_user',
-        path: '/manage/user',
-        component: 'view.manage_user',
-        meta: {
-          title: 'manage_user',
-          i18nKey: 'route.manage_user'
-        }
-      },
-      {
-        name: 'manage_user-detail',
-        path: '/manage/user-detail/:id',
-        component: 'view.manage_user-detail',
-        meta: {
-          title: 'manage_user-detail',
-          i18nKey: 'route.manage_user-detail',
-          hideInMenu: true
-        }
-      }
-    ]
   }
 ];

@@ -39,6 +39,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	menuRepo := repository.NewSysMenuRepository(db)
 	dictRepo := repository.NewSysDictRepository(db)
 	logRepo := repository.NewSysLogRepository(db)
+	bookCategoryRepo := repository.NewBookCategoryRepository(db)
+	bookTagRepo := repository.NewBookTagRepository(db)
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, db)
@@ -48,6 +50,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	menuSvc := service.NewMenuService(menuRepo)
 	dictSvc := service.NewDictService(dictRepo)
 	logSvc := service.NewLogService(logRepo)
+	bookCategorySvc := service.NewBookCategoryService(bookCategoryRepo)
+	bookTagSvc := service.NewBookTagService(bookTagRepo)
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
@@ -57,6 +61,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	menuHandler := v1.NewMenuHandler(menuSvc)
 	dictHandler := v1.NewDictHandler(dictSvc)
 	logHandler := v1.NewLogHandler(logSvc)
+	bookCategoryHandler := v1.NewBookCategoryHandler(bookCategorySvc)
+	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
 
 	api := r.Group("/api")
 	{
@@ -130,6 +136,21 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			// --- Log ---
 			manage.POST("/log/login/page", logHandler.PageLogin)
 			manage.POST("/log/operation/page", logHandler.PageOperation)
+
+			// --- Book Category ---
+			manage.GET("/book-category/tree", bookCategoryHandler.Tree)
+			manage.GET("/book-category/:id", bookCategoryHandler.GetByID)
+			manage.POST("/book-category/page", bookCategoryHandler.Page)
+			manage.POST("/book-category", middleware.RequireButton(authSvc, "book-category:create"), bookCategoryHandler.Create)
+			manage.PUT("/book-category/:id", middleware.RequireButton(authSvc, "book-category:update"), bookCategoryHandler.Update)
+			manage.DELETE("/book-category/:id", middleware.RequireButton(authSvc, "book-category:delete"), bookCategoryHandler.Delete)
+
+			// --- Book Tag ---
+			manage.GET("/book-tag/:id", bookTagHandler.GetByID)
+			manage.POST("/book-tag/page", bookTagHandler.Page)
+			manage.POST("/book-tag", middleware.RequireButton(authSvc, "book-tag:create"), bookTagHandler.Create)
+			manage.PUT("/book-tag/:id", middleware.RequireButton(authSvc, "book-tag:update"), bookTagHandler.Update)
+			manage.DELETE("/book-tag/:id", middleware.RequireButton(authSvc, "book-tag:delete"), bookTagHandler.Delete)
 		}
 	}
 

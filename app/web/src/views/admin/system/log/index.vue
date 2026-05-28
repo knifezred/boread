@@ -79,7 +79,7 @@ const {
     },
     {
       key: 'loginTime',
-      title: $t('page.manage.log.loginTime'),
+      title: $t('common.updateTime'),
       align: 'center',
       width: 180
     }

@@ -187,10 +187,10 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
     } else {
       const { data, error } = await fetchGetConstantRoutes();
 
-      if (!error) {
+      // 后端未提供常量路由或返回空数组时, 降级使用前端静态常量路由 (login/403/404 等)
+      if (!error && data?.length) {
         addConstantRoutes(data);
       } else {
-        // if fetch constant routes failed, use static constant routes
         addConstantRoutes(staticRoute.constantRoutes);
       }
     }

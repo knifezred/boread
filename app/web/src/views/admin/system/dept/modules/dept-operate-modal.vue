@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import { computed, ref, watch } from 'vue';
-import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NScrollbar, NSelect, NSpace } from 'naive-ui';
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NScrollbar, NRadioGroup, NRadio, NSpace } from 'naive-ui';
 import { enableStatusOptions } from '@/constants/business';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
 import { $t } from '@/locales';
@@ -129,7 +129,7 @@ watch(visible, () => {
     <NScrollbar class="h-360px pr-20px">
       <NForm ref="formRef" :model="model" :rules="rules" label-placement="left" :label-width="100">
         <NFormItem :label="$t('page.manage.dept.parentId')" path="parentId">
-          <NInputNumber :min="0" v-model:value="model.parentId" disabled class="w-full" />
+          <NInputNumber v-model:value="model.parentId" :min="0" disabled class="w-full" />
         </NFormItem>
         <NFormItem :label="$t('page.manage.dept.deptName')" path="deptName">
           <NInput v-model:value="model.deptName" :placeholder="$t('page.manage.dept.form.deptName')" />
@@ -141,10 +141,12 @@ watch(visible, () => {
           <NInput v-model:value="model.leader" :placeholder="$t('page.manage.dept.form.leader')" />
         </NFormItem>
         <NFormItem :label="$t('page.manage.dept.sortOrder')" path="sortOrder">
-          <NInputNumber :min="0" v-model:value="model.sortOrder" class="w-full" />
+          <NInputNumber v-model:value="model.sortOrder" :min="0" class="w-full" />
         </NFormItem>
         <NFormItem :label="$t('page.manage.dept.status')" path="status">
-          <NSelect v-model:value="model.status" :options="enableStatusOptions" :placeholder="$t('page.manage.dept.form.status')" />
+          <NRadioGroup v-model:value="model.status">
+            <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
+          </NRadioGroup>
         </NFormItem>
       </NForm>
     </NScrollbar>

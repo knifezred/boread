@@ -184,9 +184,9 @@ export function fetchGetMenuList(params?: Api.SystemManage.MenuSearchParams) {
   });
 }
 
-/** 全量菜单树 (id-label-children 简化结构, 用于权限授权穿梭框等场景) */
+/** 全量菜单树 (含按钮, 用于权限分配) */
 export function fetchGetMenuTree() {
-  return request<Api.SystemManage.MenuTree[]>({
+  return request<Api.SystemManage.MenuTreeNode[]>({
     url: "/manage/menu/tree",
     method: "get",
   });

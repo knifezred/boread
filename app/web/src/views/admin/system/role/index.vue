@@ -8,6 +8,8 @@ import { defaultTransform, useNaivePaginatedTable, useTableOperate } from '@/hoo
 import { $t } from '@/locales';
 import RoleOperateDrawer from './modules/role-operate-drawer.vue';
 import RoleSearch from './modules/role-search.vue';
+import RoleAuthModal from './modules/role-auth-modal.vue';
+import { useBoolean } from '@sa/hooks';
 
 const appStore = useAppStore();
 
@@ -18,6 +20,9 @@ const searchParams = ref<Api.SystemManage.RoleSearchParams>({
   roleCode: null,
   status: null
 });
+
+const { bool: authVisible, setTrue: openAuthModal } = useBoolean();
+const currentAuthRoleId = ref<number>(0);
 
 const { columns, columnChecks, data, loading, getData, getDataByPage, mobilePagination } = useNaivePaginatedTable({
   api: () => fetchGetRoleList(searchParams.value),
@@ -102,11 +107,17 @@ const { columns, columnChecks, data, loading, getData, getDataByPage, mobilePagi
       key: 'operate',
       title: $t('common.operate'),
       align: 'center',
-      width: 130,
+      width: 220,
       render: row => (
         <div class="flex-center gap-8px">
           <NButton type="primary" ghost size="small" onClick={() => edit(row.id)}>
             {$t('common.edit')}
+          </NButton>
+          <NButton type="info" ghost size="small" onClick={() => {
+            currentAuthRoleId.value = row.id;
+            openAuthModal();
+          }}>
+            {$t('page.manage.role.menuAuth')}
           </NButton>
           <NPopconfirm onPositiveClick={() => handleDelete(row.id)}>
             {{
@@ -168,6 +179,7 @@ function edit(id: number) {
         :pagination="mobilePagination" class="sm:h-full" />
       <RoleOperateDrawer v-model:visible="drawerVisible" :operate-type="operateType" :row-data="editingData"
         @submitted="getDataByPage" />
+      <RoleAuthModal v-model:visible="authVisible" :role-id="currentAuthRoleId" @submitted="getDataByPage" />
     </NCard>
   </div>
 </template>

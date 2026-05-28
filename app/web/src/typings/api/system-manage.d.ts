@@ -195,6 +195,26 @@ declare namespace Api {
       children?: MenuTree[];
     };
 
+    /** menu tree node (with buttons, from /manage/menu/tree) */
+    type MenuTreeNode = {
+      id: number;
+      parentId: number;
+      menuType: string;
+      menuName: string;
+      routeName: string;
+      status: string;
+      children?: MenuTreeNode[] | null;
+      buttons?: SysMenuButton[] | null;
+    };
+
+    /** menu button */
+    type SysMenuButton = {
+      id: number;
+      menuId: number;
+      buttonCode: string;
+      buttonDesc: string | null;
+    };
+
     /** dict */
     type Dict = Common.CommonRecord<{
       dictName: string;
@@ -243,6 +263,32 @@ declare namespace Api {
           startTime?: string;
           endTime?: string;
         }
+    >;
+
+    /** book category */
+    type BookCategory = Common.CommonRecord<{
+      parentId: number;
+      categoryName: string;
+      categoryCode: string;
+      sortOrder: number;
+      children?: BookCategory[] | null;
+    }>;
+
+    /** category search params */
+    type CategorySearchParams = CommonType.RecordNullable<
+      Pick<Api.SystemManage.BookCategory, "categoryName" | "categoryCode" | "status"> & CommonSearchParams
+    >;
+
+    /** book tag */
+    type BookTag = {
+      id: number;
+      tagName: string;
+      usageCount: number;
+    };
+
+    /** tag search params */
+    type TagSearchParams = CommonType.RecordNullable<
+      { tagName: string } & CommonSearchParams
     >;
   }
 }
