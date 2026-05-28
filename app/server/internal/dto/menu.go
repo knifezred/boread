@@ -23,6 +23,14 @@ type MenuRequest struct {
 	FixedIndexInTab *int               `json:"fixedIndexInTab"`
 	Query           any                `json:"query"`
 	Status          model.EnableStatus `json:"status"`
+	Buttons         []MenuButtonItem   `json:"buttons"`
+}
+
+// MenuButtonItem 菜单中的按钮项 (前端编辑菜单时内嵌提交)
+type MenuButtonItem struct {
+	ID         uint64 `json:"id"`
+	ButtonCode string `json:"buttonCode"`
+	ButtonDesc string `json:"buttonDesc"`
 }
 
 // MenuSearch 菜单分页搜索 (对齐前端 Api.SystemManage.MenuSearchParams)

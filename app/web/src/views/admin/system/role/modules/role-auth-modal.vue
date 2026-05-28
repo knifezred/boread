@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { h, computed, ref, watch } from 'vue';
-import { NDataTable, NCheckbox, NSwitch, NSpace, NButton } from 'naive-ui';
-import { fetchGetMenuTree, fetchGetRoleMenuIds, fetchGetRoleButtonIds, fetchGrantRoleMenus, fetchGrantRoleButtons } from '@/service/api';
-import { $t } from '@/locales';
+import { h, computed, ref, watch } from 'vue'
+import { NDataTable, NCheckbox, NSpace, NButton } from 'naive-ui'
+import { fetchGetMenuTree, fetchGetRoleMenuIds, fetchGetRoleButtonIds, fetchGrantRoleMenus, fetchGrantRoleButtons } from '@/service/api'
+import { $t } from '@/locales'
 
 defineOptions({ name: 'RoleAuthModal' });
 
-interface Props { roleId: number; }
+interface Props { roleId: number; roleName: string; }
 const props = defineProps<Props>();
 const visible = defineModel<boolean>('visible', { default: false });
 const loading = ref(false);
-const expandAll = ref(false);
+const submitting = ref(false);
 const expandedRowKeys = ref<number[]>([]);
 const allRowKeys = ref<number[]>([]);
 
-const title = computed(() => $t('page.manage.role.menuAuth'));
+const title = computed(() => `${$t('page.manage.role.menuAuth')} - ${props.roleName}`);
 
 interface TableTreeNode {
   id: number;
@@ -26,6 +26,7 @@ interface TableTreeNode {
 const tableTree = ref<TableTreeNode[]>([]);
 const checks = ref<number[]>([]);
 
+/** 递归收集树形结构所有节点ID */
 function collectAllKeys(nodes: TableTreeNode[]) {
   let keys: number[] = [];
   for (const n of nodes) {
@@ -35,6 +36,7 @@ function collectAllKeys(nodes: TableTreeNode[]) {
   return keys;
 }
 
+/** 将服务端菜单树节点转为表格树节点 */
 function buildTableTree(menuNodes: Api.SystemManage.MenuTreeNode[]): TableTreeNode[] {
   return menuNodes.map(n => {
     const node: TableTreeNode = {
@@ -49,6 +51,7 @@ function buildTableTree(menuNodes: Api.SystemManage.MenuTreeNode[]): TableTreeNo
   });
 }
 
+/** 获取指定节点的所有子孙节点ID（不含自身） */
 function getDescendantIds(node: TableTreeNode): number[] {
   let ids: number[] = [];
   if (node.children) {
@@ -60,6 +63,7 @@ function getDescendantIds(node: TableTreeNode): number[] {
   return ids;
 }
 
+/** 选中/取消选中菜单，联动其子孙菜单 */
 function toggleMenu(id: number, checked: boolean) {
   if (checked) {
     if (!checks.value.includes(id)) checks.value.push(id);
@@ -82,6 +86,7 @@ function toggleMenu(id: number, checked: boolean) {
   }
 }
 
+/** 选中/取消选中按钮权限 */
 function toggleButton(buttonId: number, checked: boolean) {
   const key = -buttonId;
   if (checked) {
@@ -91,6 +96,7 @@ function toggleButton(buttonId: number, checked: boolean) {
   }
 }
 
+/** 在树中递归查找指定ID的节点 */
 function findNodeById(nodes: TableTreeNode[], id: number): TableTreeNode | null {
   for (const n of nodes) {
     if (n.id === id) return n;
@@ -104,19 +110,19 @@ function findNodeById(nodes: TableTreeNode[], id: number): TableTreeNode | null 
 
 const columns = computed(() => [
   {
-    title: $t('page.manage.role.menuName'),
+    title: $t('page.manage.menu.title'),
     key: 'menuName',
     width: 220,
     treeNode: true,
     render: (row: TableTreeNode) =>
       h(NCheckbox, {
         label: row.menuName,
-        value: checks.value.includes(row.id),
-        onUpdateValue: (val: boolean) => toggleMenu(row.id, val),
+        checked: checks.value.includes(row.id),
+        onUpdateChecked: (val: boolean) => toggleMenu(row.id, val),
       }),
   },
   {
-    title: $t('page.manage.role.buttonName'),
+    title: $t('page.manage.menu.button'),
     key: 'buttons',
     render: (row: TableTreeNode) =>
       row.buttons?.length
@@ -124,8 +130,8 @@ const columns = computed(() => [
             row.buttons.map(b =>
               h(NCheckbox, {
                 label: b.buttonDesc ?? b.buttonCode,
-                value: checks.value.includes(-b.id),
-                onUpdateValue: (val: boolean) => toggleButton(b.id, val),
+                checked: checks.value.includes(-b.id),
+                onUpdateChecked: (val: boolean) => toggleButton(b.id, val),
               }),
             ),
           )
@@ -133,6 +139,7 @@ const columns = computed(() => [
   },
 ]);
 
+/** 加载菜单树和当前角色的权限数据 */
 async function init() {
   loading.value = true;
   try {
@@ -150,32 +157,34 @@ async function init() {
     if (!buttonIdsRes.error) checked.push(...buttonIdsRes.data.map(id => -Number(id)));
     checks.value = checked;
     // 默认全展开
-    expandAll.value = true;
     expandedRowKeys.value = allRowKeys.value;
   } finally {
     loading.value = false;
   }
 }
 
+/** 关闭弹窗 */
 function closeModal() { visible.value = false; }
 
-function handleExpandChange(val: boolean) {
-  expandedRowKeys.value = val ? allRowKeys.value : [];
-}
-
+/** 提交权限变更 */
 async function handleSubmit() {
-  const menuIds = checks.value.filter(k => k > 0).map(Number);
-  const buttonIds = checks.value.filter(k => k < 0).map(k => -Number(k));
-  const [menuRes, buttonRes] = await Promise.all([
-    fetchGrantRoleMenus(props.roleId, menuIds),
-    fetchGrantRoleButtons(props.roleId, buttonIds),
-  ]);
-  if (menuRes.error || buttonRes.error) {
-    window.$message?.error?.(menuRes.error?.message || buttonRes.error?.message || $t('common.operateFail'));
-    return;
+  submitting.value = true;
+  try {
+    const menuIds = checks.value.filter(k => k > 0).map(Number);
+    const buttonIds = checks.value.filter(k => k < 0).map(k => -Number(k));
+    const [menuRes, buttonRes] = await Promise.all([
+      fetchGrantRoleMenus(props.roleId, menuIds),
+      fetchGrantRoleButtons(props.roleId, buttonIds),
+    ]);
+    if (menuRes.error || buttonRes.error) {
+      window.$message?.error?.(menuRes.error?.message || buttonRes.error?.message || $t('common.operateFailed'));
+      return;
+    }
+    window.$message?.success?.($t('common.modifySuccess'));
+    closeModal();
+  } finally {
+    submitting.value = false;
   }
-  window.$message?.success?.($t('common.modifySuccess'));
-  closeModal();
 }
 
 watch(visible, val => { if (val) init(); });
@@ -183,14 +192,11 @@ watch(visible, val => { if (val) init(); });
 
 <template>
   <NModal v-model:show="visible" :title="title" preset="card" class="w-800px" :loading="loading">
-    <div class="flex items-center mb-12px">
-      <span class="mr-12px">{{ $t('page.manage.role.expandOrCollapse') }}</span>
-      <NSwitch v-model:value="expandAll" @update:value="handleExpandChange" />
-    </div>
     <NDataTable
       :columns="columns"
       :data="tableTree"
       :expanded-row-keys="expandedRowKeys"
+      @update:expanded-row-keys="expandedRowKeys = $event as number[]"
       :row-key="(row) => row.id"
       :loading="loading"
       :pagination="false"
@@ -201,14 +207,10 @@ watch(visible, val => { if (val) init(); });
     <template #footer>
       <NSpace justify="end">
         <NButton size="small" @click="closeModal">{{ $t('common.cancel') }}</NButton>
-        <NButton type="primary" size="small" @click="handleSubmit">{{ $t('common.confirm') }}</NButton>
+        <NButton type="primary" size="small" :loading="submitting" @click="handleSubmit">{{ $t('common.confirm') }}</NButton>
       </NSpace>
     </template>
   </NModal>
 </template>
 
-<style scoped>
-:deep(.n-modal-body-wrapper) {
-  overflow: hidden !important;
-}
-</style>
+<style scoped></style>

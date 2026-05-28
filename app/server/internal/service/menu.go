@@ -134,6 +134,11 @@ func (s *MenuService) Update(ctx context.Context, id uint64, req *dto.MenuReques
 	if err := s.repo.Update(ctx, m); err != nil {
 		return nil, err
 	}
+	if req.Buttons != nil {
+		if err := s.repo.ReplaceMenuButtons(ctx, id, req.Buttons); err != nil {
+			return nil, err
+		}
+	}
 	return m, nil
 }
 

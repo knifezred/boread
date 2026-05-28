@@ -23,6 +23,7 @@ const searchParams = ref<Api.SystemManage.RoleSearchParams>({
 
 const { bool: authVisible, setTrue: openAuthModal } = useBoolean();
 const currentAuthRoleId = ref<number>(0);
+const currentAuthRoleName = ref<string>('');
 
 const { columns, columnChecks, data, loading, getData, getDataByPage, mobilePagination } = useNaivePaginatedTable({
   api: () => fetchGetRoleList(searchParams.value),
@@ -115,6 +116,7 @@ const { columns, columnChecks, data, loading, getData, getDataByPage, mobilePagi
           </NButton>
           <NButton type="info" ghost size="small" onClick={() => {
             currentAuthRoleId.value = row.id;
+            currentAuthRoleName.value = row.roleName;
             openAuthModal();
           }}>
             {$t('page.manage.role.menuAuth')}
@@ -179,7 +181,7 @@ function edit(id: number) {
         :pagination="mobilePagination" class="sm:h-full" />
       <RoleOperateDrawer v-model:visible="drawerVisible" :operate-type="operateType" :row-data="editingData"
         @submitted="getDataByPage" />
-      <RoleAuthModal v-model:visible="authVisible" :role-id="currentAuthRoleId" @submitted="getDataByPage" />
+      <RoleAuthModal v-model:visible="authVisible" :role-id="currentAuthRoleId" :role-name="currentAuthRoleName" @submitted="getDataByPage" />
     </NCard>
   </div>
 </template>

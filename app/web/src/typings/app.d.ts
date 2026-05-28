@@ -363,6 +363,7 @@ declare namespace App {
         enable: string;
         disable: string;
         operateSuccess: string;
+        operateFailed: string;
         createTime: string;
         updateTime: string;
         pleaseCheckValue: string;

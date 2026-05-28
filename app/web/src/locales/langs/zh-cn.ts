@@ -38,7 +38,7 @@ const local: App.I18n.Schema = {
     enable: "启用",
     disable: "禁用",
     operateSuccess: "操作成功",
-    operateFail: "操作失败",
+    operateFailed: "操作失败",
     createTime: "创建时间",
     updateTime: "更新时间",
     pleaseCheckValue: "请检查输入的值是否合法",
@@ -249,6 +249,7 @@ const local: App.I18n.Schema = {
     admin_book_category: "小说分类",
     admin_book_tag: "小说标签",
     admin_dashboard: "首页",
+    home: "首页",
   },
   page: {
     login: {

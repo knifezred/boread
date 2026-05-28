@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"boread/internal/dto"
 	"boread/internal/model"
 )
 
@@ -78,6 +79,58 @@ func (r *SysMenuRepository) ListAllButtons(ctx context.Context) ([]model.SysMenu
 	var rows []model.SysMenuButton
 	err := r.db.WithContext(ctx).Find(&rows).Error
 	return rows, err
+}
+
+// ReplaceMenuButtons 替换菜单下的按钮列表：新增/更新/删除同步
+func (r *SysMenuRepository) ReplaceMenuButtons(ctx context.Context, menuID uint64, items []dto.MenuButtonItem) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var existing []model.SysMenuButton
+		if err := tx.Where("menu_id = ?", menuID).Find(&existing).Error; err != nil {
+			return err
+		}
+		existingMap := make(map[uint64]model.SysMenuButton, len(existing))
+		for _, b := range existing {
+			existingMap[b.ID] = b
+		}
+		incomingIDs := make(map[uint64]struct{}, len(items))
+		for i := range items {
+			item := items[i]
+			if item.ID > 0 {
+				incomingIDs[item.ID] = struct{}{}
+				if _, ok := existingMap[item.ID]; ok {
+					desc := item.ButtonDesc
+					if err := tx.Model(&model.SysMenuButton{}).Where("id = ?", item.ID).Updates(map[string]any{
+						"button_code": item.ButtonCode,
+						"button_desc": &desc,
+					}).Error; err != nil {
+						return err
+					}
+				}
+			} else {
+				desc := item.ButtonDesc
+				b := &model.SysMenuButton{
+					MenuID:     menuID,
+					ButtonCode: item.ButtonCode,
+					ButtonDesc: &desc,
+				}
+				if desc == "" {
+					b.ButtonDesc = nil
+				}
+				if err := tx.Create(b).Error; err != nil {
+					return err
+				}
+			}
+		}
+		// 删除已不在提交列表中的按钮
+		for _, eb := range existing {
+			if _, keep := incomingIDs[eb.ID]; !keep {
+				if err := tx.Delete(&model.SysMenuButton{}, eb.ID).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 }
 
 // Page 菜单分页查询 (只查顶级菜单 parent_id=0)
