@@ -66,6 +66,32 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
   /** auth routes */
   const authRoutes = shallowRef<ElegantConstRoute[]>([]);
 
+  /** backend menu routes (用于动态模式下侧边栏菜单驱动) */
+  const backendMenuRoutes = shallowRef<ElegantConstRoute[]>([]);
+
+  /**
+   * Filter backend menu routes — remove items whose route name doesn't exist
+   * in the frontend routeMap (防止后端返回的菜单在前端没有对应路由)
+   */
+  function filterBackendMenus(routes: ElegantConstRoute[]): ElegantConstRoute[] {
+    return routes.reduce<ElegantConstRoute[]>((acc, route) => {
+      const routePath = getRoutePath(route.name as RouteKey);
+      if (!routePath) return acc;
+
+      const filteredChildren = route.children?.length ? filterBackendMenus(route.children) : undefined;
+
+      if (filteredChildren?.length === 0) return acc;
+
+      return [
+        ...acc,
+        {
+          ...route,
+          ...(filteredChildren ? { children: filteredChildren } : {})
+        }
+      ];
+    }, []);
+  }
+
   function addAuthRoutes(routes: ElegantConstRoute[]) {
     const authRoutesMap = new Map<string, ElegantConstRoute>([]);
 
@@ -135,6 +161,8 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
     const routeStore = useRouteStore();
 
     routeStore.$reset();
+
+    backendMenuRoutes.value = [];
 
     resetVueRoutes();
 
@@ -216,6 +244,10 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
 
       addAuthRoutes(routes);
 
+      // 保存后端返回的菜单树, handleConstantAndAuthRoutes 中会用此驱动侧边栏
+      // 过滤掉前端 routeMap 中不存在的路由, 避免导航报错
+      backendMenuRoutes.value = filterBackendMenus(routes);
+
       handleConstantAndAuthRoutes();
 
       setRouteHome(home);
@@ -241,7 +273,13 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
 
     addRoutesToVueRouter(vueRoutes);
 
-    getGlobalMenus(sortRoutes);
+    if (backendMenuRoutes.value.length) {
+      // 动态模式: 使用后端返回的菜单树渲染侧边栏
+      getGlobalMenus(sortRoutesByOrder(backendMenuRoutes.value));
+    } else {
+      // 静态模式: 从全量路由生成菜单
+      getGlobalMenus(sortRoutes);
+    }
 
     getCacheRoutes(vueRoutes);
   }

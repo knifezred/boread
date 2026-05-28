@@ -39,7 +39,7 @@ async function search() {
 
 <template>
   <NCard :bordered="false" size="small" class="card-wrapper">
-    <NCollapse>
+    <NCollapse :default-expanded-names="['dict-search']">
       <NCollapseItem :title="$t('common.search')" name="dict-search">
         <NForm ref="formRef" :model="model" label-placement="left" :label-width="80">
           <NGrid responsive="screen" item-responsive>
@@ -53,7 +53,7 @@ async function search() {
               <NSelect v-model:value="model.status" :placeholder="$t('page.manage.dict.form.dictStatus')"
                 :options="translateOptions(enableStatusOptions)" clearable />
             </NFormItemGi>
-            <NFormItemGi span="24 m:12" class="pr-24px">
+            <NFormItemGi span="24 m:6" class="pr-24px">
               <NSpace class="w-full" justify="end">
                 <NButton @click="reset">
                   <template #icon>
