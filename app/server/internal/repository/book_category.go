@@ -90,3 +90,19 @@ func (r *BookCategoryRepository) ListByIDs(ctx context.Context, ids []uint64) ([
 	}
 	return rows, nil
 }
+
+// GetMapByIDs 根据主键 ID 批量查询分类，返回 id → CategoryName 映射
+func (r *BookCategoryRepository) GetMapByIDs(ctx context.Context, ids []uint64) (map[uint64]string, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var rows []model.BookCategory
+	if err := r.db.WithContext(ctx).Model(&model.BookCategory{}).Where("id IN ?", ids).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	m := make(map[uint64]string, len(rows))
+	for _, c := range rows {
+		m[c.ID] = c.CategoryName
+	}
+	return m, nil
+}

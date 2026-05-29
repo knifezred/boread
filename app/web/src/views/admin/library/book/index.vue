@@ -1,26 +1,26 @@
 <script setup lang="tsx">
-import { ref } from "vue";
-import type { Ref } from "vue";
-import { NButton, NPopconfirm, NTag, NSpace, NSelect, NInput } from "naive-ui";
-import { useBoolean } from "@sa/hooks";
+import { ref } from "vue"
+import type { Ref } from "vue"
+import { NButton, NPopconfirm, NTag, NSpace, NSelect, NInput } from "naive-ui"
+import { useBoolean } from "@sa/hooks"
 import {
   bookStatusRecord,
-} from "@/constants/business";
-import { useDictItems } from "@/hooks/business/dict";
+} from "@/constants/business"
+import { useDictItems } from "@/hooks/business/dict"
 import {
   fetchGetBookList,
   fetchDeleteBook,
   fetchGetCategoryTree,
   fetchUpdateBookStatus,
-} from "@/service/api";
-import { useAppStore } from "@/store/modules/app";
+} from "@/service/api"
+import { useAppStore } from "@/store/modules/app"
 import {
   defaultTransform,
   useNaivePaginatedTable,
   useTableOperate,
-} from "@/hooks/common/table";
-import { $t } from "@/locales";
-import BookOperateModal from "./modules/book-operate-modal.vue";
+} from "@/hooks/common/table"
+import { $t } from "@/locales"
+import BookOperateModal from "./modules/book-operate-modal.vue"
 
 const appStore = useAppStore();
 
@@ -91,6 +91,12 @@ const {
       render: (_, index) => index + 1,
     },
     {
+      key: "categoryName",
+      title: $t("page.admin.library.book.categoryId"),
+      align: "center",
+      width: 100,
+    },
+    {
       key: "title",
       title: $t("page.admin.library.book.bookName"),
       align: "left",
@@ -103,12 +109,6 @@ const {
       align: "center",
       width: 140,
       ellipsis: { tooltip: true },
-    },
-    {
-      key: "categoryId",
-      title: $t("page.admin.library.book.categoryId"),
-      align: "center",
-      width: 100,
     },
     {
       key: "serialStatus",

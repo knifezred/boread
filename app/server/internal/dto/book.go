@@ -32,11 +32,12 @@ type BookSearch struct {
 	TagID      *uint64 `json:"tagId"`
 }
 
-// BookResponse 书籍响应 (包含标签列表)
+// BookResponse 书籍响应 (包含标签列表和分类名称)
 type BookResponse struct {
 	model.Book
-	TagIDs   []uint64 `json:"tagIds"`
-	Tags     []TagBrief `json:"tags,omitempty"`
+	TagIDs       []uint64   `json:"tagIds"`
+	Tags         []TagBrief `json:"tags,omitempty"`
+	CategoryName string     `json:"categoryName,omitempty"`
 }
 
 // TagBrief 标签简要信息

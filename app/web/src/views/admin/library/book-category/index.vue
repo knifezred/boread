@@ -1,20 +1,20 @@
 <script setup lang="tsx">
-import { ref } from "vue";
-import type { Ref } from "vue";
-import { NButton, NPopconfirm, NTag } from "naive-ui";
-import { useBoolean } from "@sa/hooks";
-import { enableStatusRecord } from "@/constants/business";
-import { fetchGetCategoryList, fetchDeleteCategory } from "@/service/api";
-import { useAppStore } from "@/store/modules/app";
+import { ref } from "vue"
+import type { Ref } from "vue"
+import { NButton, NPopconfirm, NTag } from "naive-ui"
+import { useBoolean } from "@sa/hooks"
+import { enableStatusRecord } from "@/constants/business"
+import { fetchGetCategoryList, fetchDeleteCategory } from "@/service/api"
+import { useAppStore } from "@/store/modules/app"
 import {
   defaultTransform,
   useNaivePaginatedTable,
   useTableOperate,
-} from "@/hooks/common/table";
-import { $t } from "@/locales";
+} from "@/hooks/common/table"
+import { $t } from "@/locales"
 import CategoryOperateModal, {
   type OperateType,
-} from "./modules/category-operate-modal.vue";
+} from "./modules/category-operate-modal.vue"
 
 const appStore = useAppStore();
 
@@ -56,23 +56,17 @@ const {
       width: 240,
     },
     {
-      key: "description",
-      title: $t("page.admin.library.bookCategory.description"),
-      align: "left",
-      ellipsis: { tooltip: true },
-      minWidth: 160,
-    },
-    {
       key: "categoryCode",
       title: $t("page.admin.library.bookCategory.categoryCode"),
       align: "center",
       width: 140,
     },
     {
-      key: "parentId",
-      title: $t("page.admin.library.bookCategory.parentId"),
-      align: "center",
-      width: 90,
+      key: "description",
+      title: $t("page.admin.library.bookCategory.description"),
+      align: "left",
+      ellipsis: { tooltip: true },
+      minWidth: 160,
     },
     {
       key: "sortOrder",
