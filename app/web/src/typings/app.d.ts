@@ -766,12 +766,14 @@ declare namespace App {
             title: string;
             categoryName: string;
             categoryCode: string;
+            description: string;
             parentId: string;
             sortOrder: string;
             categoryStatus: string;
             form: {
               categoryName: string;
               categoryCode: string;
+              description: string;
               sortOrder: string;
               categoryStatus: string;
             };
@@ -782,9 +784,11 @@ declare namespace App {
           bookTag: {
             title: string;
             tagName: string;
+            description: string;
             usageCount: string;
             form: {
               tagName: string;
+              description: string;
             };
             addTag: string;
             editTag: string;

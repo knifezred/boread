@@ -1,7 +1,8 @@
 package dto
 
 type TagRequest struct {
-	TagName string `json:"tagName" binding:"required,max=64"`
+	TagName     string `json:"tagName" binding:"required,max=64"`
+	Description string `json:"description"`
 }
 
 type TagSearch struct {

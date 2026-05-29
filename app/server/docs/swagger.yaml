@@ -207,6 +207,15 @@ definitions:
       token:
         type: string
     type: object
+  boread_internal_dto.MenuButtonItem:
+    properties:
+      buttonCode:
+        type: string
+      buttonDesc:
+        type: string
+      id:
+        type: integer
+    type: object
   boread_internal_dto.MenuButtonRequest:
     properties:
       buttonCode:
@@ -316,6 +325,10 @@ definitions:
     properties:
       activeMenu:
         type: string
+      buttons:
+        items:
+          $ref: '#/definitions/boread_internal_dto.MenuButtonItem'
+        type: array
       component:
         type: string
       constant:
@@ -507,6 +520,8 @@ definitions:
     type: object
   boread_internal_dto.TagRequest:
     properties:
+      description:
+        type: string
       tagName:
         maxLength: 64
         type: string
@@ -640,6 +655,8 @@ definitions:
         type: integer
       createTime:
         type: string
+      description:
+        type: string
       id:
         type: integer
       parentId:
@@ -656,6 +673,8 @@ definitions:
   boread_internal_model.BookTag:
     properties:
       createTime:
+        type: string
+      description:
         type: string
       id:
         type: integer

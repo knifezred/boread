@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sort"
 	"strconv"
 	"time"
@@ -224,7 +223,7 @@ func buildLevel(parentID uint64, childrenMap map[uint64][]model.SysMenu) []dto.M
 			r.Children = children
 			// 目录类型默认重定向到第一个子菜单
 			if m.MenuType == model.MenuTypeDir && len(children) > 0 {
-				r.Redirect = fmt.Sprintf("%s/%s", m.RoutePath, children[0].Name)
+				r.Redirect = children[0].Path
 			}
 		}
 		out = append(out, r)

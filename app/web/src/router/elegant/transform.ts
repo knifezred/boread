@@ -144,8 +144,8 @@ function transformElegantRouteToVueRoute(
 
   if (children?.length) {
     const childRoutes = children.flatMap(child => transformElegantRouteToVueRoute(child, layouts, views));
-
-    if(isFirstLevelRoute(route)) {
+    
+    if(isFirstLevelRoute(route) || (component && isLayout(component))) {
       vueRoute.children = childRoutes;
     } else {
       vueRoutes.push(...childRoutes);

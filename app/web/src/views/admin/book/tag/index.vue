@@ -23,7 +23,8 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
   columns: () => [
     { type: 'selection', align: 'center', width: 48 },
     { key: 'index', title: $t('common.index'), align: 'center', width: 64, render: (_, index) => index + 1 },
-    { key: 'tagName', title: $t('page.manage.bookTag.tagName'), align: 'center', minWidth: 160 },
+    { key: 'tagName', title: $t('page.manage.bookTag.tagName'), align: 'center', minWidth: 140 },
+    { key: 'description', title: $t('page.manage.bookTag.description'), align: 'left', ellipsis: { tooltip: true }, minWidth: 160 },
     { key: 'usageCount', title: $t('page.manage.bookTag.usageCount'), align: 'center', width: 120 },
     {
       key: 'operate', title: $t('common.operate'), align: 'center', width: 180,

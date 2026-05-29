@@ -45,7 +45,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     component: 'layout.base',
     meta: {
       title: 'admin',
-      i18nKey: 'route.admin'
+      i18nKey: 'route.admin',
     },
     children: [
       {

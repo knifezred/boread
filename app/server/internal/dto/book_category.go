@@ -6,6 +6,7 @@ type CategoryRequest struct {
 	ParentID     uint64             `json:"parentId"`
 	CategoryName string             `json:"categoryName" binding:"required,max=64"`
 	CategoryCode string             `json:"categoryCode" binding:"required,max=64"`
+	Description  string             `json:"description"`
 	SortOrder    int                `json:"sortOrder"`
 	Status       model.EnableStatus `json:"status"`
 }
@@ -15,6 +16,7 @@ type CategoryNode struct {
 	ParentID     uint64             `json:"parentId"`
 	CategoryName string             `json:"categoryName"`
 	CategoryCode string             `json:"categoryCode"`
+	Description  string             `json:"description"`
 	SortOrder    int                `json:"sortOrder"`
 	Status       model.EnableStatus `json:"status"`
 	Children     []*CategoryNode    `json:"children"`

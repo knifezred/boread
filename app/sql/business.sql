@@ -30,7 +30,11 @@ CREATE TABLE `sys_user_profile` (
   `signature`     VARCHAR(255)    NULL     DEFAULT NULL             COMMENT '个性签名',
   `create_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
-  PRIMARY KEY (`user_id`)
+  `create_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+  `update_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
+  PRIMARY KEY (`user_id`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户扩展信息表';
 
 
@@ -72,8 +76,10 @@ CREATE TABLE `book_tag` (
   `create_time` DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
   `update_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_tag_name` (`tag_name`)
+  UNIQUE KEY `uk_tag_name` (`tag_name`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='书籍标签表';
 
 -- ---------------------------------------------------------------------
@@ -127,9 +133,15 @@ CREATE TABLE `book_tag_rel` (
   `id`      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键 id',
   `book_id` BIGINT UNSIGNED NOT NULL                COMMENT '书籍 id',
   `tag_id`  BIGINT UNSIGNED NOT NULL                COMMENT '标签 id',
+  `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+  `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+  `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_book_tag` (`book_id`, `tag_id`),
-  KEY `idx_tag_id` (`tag_id`)
+  KEY `idx_tag_id` (`tag_id`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='书籍标签关联表';
 
 -- ---------------------------------------------------------------------
@@ -267,6 +279,7 @@ CREATE TABLE `book_upload` (
   `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
   `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   KEY `idx_uploader` (`uploader_type`, `uploader_id`),
   KEY `idx_book_id` (`book_id`),
@@ -287,10 +300,16 @@ CREATE TABLE `reader_bookshelf` (
   `is_top`          TINYINT(1)      NOT NULL DEFAULT 0                COMMENT '是否置顶',
   `last_read_time`  DATETIME(3)     NULL     DEFAULT NULL             COMMENT '最后阅读时间',
   `add_time`        DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '加入书架时间',
+  `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+  `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+  `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_reader_book` (`reader_id`, `book_id`),
   KEY `idx_book_id` (`book_id`),
-  KEY `idx_last_read` (`reader_id`, `last_read_time`)
+  KEY `idx_last_read` (`reader_id`, `last_read_time`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='读者书架表';
 
 -- ---------------------------------------------------------------------
@@ -310,9 +329,14 @@ CREATE TABLE `reader_read_progress` (
   `read_duration`   INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '累计阅读时长 (秒)',
   `last_read_time`  DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '最后阅读时间',
   `create_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+  `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+  `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_reader_book` (`reader_id`, `book_id`),
-  KEY `idx_chapter` (`chapter_id`)
+  KEY `idx_chapter` (`chapter_id`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='阅读进度表';
 
 -- ---------------------------------------------------------------------
@@ -484,10 +508,16 @@ CREATE TABLE `reader_read_event` (
   `word_count`     INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '本次阅读字数 (服务端从 book_chapter.word_count 回填, 客户端上报仅供参考)',
   `event_date`     DATE            NOT NULL                          COMMENT '事件日期 (聚合维度, 冗余于 event_time)',
   `event_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '事件时间',
+  `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+  `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+  `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   KEY `idx_reader_date` (`reader_id`, `event_date`),
   KEY `idx_book_id` (`book_id`),
-  KEY `idx_event_date` (`event_date`)
+  KEY `idx_event_date` (`event_date`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='阅读事件原子表';
 
 -- ---------------------------------------------------------------------
@@ -514,9 +544,11 @@ CREATE TABLE `reader_read_stat_daily` (
   `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
   `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_reader_date` (`reader_id`, `stat_date`),
-  KEY `idx_stat_date` (`stat_date`)
+  KEY `idx_stat_date` (`stat_date`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='读者阅读日统计';
 
 -- ---------------------------------------------------------------------
@@ -537,7 +569,9 @@ CREATE TABLE `reader_read_stat_book` (
   `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
   `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_reader_book_date` (`reader_id`, `book_id`, `stat_date`),
-  KEY `idx_book_date` (`book_id`, `stat_date`)
+  KEY `idx_book_date` (`book_id`, `stat_date`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='读者-书-日 阅读统计';

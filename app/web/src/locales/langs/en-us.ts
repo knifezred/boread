@@ -476,12 +476,14 @@ const local: App.I18n.Schema = {
         title: 'Book Categories',
         categoryName: 'Category Name',
         categoryCode: 'Category Code',
+        description: 'Description',
         parentId: 'Parent ID',
         sortOrder: 'Sort Order',
         categoryStatus: 'Status',
         form: {
           categoryName: 'Please enter category name',
           categoryCode: 'Please enter category code',
+          description: 'Please enter description',
           sortOrder: 'Please enter sort order',
           categoryStatus: 'Please select status'
         },
@@ -492,9 +494,11 @@ const local: App.I18n.Schema = {
       bookTag: {
         title: 'Book Tags',
         tagName: 'Tag Name',
+        description: 'Description',
         usageCount: 'Usage Count',
         form: {
-          tagName: 'Please enter tag name'
+          tagName: 'Please enter tag name',
+          description: 'Please enter description'
         },
         addTag: 'Add Tag',
         editTag: 'Edit Tag'

@@ -3014,6 +3014,20 @@ const docTemplate = `{
                 }
             }
         },
+        "boread_internal_dto.MenuButtonItem": {
+            "type": "object",
+            "properties": {
+                "buttonCode": {
+                    "type": "string"
+                },
+                "buttonDesc": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "boread_internal_dto.MenuButtonRequest": {
             "type": "object",
             "required": [
@@ -3183,6 +3197,12 @@ const docTemplate = `{
             "properties": {
                 "activeMenu": {
                     "type": "string"
+                },
+                "buttons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/boread_internal_dto.MenuButtonItem"
+                    }
                 },
                 "component": {
                     "type": "string"
@@ -3469,6 +3489,9 @@ const docTemplate = `{
                 "tagName"
             ],
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "tagName": {
                     "type": "string",
                     "maxLength": 64
@@ -3664,6 +3687,9 @@ const docTemplate = `{
                 "createTime": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3688,6 +3714,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createTime": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "id": {

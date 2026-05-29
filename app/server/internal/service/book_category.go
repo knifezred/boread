@@ -49,6 +49,7 @@ func (s *BookCategoryService) Create(ctx context.Context, req *dto.CategoryReque
 		Ancestors:    ancestors,
 		CategoryName: req.CategoryName,
 		CategoryCode: req.CategoryCode,
+		Description:  req.Description,
 		SortOrder:    req.SortOrder,
 		Status:       status,
 	}
@@ -87,6 +88,7 @@ func (s *BookCategoryService) Update(ctx context.Context, id uint64, req *dto.Ca
 
 	m.CategoryName = req.CategoryName
 	m.CategoryCode = req.CategoryCode
+	m.Description = req.Description
 	m.SortOrder = req.SortOrder
 	if req.Status != "" {
 		m.Status = req.Status
@@ -135,6 +137,7 @@ func buildCategoryTree(rows []model.BookCategory) []*dto.CategoryNode {
 			ParentID:     r.ParentID,
 			CategoryName: r.CategoryName,
 			CategoryCode: r.CategoryCode,
+			Description:  r.Description,
 			SortOrder:    r.SortOrder,
 			Status:       r.Status,
 			Children:     []*dto.CategoryNode{},
@@ -170,6 +173,7 @@ func (s *BookCategoryService) Page(ctx context.Context, req *dto.CategorySearch)
 			ParentID:     r.ParentID,
 			CategoryName: r.CategoryName,
 			CategoryCode: r.CategoryCode,
+			Description:  r.Description,
 			SortOrder:    r.SortOrder,
 			Status:       r.Status,
 			Children:     []*dto.CategoryNode{},
@@ -197,6 +201,7 @@ func (s *BookCategoryService) loadChildrenRecursively(ctx context.Context, nodeM
 			ParentID:     c.ParentID,
 			CategoryName: c.CategoryName,
 			CategoryCode: c.CategoryCode,
+			Description:  c.Description,
 			SortOrder:    c.SortOrder,
 			Status:       c.Status,
 			Children:     []*dto.CategoryNode{},

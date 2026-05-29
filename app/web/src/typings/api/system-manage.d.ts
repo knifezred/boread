@@ -270,6 +270,7 @@ declare namespace Api {
       parentId: number;
       categoryName: string;
       categoryCode: string;
+      description: string | null;
       sortOrder: number;
       children?: BookCategory[] | null;
     }>;
@@ -283,6 +284,7 @@ declare namespace Api {
     type BookTag = {
       id: number;
       tagName: string;
+      description: string | null;
       usageCount: number;
     };
 

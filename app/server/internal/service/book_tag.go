@@ -23,18 +23,20 @@ func NewBookTagService(repo *repository.BookTagRepository) *BookTagService {
 	return &BookTagService{repo: repo}
 }
 
-func (s *BookTagService) Create(ctx context.Context, req *dto.TagRequest) (*model.BookTag, error) {
+func (s *BookTagService) Create(ctx context.Context, req *dto.TagRequest, userID uint64) (*model.BookTag, error) {
 	if _, err := s.repo.GetByName(ctx, req.TagName); err == nil {
 		return nil, ErrTagNameExists
 	}
-	m := &model.BookTag{TagName: req.TagName}
+	m := &model.BookTag{TagName: req.TagName, Description: req.Description}
+	m.CreateBy = &userID
+	m.UpdateBy = &userID
 	if err := s.repo.Create(ctx, m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (s *BookTagService) Update(ctx context.Context, id uint64, req *dto.TagRequest) (*model.BookTag, error) {
+func (s *BookTagService) Update(ctx context.Context, id uint64, req *dto.TagRequest, userID uint64) (*model.BookTag, error) {
 	m, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -45,6 +47,8 @@ func (s *BookTagService) Update(ctx context.Context, id uint64, req *dto.TagRequ
 		}
 	}
 	m.TagName = req.TagName
+	m.Description = req.Description
+	m.UpdateBy = &userID
 	if err := s.repo.Update(ctx, m); err != nil {
 		return nil, err
 	}

@@ -6,6 +6,7 @@ type BookCategory struct {
 	Ancestors    string       `gorm:"column:ancestors;size:1024;default:''" json:"ancestors"`
 	CategoryName string       `gorm:"column:category_name;size:64;not null" json:"categoryName"`
 	CategoryCode string       `gorm:"column:category_code;size:64;not null" json:"categoryCode"`
+	Description  string       `gorm:"column:description;size:255" json:"description"`
 	SortOrder    int          `gorm:"column:sort_order;default:0" json:"sortOrder"`
 	Status       EnableStatus `gorm:"column:status;type:char(1);default:'1'" json:"status"`
 }

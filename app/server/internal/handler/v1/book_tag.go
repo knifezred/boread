@@ -80,7 +80,7 @@ func (h *BookTagHandler) Create(c *gin.Context) {
 		response.Error(c, 1001, err.Error())
 		return
 	}
-	m, err := h.svc.Create(c.Request.Context(), &req)
+	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
 	if err != nil {
 		response.Error(c, mapTagErr(err), err.Error())
 		return
@@ -109,7 +109,7 @@ func (h *BookTagHandler) Update(c *gin.Context) {
 		response.Error(c, 1001, err.Error())
 		return
 	}
-	m, err := h.svc.Update(c.Request.Context(), id, &req)
+	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
 	if err != nil {
 		response.Error(c, mapTagErr(err), err.Error())
 		return

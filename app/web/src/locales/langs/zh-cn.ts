@@ -509,12 +509,14 @@ const local: App.I18n.Schema = {
         title: "小说分类",
         categoryName: "分类名称",
         categoryCode: "分类编码",
+        description: "分类描述",
         parentId: "父分类ID",
         sortOrder: "排序",
         categoryStatus: "状态",
         form: {
           categoryName: "请输入分类名称",
           categoryCode: "请输入分类编码",
+          description: "请输入分类描述",
           sortOrder: "请输入排序",
           categoryStatus: "请选择状态",
         },
@@ -525,9 +527,11 @@ const local: App.I18n.Schema = {
       bookTag: {
         title: "小说标签",
         tagName: "标签名",
+        description: "标签描述",
         usageCount: "使用次数",
         form: {
           tagName: "请输入标签名",
+          description: "请输入标签描述",
         },
         addTag: "新增标签",
         editTag: "编辑标签",

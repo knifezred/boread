@@ -22,8 +22,8 @@ const title = computed(() => {
   return titles[props.operateType];
 });
 
-type Model = { id: number; tagName: string };
-const model = ref<Model>({ id: 0, tagName: '' });
+type Model = { id: number; tagName: string; description: string };
+const model = ref<Model>({ id: 0, tagName: '', description: '' });
 const rules: Record<'tagName', App.Global.FormRule> = { tagName: defaultRequiredRule };
 
 function closeModal() { visible.value = false; }
@@ -42,7 +42,7 @@ async function handleSubmit() {
 
 watch(visible, () => {
   if (visible.value) {
-    model.value = { id: props.rowData?.id ?? 0, tagName: props.rowData?.tagName ?? '' };
+    model.value = { id: props.rowData?.id ?? 0, tagName: props.rowData?.tagName ?? '', description: props.rowData?.description ?? '' };
     restoreValidation();
   }
 });
@@ -54,6 +54,9 @@ watch(visible, () => {
       <NForm ref="formRef" :model="model" :rules="rules" label-placement="left" :label-width="80">
         <NFormItem :label="$t('page.manage.bookTag.tagName')" path="tagName">
           <NInput v-model:value="model.tagName" :placeholder="$t('page.manage.bookTag.form.tagName')" />
+        </NFormItem>
+        <NFormItem :label="$t('page.manage.bookTag.description')" path="description">
+          <NInput v-model:value="model.description" type="textarea" :placeholder="$t('page.manage.bookTag.form.description')" />
         </NFormItem>
       </NForm>
     </NScrollbar>
