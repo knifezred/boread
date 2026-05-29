@@ -102,3 +102,57 @@ export function fetchDeleteTag(id: string | number) {
     method: "delete",
   });
 }
+
+// -------- Book (Novel) --------
+
+/** 书籍分页 */
+export function fetchGetBookList(params?: Api.SystemManage.BookSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Book>>({
+    url: "/manage/book/page",
+    method: "post",
+    data: params,
+  });
+}
+
+/** 书籍详情 */
+export function fetchGetBook(id: string | number) {
+  return request<Api.SystemManage.Book>({
+    url: `/manage/book/${id}`,
+    method: "get",
+  });
+}
+
+/** 新增书籍 */
+export function fetchCreateBook(data: Api.SystemManage.BookRequest) {
+  return request<Api.SystemManage.Book>({
+    url: "/manage/book",
+    method: "post",
+    data,
+  });
+}
+
+/** 编辑书籍 */
+export function fetchUpdateBook(id: string | number, data: Api.SystemManage.BookRequest) {
+  return request<Api.SystemManage.Book>({
+    url: `/manage/book/${id}`,
+    method: "put",
+    data,
+  });
+}
+
+/** 删除书籍 */
+export function fetchDeleteBook(id: string | number) {
+  return request<null>({
+    url: `/manage/book/${id}`,
+    method: "delete",
+  });
+}
+
+/** 更新书籍上架状态 */
+export function fetchUpdateBookStatus(id: string | number, data: Api.SystemManage.BookUpdateStatusRequest) {
+  return request<null>({
+    url: `/manage/book/${id}/status`,
+    method: "put",
+    data,
+  });
+}

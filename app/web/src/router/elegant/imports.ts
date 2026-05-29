@@ -23,6 +23,7 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   admin_dashboard: () => import("@/views/admin/dashboard/index.vue"),
   "admin_library_book-category": () => import("@/views/admin/library/book-category/index.vue"),
   "admin_library_book-tag": () => import("@/views/admin/library/book-tag/index.vue"),
+  admin_library_book: () => import("@/views/admin/library/book/index.vue"),
   admin_system_dept: () => import("@/views/admin/system/dept/index.vue"),
   admin_system_dict: () => import("@/views/admin/system/dict/index.vue"),
   admin_system_log: () => import("@/views/admin/system/log/index.vue"),

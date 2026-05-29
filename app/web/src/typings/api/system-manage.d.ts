@@ -292,5 +292,70 @@ declare namespace Api {
     type TagSearchParams = CommonType.RecordNullable<
       { tagName: string } & CommonSearchParams
     >;
+
+    // ============= Book (Novel) =============
+
+    /** serial status: 1-ongoing 2-finished 3-stopped */
+    type SerialStatus = '1' | '2' | '3';
+    /** visibility: 1-public 2-private 3-dept */
+    type Visibility = '1' | '2' | '3';
+    /** book listing status: 1-listed 2-unlisted 3-reviewing 4-rejected */
+    type BookListingStatus = '1' | '2' | '3' | '4';
+    /** aggregate status: 1-single 2-merging 3-done */
+    type AggregateStatus = '1' | '2' | '3';
+
+    /** book (novel) */
+    type Book = Common.CommonRecord<{
+      title: string;
+      author: string;
+      cover: string | null;
+      intro: string | null;
+      categoryId: number | null;
+      language: string;
+      serialStatus: SerialStatus;
+      visibility: Visibility;
+      primaryFileId: number | null;
+      totalChapters: number;
+      totalWords: number;
+      aggregateStatus: AggregateStatus;
+      avgRating: number;
+      ratingCount: number;
+      ownerId: number;
+      ownerType: string;
+      deptId: number | null;
+      tagIds?: number[];
+      tags?: { id: number; tagName: string }[];
+    }>;
+
+    /** book search params */
+    type BookSearchParams = CommonType.RecordNullable<
+      {
+        title: string;
+        author: string;
+        categoryId: number | null;
+        status: BookListingStatus;
+        visibility: Visibility;
+        serialStatus: SerialStatus;
+        tagId: number | null;
+      } & CommonSearchParams
+    >;
+
+    /** book create/update request */
+    type BookRequest = {
+      title: string;
+      author: string;
+      cover: string | null;
+      intro: string | null;
+      categoryId: number | null;
+      language: string;
+      serialStatus: SerialStatus;
+      visibility: Visibility;
+      tagIds: number[];
+    };
+
+    /** book status update request */
+    type BookUpdateStatusRequest = {
+      status: BookListingStatus;
+    };
   }
 }

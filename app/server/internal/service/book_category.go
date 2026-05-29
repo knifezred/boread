@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 
 	"gorm.io/gorm"
 
@@ -151,6 +152,14 @@ func buildCategoryTree(rows []model.BookCategory) []*dto.CategoryNode {
 		} else {
 			roots = append(roots, n)
 		}
+	}
+	sort.Slice(roots, func(i, j int) bool {
+		return roots[i].SortOrder < roots[j].SortOrder
+	})
+	for _, n := range nodeMap {
+		sort.Slice(n.Children, func(i, j int) bool {
+			return n.Children[i].SortOrder < n.Children[j].SortOrder
+		})
 	}
 	return roots
 }

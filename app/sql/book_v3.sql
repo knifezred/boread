@@ -107,8 +107,7 @@ CREATE TABLE `book_review` (
   `like_count`    INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '点赞数',
   `reply_count`   INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '回复数 (冗余)',
   `owner_id`      BIGINT UNSIGNED NOT NULL                          COMMENT '创建者 id (数据权限)',
-  `owner_type`    CHAR(1)         NOT NULL DEFAULT '2'              COMMENT '创建者类型: 1-sys_user, 2-reader',
-  `dept_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建者所属部门 id (数据权限, owner_type=1 时有效)',
+  `dept_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建者所属部门 id',
   `status`        CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-正常, 2-隐藏, 3-审核中',
   `create_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
@@ -118,7 +117,7 @@ CREATE TABLE `book_review` (
   PRIMARY KEY (`id`),
   KEY `idx_book_id` (`book_id`),
   KEY `idx_reader_id` (`reader_id`),
-  KEY `idx_owner` (`owner_type`, `owner_id`),
+  KEY `idx_owner` (`owner_id`),
   KEY `idx_dept_id` (`dept_id`),
   KEY `idx_deleted_at` (`deleted_at`),
   CONSTRAINT `ck_review_rating` CHECK (`rating` IS NULL OR (`rating` BETWEEN 1 AND 5))
@@ -139,8 +138,7 @@ CREATE TABLE `chapter_comment` (
   `content`       TEXT            NOT NULL                          COMMENT '评论内容',
   `like_count`    INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '点赞数',
   `owner_id`      BIGINT UNSIGNED NOT NULL                          COMMENT '创建者 id (数据权限)',
-  `owner_type`    CHAR(1)         NOT NULL DEFAULT '2'              COMMENT '创建者类型: 1-sys_user, 2-reader',
-  `dept_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建者所属部门 id (数据权限, owner_type=1 时有效)',
+  `dept_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建者所属部门 id',
   `status`        CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-正常, 2-隐藏, 3-审核中',
   `create_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
@@ -152,7 +150,7 @@ CREATE TABLE `chapter_comment` (
   KEY `idx_book_id` (`book_id`),
   KEY `idx_reader_id` (`reader_id`),
   KEY `idx_parent_id` (`parent_id`),
-  KEY `idx_owner` (`owner_type`, `owner_id`),
+  KEY `idx_owner` (`owner_id`),
   KEY `idx_dept_id` (`dept_id`),
   KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节评论表';

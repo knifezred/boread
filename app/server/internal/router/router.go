@@ -41,6 +41,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	logRepo := repository.NewSysLogRepository(db)
 	bookCategoryRepo := repository.NewBookCategoryRepository(db)
 	bookTagRepo := repository.NewBookTagRepository(db)
+	bookRepo := repository.NewBookRepository(db)
+	bookTagRelRepo := repository.NewBookTagRelRepository(db)
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, db)
@@ -52,6 +54,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	logSvc := service.NewLogService(logRepo)
 	bookCategorySvc := service.NewBookCategoryService(bookCategoryRepo)
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
+	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo)
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
@@ -63,6 +66,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	logHandler := v1.NewLogHandler(logSvc)
 	bookCategoryHandler := v1.NewBookCategoryHandler(bookCategorySvc)
 	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
+	bookHandler := v1.NewBookHandler(bookSvc)
 
 	api := r.Group("/api")
 	{
@@ -151,6 +155,14 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.POST("/book-tag", middleware.RequireButton(authSvc, "book-tag:create"), bookTagHandler.Create)
 			manage.PUT("/book-tag/:id", middleware.RequireButton(authSvc, "book-tag:update"), bookTagHandler.Update)
 			manage.DELETE("/book-tag/:id", middleware.RequireButton(authSvc, "book-tag:delete"), bookTagHandler.Delete)
+
+			// --- Book ---
+			manage.GET("/book/:id", bookHandler.GetByID)
+			manage.POST("/book/page", bookHandler.Page)
+			manage.POST("/book", middleware.RequireButton(authSvc, "book:create"), bookHandler.Create)
+			manage.PUT("/book/:id", middleware.RequireButton(authSvc, "book:update"), bookHandler.Update)
+			manage.PUT("/book/:id/status", middleware.RequireButton(authSvc, "book:update"), bookHandler.UpdateStatus)
+			manage.DELETE("/book/:id", middleware.RequireButton(authSvc, "book:delete"), bookHandler.Delete)
 		}
 	}
 

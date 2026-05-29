@@ -23,6 +23,7 @@ declare module "@elegant-router/types" {
     "admin": "/admin";
     "admin_dashboard": "/admin/dashboard";
     "admin_library": "/admin/library";
+    "admin_library_book": "/admin/library/book";
     "admin_library_book-category": "/admin/library/book-category";
     "admin_library_book-tag": "/admin/library/book-tag";
     "admin_system": "/admin/system";
@@ -98,6 +99,7 @@ declare module "@elegant-router/types" {
     | "admin_dashboard"
     | "admin_library_book-category"
     | "admin_library_book-tag"
+    | "admin_library_book"
     | "admin_system_dept"
     | "admin_system_dict"
     | "admin_system_log"

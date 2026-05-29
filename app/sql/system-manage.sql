@@ -329,3 +329,23 @@ CREATE TABLE `sys_dict_item` (
   KEY `idx_dict_id` (`dict_id`),
   KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='字典项表';
+
+-- ---------------------------------------------------------------------
+-- Dict seed data
+-- ---------------------------------------------------------------------
+
+INSERT INTO `sys_dict` (`id`, `dict_name`, `dict_code`, `dict_desc`, `is_system`, `status`, `create_time`, `update_time`)
+VALUES
+  (1, '连载状态', 'book_serial_status', '小说连载状态: 连载中/已完结/断更', 1, '1', NOW(3), NOW(3)),
+  (2, '可见性', 'book_visibility', '小说可见性: 公开/仅自己/部门内', 1, '1', NOW(3), NOW(3));
+
+INSERT INTO `sys_dict_item` (`dict_id`, `item_label`, `item_value`, `item_desc`, `sort_order`, `status`, `create_time`, `update_time`)
+VALUES
+  -- book_serial_status (dict_id=1)
+  (1, '连载中', '1', '连载中', 1, '1', NOW(3), NOW(3)),
+  (1, '已完结', '2', '已完结', 2, '1', NOW(3), NOW(3)),
+  (1, '断更',   '3', '断更',   3, '1', NOW(3), NOW(3)),
+  -- book_visibility (dict_id=2)
+  (2, '公开',   '1', '所有人可见', 1, '1', NOW(3), NOW(3)),
+  (2, '仅自己', '2', '仅自己可见', 2, '1', NOW(3), NOW(3)),
+  (2, '部门内', '3', '部门内可见', 3, '1', NOW(3), NOW(3));

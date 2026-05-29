@@ -37,3 +37,12 @@ export const dataScopeRecord: Record<Api.SystemManage.DataScope, App.I18n.I18nKe
 };
 
 export const dataScopeOptions = transformRecordToOption(dataScopeRecord);
+
+export const bookStatusRecord: Record<Api.SystemManage.BookListingStatus, App.I18n.I18nKey> = {
+  '1': 'page.admin.library.book.statusListed',
+  '2': 'page.admin.library.book.statusUnlisted',
+  '3': 'page.admin.library.book.statusReviewing',
+  '4': 'page.admin.library.book.statusRejected'
+};
+
+export const bookStatusOptions = transformRecordToOption(bookStatusRecord);

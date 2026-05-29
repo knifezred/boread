@@ -316,7 +316,10 @@ declare namespace App {
       key: LangType;
     };
 
-    type I18nRouteKey = Exclude<RouteKey, "root" | "not-found">;
+    type I18nRouteKey =
+      | Exclude<RouteKey, "root" | "not-found">
+      | "system"
+      | "library";
 
     type FormMsg = {
       required: string;
@@ -820,6 +823,41 @@ declare namespace App {
               };
               addTag: string;
               editTag: string;
+            };
+            book: {
+              title: string;
+              bookName: string;
+              author: string;
+              cover: string;
+              intro: string;
+              categoryId: string;
+              language: string;
+              serialStatus: string;
+              visibility: string;
+              totalChapters: string;
+              totalWords: string;
+              listingStatus: string;
+              statusListed: string;
+              statusUnlisted: string;
+              statusReviewing: string;
+              statusRejected: string;
+              avgRating: string;
+              ratingCount: string;
+              tags: string;
+              form: {
+                title: string;
+                author: string;
+                cover: string;
+                intro: string;
+                categoryId: string;
+                language: string;
+                serialStatus: string;
+                visibility: string;
+                tags: string;
+              };
+              addBook: string;
+              editBook: string;
+              bookDetail: string;
             };
           };
         };

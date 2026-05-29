@@ -66,6 +66,15 @@ export const generatedRoutes: GeneratedRoute[] = [
         },
         children: [
           {
+            name: 'admin_library_book',
+            path: '/admin/library/book',
+            component: 'view.admin_library_book',
+            meta: {
+              title: 'admin_library_book',
+              i18nKey: 'route.admin_library_book'
+            }
+          },
+          {
             name: 'admin_library_book-category',
             path: '/admin/library/book-category',
             component: 'view.admin_library_book-category',

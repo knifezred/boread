@@ -169,6 +169,7 @@ const routeMap: RouteMap = {
   "admin": "/admin",
   "admin_dashboard": "/admin/dashboard",
   "admin_library": "/admin/library",
+  "admin_library_book": "/admin/library/book",
   "admin_library_book-category": "/admin/library/book-category",
   "admin_library_book-tag": "/admin/library/book-tag",
   "admin_system": "/admin/system",
