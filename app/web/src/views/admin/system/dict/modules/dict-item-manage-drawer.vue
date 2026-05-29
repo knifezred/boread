@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { NButton, NCard, NDataTable, NDrawer, NDrawerContent, NPopconfirm, NSpace, NTag } from 'naive-ui';
 import { useBoolean } from '@sa/hooks';
 import { enableStatusRecord } from '@/constants/business';
@@ -146,8 +146,10 @@ const columns = computed(() => [
   }
 ]);
 
-onMounted(() => {
-  loadItems();
+watch(visible, (val) => {
+  if (val) {
+    loadItems();
+  }
 });
 </script>
 
