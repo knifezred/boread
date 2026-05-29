@@ -72,6 +72,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
   /**
    * Filter backend menu routes — remove items whose route name doesn't exist
    * in the frontend routeMap (防止后端返回的菜单在前端没有对应路由)
+   * 暂时不用, 因为动态模式下, 侧边栏菜单层级可能跟实际路由层级不一致
    */
   function filterBackendMenus(routes: ElegantConstRoute[]): ElegantConstRoute[] {
     return routes.reduce<ElegantConstRoute[]>((acc, route) => {
@@ -245,8 +246,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
       addAuthRoutes(routes);
 
       // 保存后端返回的菜单树, handleConstantAndAuthRoutes 中会用此驱动侧边栏
-      // 过滤掉前端 routeMap 中不存在的路由, 避免导航报错
-      backendMenuRoutes.value = filterBackendMenus(routes);
+      backendMenuRoutes.value = routes;
 
       handleConstantAndAuthRoutes();
 
