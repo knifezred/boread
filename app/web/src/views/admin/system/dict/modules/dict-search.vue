@@ -43,14 +43,14 @@ async function search() {
       <NCollapseItem :title="$t('common.search')" name="dict-search">
         <NForm ref="formRef" :model="model" label-placement="left" :label-width="80">
           <NGrid responsive="screen" item-responsive>
-            <NFormItemGi span="24 s:12 m:6" :label="$t('page.manage.dict.dictName')" path="dictName" class="pr-24px">
-              <NInput v-model:value="model.dictName" :placeholder="$t('page.manage.dict.form.dictName')" />
+            <NFormItemGi span="24 s:12 m:6" :label="$t('page.admin.system.dict.dictName')" path="dictName" class="pr-24px">
+              <NInput v-model:value="model.dictName" :placeholder="$t('page.admin.system.dict.form.dictName')" />
             </NFormItemGi>
-            <NFormItemGi span="24 s:12 m:6" :label="$t('page.manage.dict.dictCode')" path="dictCode" class="pr-24px">
-              <NInput v-model:value="model.dictCode" :placeholder="$t('page.manage.dict.form.dictCode')" />
+            <NFormItemGi span="24 s:12 m:6" :label="$t('page.admin.system.dict.dictCode')" path="dictCode" class="pr-24px">
+              <NInput v-model:value="model.dictCode" :placeholder="$t('page.admin.system.dict.form.dictCode')" />
             </NFormItemGi>
-            <NFormItemGi span="24 s:12 m:6" :label="$t('page.manage.dict.dictStatus')" path="status" class="pr-24px">
-              <NSelect v-model:value="model.status" :placeholder="$t('page.manage.dict.form.dictStatus')" :options="translateOptions(enableStatusOptions)" clearable />
+            <NFormItemGi span="24 s:12 m:6" :label="$t('page.admin.system.dict.dictStatus')" path="status" class="pr-24px">
+              <NSelect v-model:value="model.status" :placeholder="$t('page.admin.system.dict.form.dictStatus')" :options="translateOptions(enableStatusOptions)" clearable />
             </NFormItemGi>
             <NFormItemGi span="24 m:6" class="pr-24px">
               <NSpace class="w-full" justify="end">

@@ -30,8 +30,8 @@ const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
   const titles: Record<NaiveUI.TableOperateType, string> = {
-    add: $t('page.manage.role.addRole'),
-    edit: $t('page.manage.role.editRole')
+    add: $t('page.admin.system.role.addRole'),
+    edit: $t('page.admin.system.role.editRole')
   };
   return titles[props.operateType];
 });
@@ -100,24 +100,24 @@ watch(visible, () => {
   <NDrawer v-model:show="visible" display-directive="show" :width="520">
     <NDrawerContent :title="title" :native-scrollbar="false" closable>
       <NForm ref="formRef" :model="model" :rules="rules">
-        <NFormItem :label="$t('page.manage.role.roleName')" path="roleName">
-          <NInput v-model:value="model.roleName" :placeholder="$t('page.manage.role.form.roleName')" />
+        <NFormItem :label="$t('page.admin.system.role.roleName')" path="roleName">
+          <NInput v-model:value="model.roleName" :placeholder="$t('page.admin.system.role.form.roleName')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.role.roleCode')" path="roleCode">
-          <NInput v-model:value="model.roleCode" :placeholder="$t('page.manage.role.form.roleCode')" />
+        <NFormItem :label="$t('page.admin.system.role.roleCode')" path="roleCode">
+          <NInput v-model:value="model.roleCode" :placeholder="$t('page.admin.system.role.form.roleCode')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.role.roleStatus')" path="status">
+        <NFormItem :label="$t('page.admin.system.role.roleStatus')" path="status">
           <NRadioGroup v-model:value="model.status">
             <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
           </NRadioGroup>
         </NFormItem>
-        <NFormItem :label="$t('page.manage.role.dataScope.title')" path="dataScope">
+        <NFormItem :label="$t('page.admin.system.role.dataScope.title')" path="dataScope">
           <NRadioGroup v-model:value="model.dataScope">
             <NRadio v-for="item in dataScopeOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
           </NRadioGroup>
         </NFormItem>
-        <NFormItem :label="$t('page.manage.role.roleDesc')" path="roleDesc">
-          <NInput v-model:value="model.roleDesc" :placeholder="$t('page.manage.role.form.roleDesc')" />
+        <NFormItem :label="$t('page.admin.system.role.roleDesc')" path="roleDesc">
+          <NInput v-model:value="model.roleDesc" :placeholder="$t('page.admin.system.role.form.roleDesc')" />
         </NFormItem>
       </NForm>
     <template #footer>

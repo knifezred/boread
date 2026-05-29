@@ -36,8 +36,8 @@ const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
   const titles: Record<NaiveUI.TableOperateType, string> = {
-    add: $t('page.manage.dictItem.addDictItem'),
-    edit: $t('page.manage.dictItem.editDictItem')
+    add: $t('page.admin.system.dictItem.addDictItem'),
+    edit: $t('page.admin.system.dictItem.editDictItem')
   };
   return titles[props.operateType];
 });
@@ -112,19 +112,19 @@ watch(visible, () => {
   <NModal v-model:show="visible" :title="title" preset="card" class="w-600px">
     <NScrollbar class="h-360px pr-20px">
       <NForm ref="formRef" :model="model" :rules="rules" label-placement="left" :label-width="100">
-        <NFormItem :label="$t('page.manage.dictItem.itemLabel')" path="itemLabel">
-          <NInput v-model:value="model.itemLabel" :placeholder="$t('page.manage.dictItem.form.itemLabel')" />
+        <NFormItem :label="$t('page.admin.system.dictItem.itemLabel')" path="itemLabel">
+          <NInput v-model:value="model.itemLabel" :placeholder="$t('page.admin.system.dictItem.form.itemLabel')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dictItem.itemValue')" path="itemValue">
-          <NInput v-model:value="model.itemValue" :placeholder="$t('page.manage.dictItem.form.itemValue')" />
+        <NFormItem :label="$t('page.admin.system.dictItem.itemValue')" path="itemValue">
+          <NInput v-model:value="model.itemValue" :placeholder="$t('page.admin.system.dictItem.form.itemValue')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dictItem.itemDesc')" path="itemDesc">
-          <NInput v-model:value="model.itemDesc" :placeholder="$t('page.manage.dictItem.form.itemDesc')" />
+        <NFormItem :label="$t('page.admin.system.dictItem.itemDesc')" path="itemDesc">
+          <NInput v-model:value="model.itemDesc" :placeholder="$t('page.admin.system.dictItem.form.itemDesc')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dictItem.sortOrder')" path="sortOrder">
+        <NFormItem :label="$t('page.admin.system.dictItem.sortOrder')" path="sortOrder">
           <NInputNumber v-model:value="model.sortOrder" class="w-full" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dictItem.itemStatus')" path="status">
+        <NFormItem :label="$t('page.admin.system.dictItem.itemStatus')" path="status">
           <NRadioGroup v-model:value="model.status">
             <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
           </NRadioGroup>

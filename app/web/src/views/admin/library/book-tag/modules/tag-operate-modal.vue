@@ -17,7 +17,7 @@ const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
   const titles: Record<NaiveUI.TableOperateType, string> = {
-    add: $t('page.manage.bookTag.addTag'), edit: $t('page.manage.bookTag.editTag')
+    add: $t('page.admin.library.bookTag.addTag'), edit: $t('page.admin.library.bookTag.editTag')
   };
   return titles[props.operateType];
 });
@@ -52,11 +52,11 @@ watch(visible, () => {
   <NModal v-model:show="visible" :title="title" preset="card" class="w-500px">
     <NScrollbar class="h-200px pr-20px">
       <NForm ref="formRef" :model="model" :rules="rules" label-placement="left" :label-width="80">
-        <NFormItem :label="$t('page.manage.bookTag.tagName')" path="tagName">
-          <NInput v-model:value="model.tagName" :placeholder="$t('page.manage.bookTag.form.tagName')" />
+        <NFormItem :label="$t('page.admin.library.bookTag.tagName')" path="tagName">
+          <NInput v-model:value="model.tagName" :placeholder="$t('page.admin.library.bookTag.form.tagName')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.bookTag.description')" path="description">
-          <NInput v-model:value="model.description" type="textarea" :placeholder="$t('page.manage.bookTag.form.description')" />
+        <NFormItem :label="$t('page.admin.library.bookTag.description')" path="description">
+          <NInput v-model:value="model.description" type="textarea" :placeholder="$t('page.admin.library.bookTag.form.description')" />
         </NFormItem>
       </NForm>
     </NScrollbar>

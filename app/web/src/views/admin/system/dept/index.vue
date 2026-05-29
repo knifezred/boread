@@ -38,36 +38,36 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'deptName',
-      title: $t('page.manage.dept.deptName'),
+      title: $t('page.admin.system.dept.deptName'),
       align: 'left',
     },
     {
       key: 'deptCode',
-      title: $t('page.manage.dept.deptCode'),
+      title: $t('page.admin.system.dept.deptCode'),
       align: 'center',
       width: 120
     },
     {
       key: 'leader',
-      title: $t('page.manage.dept.leader'),
+      title: $t('page.admin.system.dept.leader'),
       align: 'center',
       width: 100
     },
     {
       key: 'parentId',
-      title: $t('page.manage.dept.parentId'),
+      title: $t('page.admin.system.dept.parentId'),
       align: 'center',
       width: 90
     },
     {
       key: 'sortOrder',
-      title: $t('page.manage.dept.sortOrder'),
+      title: $t('page.admin.system.dept.sortOrder'),
       align: 'center',
       width: 80
     },
     {
       key: 'status',
-      title: $t('page.manage.dept.status'),
+      title: $t('page.admin.system.dept.status'),
       align: 'center',
       width: 80,
       render: (row: Api.SystemManage.Dept) => {
@@ -93,7 +93,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
       render: (row: Api.SystemManage.Dept) => (
         <div class="flex-center justify-end gap-8px">
           <NButton type="primary" ghost size="small" onClick={() => handleAddChildDept(row)}>
-            {$t('page.manage.dept.addChildDept')}
+            {$t('page.admin.system.dept.addChildDept')}
           </NButton>
           <NButton type="primary" ghost size="small" onClick={() => handleEdit(row)}>
             {$t('common.edit')}
@@ -158,7 +158,7 @@ function handleAddChildDept(item: Api.SystemManage.Dept) {
 
 <template>
   <div ref="wrapperRef" class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
-    <NCard :title="$t('page.manage.dept.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard :title="$t('page.admin.system.dept.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <TableHeaderOperation v-model:columns="columnChecks" :disabled-delete="checkedRowKeys.length === 0"
           :loading="loading" @add="handleAdd" @delete="handleBatchDelete" @refresh="getData" />

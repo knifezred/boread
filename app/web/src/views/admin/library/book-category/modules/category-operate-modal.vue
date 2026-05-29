@@ -37,9 +37,9 @@ const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
   const titles: Record<OperateType, string> = {
-    add: $t("page.manage.bookCategory.addCategory"),
-    addChild: $t("page.manage.bookCategory.addChildCategory"),
-    edit: $t("page.manage.bookCategory.editCategory"),
+    add: $t("page.admin.library.bookCategory.addCategory"),
+    addChild: $t("page.admin.library.bookCategory.addChildCategory"),
+    edit: $t("page.admin.library.bookCategory.editCategory"),
   };
   return titles[props.operateType];
 });
@@ -116,7 +116,7 @@ watch(visible, () => {
         :label-width="100"
       >
         <NFormItem
-          :label="$t('page.manage.bookCategory.parentId')"
+          :label="$t('page.admin.library.bookCategory.parentId')"
           path="parentId"
         >
           <NInputNumber
@@ -127,35 +127,35 @@ watch(visible, () => {
           />
         </NFormItem>
         <NFormItem
-          :label="$t('page.manage.bookCategory.categoryName')"
+          :label="$t('page.admin.library.bookCategory.categoryName')"
           path="categoryName"
         >
           <NInput
             v-model:value="model.categoryName"
-            :placeholder="$t('page.manage.bookCategory.form.categoryName')"
+            :placeholder="$t('page.admin.library.bookCategory.form.categoryName')"
           />
         </NFormItem>
         <NFormItem
-          :label="$t('page.manage.bookCategory.categoryCode')"
+          :label="$t('page.admin.library.bookCategory.categoryCode')"
           path="categoryCode"
         >
           <NInput
             v-model:value="model.categoryCode"
-            :placeholder="$t('page.manage.bookCategory.form.categoryCode')"
+            :placeholder="$t('page.admin.library.bookCategory.form.categoryCode')"
           />
         </NFormItem>
         <NFormItem
-          :label="$t('page.manage.bookCategory.description')"
+          :label="$t('page.admin.library.bookCategory.description')"
           path="description"
         >
           <NInput
             v-model:value="model.description"
             type="textarea"
-            :placeholder="$t('page.manage.bookCategory.form.description')"
+            :placeholder="$t('page.admin.library.bookCategory.form.description')"
           />
         </NFormItem>
         <NFormItem
-          :label="$t('page.manage.bookCategory.sortOrder')"
+          :label="$t('page.admin.library.bookCategory.sortOrder')"
           path="sortOrder"
         >
           <NInputNumber
@@ -165,7 +165,7 @@ watch(visible, () => {
           />
         </NFormItem>
         <NFormItem
-          :label="$t('page.manage.bookCategory.categoryStatus')"
+          :label="$t('page.admin.library.bookCategory.categoryStatus')"
           path="status"
         >
           <NRadioGroup v-model:value="model.status">

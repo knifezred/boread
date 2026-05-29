@@ -59,24 +59,24 @@ const {
     },
     {
       key: "roleName",
-      title: $t("page.manage.role.roleName"),
+      title: $t("page.admin.system.role.roleName"),
       align: "center",
       minWidth: 120,
     },
     {
       key: "roleCode",
-      title: $t("page.manage.role.roleCode"),
+      title: $t("page.admin.system.role.roleCode"),
       align: "center",
       minWidth: 120,
     },
     {
       key: "roleDesc",
-      title: $t("page.manage.role.roleDesc"),
+      title: $t("page.admin.system.role.roleDesc"),
       minWidth: 120,
     },
     {
       key: "dataScope",
-      title: $t("page.manage.role.dataScope.title"),
+      title: $t("page.admin.system.role.dataScope.title"),
       minWidth: 120,
       render: (row) => {
         if (row.dataScope === null) {
@@ -98,7 +98,7 @@ const {
     },
     {
       key: "status",
-      title: $t("page.manage.role.roleStatus"),
+      title: $t("page.admin.system.role.roleStatus"),
       align: "center",
       width: 100,
       render: (row) => {
@@ -141,7 +141,7 @@ const {
               openAuthModal();
             }}
           >
-            {$t("page.manage.role.menuAuth")}
+            {$t("page.admin.system.role.menuAuth")}
           </NButton>
           <NPopconfirm onPositiveClick={() => handleDelete(row.id)}>
             {{
@@ -196,7 +196,7 @@ function edit(id: number) {
   >
     <RoleSearch v-model:model="searchParams" @search="getDataByPage" />
     <NCard
-      :title="$t('page.manage.role.title')"
+      :title="$t('page.admin.system.role.title')"
       :bordered="false"
       size="small"
       class="card-wrapper sm:flex-1-hidden"

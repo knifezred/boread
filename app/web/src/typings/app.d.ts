@@ -584,48 +584,41 @@ declare namespace App {
           creativity: string;
         };
 
-        manage: {
-          common: {
-            status: {
-              enable: string;
-              disable: string;
+        admin: {
+          system: {
+            common: {
+              status: {
+                enable: string;
+                disable: string;
+              };
             };
-          };
-          role: {
-            title: string;
-            roleName: string;
-            roleCode: string;
-            roleStatus: string;
-            roleDesc: string;
-            form: {
+            role: {
+              title: string;
               roleName: string;
               roleCode: string;
               roleStatus: string;
               roleDesc: string;
+              form: {
+                roleName: string;
+                roleCode: string;
+                roleStatus: string;
+                roleDesc: string;
+              };
+              dataScope: {
+                title: string;
+                all: string;
+                custom: string;
+                dept: string;
+                deptAndSub: string;
+                self: string;
+              };
+              addRole: string;
+              editRole: string;
+              menuAuth: string;
+              buttonAuth: string;
             };
-            dataScope: {
+            user: {
               title: string;
-              all: string;
-              custom: string;
-              dept: string;
-              deptAndSub: string;
-              self: string;
-            };
-            addRole: string;
-            editRole: string;
-            menuAuth: string;
-            buttonAuth: string;
-          };
-          user: {
-            title: string;
-            userName: string;
-            userGender: string;
-            nickName: string;
-            userPhone: string;
-            userEmail: string;
-            userStatus: string;
-            userRole: string;
-            form: {
               userName: string;
               userGender: string;
               nickName: string;
@@ -633,45 +626,27 @@ declare namespace App {
               userEmail: string;
               userStatus: string;
               userRole: string;
+              form: {
+                userName: string;
+                userGender: string;
+                nickName: string;
+                userPhone: string;
+                userEmail: string;
+                userStatus: string;
+                userRole: string;
+              };
+              addUser: string;
+              editUser: string;
+              gender: {
+                male: string;
+                female: string;
+              };
             };
-            addUser: string;
-            editUser: string;
-            gender: {
-              male: string;
-              female: string;
-            };
-          };
-          menu: {
-            home: string;
-            title: string;
-            id: string;
-            parentId: string;
-            menuType: string;
-            menuName: string;
-            routeName: string;
-            routePath: string;
-            pathParam: string;
-            layout: string;
-            page: string;
-            i18nKey: string;
-            icon: string;
-            localIcon: string;
-            iconTypeTitle: string;
-            order: string;
-            constant: string;
-            keepAlive: string;
-            href: string;
-            hideInMenu: string;
-            activeMenu: string;
-            multiTab: string;
-            fixedIndexInTab: string;
-            query: string;
-            button: string;
-            buttonCode: string;
-            buttonDesc: string;
-            menuStatus: string;
-            form: {
+            menu: {
               home: string;
+              title: string;
+              id: string;
+              parentId: string;
               menuType: string;
               menuName: string;
               routeName: string;
@@ -682,131 +657,116 @@ declare namespace App {
               i18nKey: string;
               icon: string;
               localIcon: string;
+              iconTypeTitle: string;
               order: string;
+              constant: string;
               keepAlive: string;
               href: string;
               hideInMenu: string;
               activeMenu: string;
               multiTab: string;
-              fixedInTab: string;
               fixedIndexInTab: string;
-              queryKey: string;
-              queryValue: string;
+              query: string;
               button: string;
               buttonCode: string;
               buttonDesc: string;
               menuStatus: string;
+              form: {
+                home: string;
+                menuType: string;
+                menuName: string;
+                routeName: string;
+                routePath: string;
+                pathParam: string;
+                layout: string;
+                page: string;
+                i18nKey: string;
+                icon: string;
+                localIcon: string;
+                order: string;
+                keepAlive: string;
+                href: string;
+                hideInMenu: string;
+                activeMenu: string;
+                multiTab: string;
+                fixedInTab: string;
+                fixedIndexInTab: string;
+                queryKey: string;
+                queryValue: string;
+                button: string;
+                buttonCode: string;
+                buttonDesc: string;
+                menuStatus: string;
+              };
+              addMenu: string;
+              editMenu: string;
+              addChildMenu: string;
+              type: {
+                directory: string;
+                menu: string;
+              };
+              iconType: {
+                iconify: string;
+                local: string;
+              };
             };
-            addMenu: string;
-            editMenu: string;
-            addChildMenu: string;
-            type: {
-              directory: string;
-              menu: string;
-            };
-            iconType: {
-              iconify: string;
-              local: string;
-            };
-          };
-          dept: {
-            title: string;
-            deptId: string;
-            deptName: string;
-            deptCode: string;
-            leader: string;
-            parentId: string;
-            sortOrder: string;
-            status: string;
-            form: {
-              parentId: string;
+            dept: {
+              title: string;
+              deptId: string;
               deptName: string;
               deptCode: string;
               leader: string;
+              parentId: string;
               sortOrder: string;
               status: string;
+              form: {
+                parentId: string;
+                deptName: string;
+                deptCode: string;
+                leader: string;
+                sortOrder: string;
+                status: string;
+              };
+              addDept: string;
+              editDept: string;
+              addChildDept: string;
             };
-            addDept: string;
-            editDept: string;
-            addChildDept: string;
-          };
-          dict: {
-            title: string;
-            dictName: string;
-            dictCode: string;
-            dictDesc: string;
-            dictStatus: string;
-            form: {
+            dict: {
+              title: string;
               dictName: string;
               dictCode: string;
               dictDesc: string;
               dictStatus: string;
+              form: {
+                dictName: string;
+                dictCode: string;
+                dictDesc: string;
+                dictStatus: string;
+              };
+              addDict: string;
+              editDict: string;
             };
-            addDict: string;
-            editDict: string;
-          };
-          dictItem: {
-            title: string;
-            itemLabel: string;
-            itemValue: string;
-            itemDesc: string;
-            sortOrder: string;
-            itemStatus: string;
-            form: {
+            dictItem: {
+              title: string;
               itemLabel: string;
               itemValue: string;
               itemDesc: string;
               sortOrder: string;
               itemStatus: string;
+              form: {
+                itemLabel: string;
+                itemValue: string;
+                itemDesc: string;
+                sortOrder: string;
+                itemStatus: string;
+              };
+              addDictItem: string;
+              editDictItem: string;
             };
-            addDictItem: string;
-            editDictItem: string;
-          };
-          bookCategory: {
-            title: string;
-            categoryName: string;
-            categoryCode: string;
-            description: string;
-            parentId: string;
-            sortOrder: string;
-            categoryStatus: string;
-            form: {
-              categoryName: string;
-              categoryCode: string;
-              description: string;
-              sortOrder: string;
-              categoryStatus: string;
-            };
-            addCategory: string;
-            addChildCategory: string;
-            editCategory: string;
-          };
-          bookTag: {
-            title: string;
-            tagName: string;
-            description: string;
-            usageCount: string;
-            form: {
-              tagName: string;
-              description: string;
-            };
-            addTag: string;
-            editTag: string;
-          };
-          log: {
-            title: string;
-            loginLog: string;
-            operationLog: string;
-            userName: string;
-            loginIp: string;
-            loginType: string;
-            loginResult: string;
-            module: string;
-            action: string;
-            clientIp: string;
-            startTime: string;
-            endTime: string;
-            form: {
+            log: {
+              title: string;
+              loginLog: string;
+              operationLog: string;
               userName: string;
               loginIp: string;
               loginType: string;
@@ -816,6 +776,50 @@ declare namespace App {
               clientIp: string;
               startTime: string;
               endTime: string;
+              form: {
+                userName: string;
+                loginIp: string;
+                loginType: string;
+                loginResult: string;
+                module: string;
+                action: string;
+                clientIp: string;
+                startTime: string;
+                endTime: string;
+              };
+            };
+          };
+          library: {
+            bookCategory: {
+              title: string;
+              categoryName: string;
+              categoryCode: string;
+              description: string;
+              parentId: string;
+              sortOrder: string;
+              categoryStatus: string;
+              form: {
+                categoryName: string;
+                categoryCode: string;
+                description: string;
+                sortOrder: string;
+                categoryStatus: string;
+              };
+              addCategory: string;
+              addChildCategory: string;
+              editCategory: string;
+            };
+            bookTag: {
+              title: string;
+              tagName: string;
+              description: string;
+              usageCount: string;
+              form: {
+                tagName: string;
+                description: string;
+              };
+              addTag: string;
+              editTag: string;
             };
           };
         };

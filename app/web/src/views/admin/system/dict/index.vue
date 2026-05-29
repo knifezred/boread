@@ -47,24 +47,24 @@ const { columns, columnChecks, data, getData, getDataByPage, loading, mobilePagi
     },
     {
       key: 'dictName',
-      title: $t('page.manage.dict.dictName'),
+      title: $t('page.admin.system.dict.dictName'),
       align: 'center',
       minWidth: 120
     },
     {
       key: 'dictCode',
-      title: $t('page.manage.dict.dictCode'),
+      title: $t('page.admin.system.dict.dictCode'),
       align: 'center',
       minWidth: 120
     },
     {
       key: 'dictDesc',
-      title: $t('page.manage.dict.dictDesc'),
+      title: $t('page.admin.system.dict.dictDesc'),
       minWidth: 160
     },
     {
       key: 'status',
-      title: $t('page.manage.dict.dictStatus'),
+      title: $t('page.admin.system.dict.dictStatus'),
       align: 'center',
       width: 100,
       render: row => {
@@ -90,7 +90,7 @@ const { columns, columnChecks, data, getData, getDataByPage, loading, mobilePagi
       render: row => (
         <div class="flex-center gap-8px">
           <NButton type="primary" ghost size="small" onClick={() => handleItems(row)}>
-            {$t('page.manage.dictItem.title')}
+            {$t('page.admin.system.dictItem.title')}
           </NButton>
           <NButton type="primary" ghost size="small" onClick={() => handleEdit(row)}>
             {$t('common.edit')}
@@ -151,7 +151,7 @@ function handleItems(item: Api.SystemManage.Dict) {
 <template>
   <div class="min-h-500px flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
     <DictSearch v-model:model="searchParams" @search="getDataByPage" />
-    <NCard :title="$t('page.manage.dict.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard :title="$t('page.admin.system.dict.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <TableHeaderOperation
           v-model:columns="columnChecks"

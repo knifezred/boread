@@ -36,8 +36,8 @@ const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
   const titles: Record<NaiveUI.TableOperateType, string> = {
-    add: $t('page.manage.dict.addDict'),
-    edit: $t('page.manage.dict.editDict')
+    add: $t('page.admin.system.dict.addDict'),
+    edit: $t('page.admin.system.dict.editDict')
   };
   return titles[props.operateType];
 });
@@ -110,16 +110,16 @@ watch(visible, () => {
   <NModal v-model:show="visible" :title="title" preset="card" class="w-600px">
     <NScrollbar class="h-360px pr-20px">
       <NForm ref="formRef" :model="model" :rules="rules" label-placement="left" :label-width="100">
-        <NFormItem :label="$t('page.manage.dict.dictName')" path="dictName">
-          <NInput v-model:value="model.dictName" :placeholder="$t('page.manage.dict.form.dictName')" />
+        <NFormItem :label="$t('page.admin.system.dict.dictName')" path="dictName">
+          <NInput v-model:value="model.dictName" :placeholder="$t('page.admin.system.dict.form.dictName')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dict.dictCode')" path="dictCode">
-          <NInput v-model:value="model.dictCode" :placeholder="$t('page.manage.dict.form.dictCode')" />
+        <NFormItem :label="$t('page.admin.system.dict.dictCode')" path="dictCode">
+          <NInput v-model:value="model.dictCode" :placeholder="$t('page.admin.system.dict.form.dictCode')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dict.dictDesc')" path="dictDesc">
-          <NInput v-model:value="model.dictDesc" :placeholder="$t('page.manage.dict.form.dictDesc')" />
+        <NFormItem :label="$t('page.admin.system.dict.dictDesc')" path="dictDesc">
+          <NInput v-model:value="model.dictDesc" :placeholder="$t('page.admin.system.dict.form.dictDesc')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dict.dictStatus')" path="status">
+        <NFormItem :label="$t('page.admin.system.dict.dictStatus')" path="status">
           <NRadioGroup v-model:value="model.status">
             <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
           </NRadioGroup>

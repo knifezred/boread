@@ -21,10 +21,10 @@ declare module "@elegant-router/types" {
     "404": "/404";
     "500": "/500";
     "admin": "/admin";
-    "admin_book": "/admin/book";
-    "admin_book_category": "/admin/book/category";
-    "admin_book_tag": "/admin/book/tag";
     "admin_dashboard": "/admin/dashboard";
+    "admin_library": "/admin/library";
+    "admin_library_book-category": "/admin/library/book-category";
+    "admin_library_book-tag": "/admin/library/book-tag";
     "admin_system": "/admin/system";
     "admin_system_dept": "/admin/system/dept";
     "admin_system_dict": "/admin/system/dict";
@@ -95,9 +95,9 @@ declare module "@elegant-router/types" {
     | "500"
     | "iframe-page"
     | "login"
-    | "admin_book_category"
-    | "admin_book_tag"
     | "admin_dashboard"
+    | "admin_library_book-category"
+    | "admin_library_book-tag"
     | "admin_system_dept"
     | "admin_system_dict"
     | "admin_system_log"

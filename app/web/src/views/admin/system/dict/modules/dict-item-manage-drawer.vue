@@ -85,31 +85,31 @@ const columns = computed(() => [
   },
   {
     key: 'itemLabel',
-    title: $t('page.manage.dictItem.itemLabel'),
+    title: $t('page.admin.system.dictItem.itemLabel'),
     align: 'center' as const,
     minWidth: 120
   },
   {
     key: 'itemValue',
-    title: $t('page.manage.dictItem.itemValue'),
+    title: $t('page.admin.system.dictItem.itemValue'),
     align: 'center' as const,
     minWidth: 120
   },
   {
     key: 'itemDesc',
-    title: $t('page.manage.dictItem.itemDesc'),
+    title: $t('page.admin.system.dictItem.itemDesc'),
     minWidth: 160,
     render: (row: Api.SystemManage.DictItem) => row.itemDesc || '-'
   },
   {
     key: 'sortOrder',
-    title: $t('page.manage.dictItem.sortOrder'),
+    title: $t('page.admin.system.dictItem.sortOrder'),
     align: 'center' as const,
     width: 80
   },
   {
     key: 'status',
-    title: $t('page.manage.dictItem.itemStatus'),
+    title: $t('page.admin.system.dictItem.itemStatus'),
     align: 'center' as const,
     width: 100,
     render: (row: Api.SystemManage.DictItem) => {
@@ -153,7 +153,7 @@ onMounted(() => {
 
 <template>
   <NDrawer v-model:show="visible" display-directive="show" width="45%">
-    <NDrawerContent :title="$t('page.manage.dictItem.title')" :native-scrollbar="false" closable @after-leave="closeDrawer">
+    <NDrawerContent :title="$t('page.admin.system.dictItem.title')" :native-scrollbar="false" closable @after-leave="closeDrawer">
       <NCard :bordered="false" size="small" :title="dictName" class="card-wrapper">
         <template #header-extra>
           <NSpace :size="12">
@@ -163,7 +163,7 @@ onMounted(() => {
             </NButton>
             <NButton type="primary" size="small" @click="handleAdd">
               <template #icon><icon-ic-round-add class="text-icon" /></template>
-              {{ $t('page.manage.dictItem.addDictItem') }}
+              {{ $t('page.admin.system.dictItem.addDictItem') }}
             </NButton>
           </NSpace>
         </template>

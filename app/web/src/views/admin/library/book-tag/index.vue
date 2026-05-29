@@ -23,9 +23,9 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
   columns: () => [
     { type: 'selection', align: 'center', width: 48 },
     { key: 'index', title: $t('common.index'), align: 'center', width: 64, render: (_, index) => index + 1 },
-    { key: 'tagName', title: $t('page.manage.bookTag.tagName'), align: 'center', minWidth: 140 },
-    { key: 'description', title: $t('page.manage.bookTag.description'), align: 'left', ellipsis: { tooltip: true }, minWidth: 160 },
-    { key: 'usageCount', title: $t('page.manage.bookTag.usageCount'), align: 'center', width: 120 },
+    { key: 'tagName', title: $t('page.admin.library.bookTag.tagName'), align: 'center', minWidth: 140 },
+    { key: 'description', title: $t('page.admin.library.bookTag.description'), align: 'left', ellipsis: { tooltip: true }, minWidth: 160 },
+    { key: 'usageCount', title: $t('page.admin.library.bookTag.usageCount'), align: 'center', width: 120 },
     {
       key: 'operate', title: $t('common.operate'), align: 'center', width: 180,
       render: (row: Api.SystemManage.BookTag) => (
@@ -53,7 +53,7 @@ async function handleBatchDelete() { onBatchDeleted(); }
 
 <template>
   <div class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
-    <NCard :title="$t('page.manage.bookTag.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard :title="$t('page.admin.library.bookTag.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <TableHeaderOperation v-model:columns="columnChecks" :disabled-delete="checkedRowKeys.length === 0"
           :loading="loading" @add="handleAdd" @delete="handleBatchDelete" @refresh="getData" />

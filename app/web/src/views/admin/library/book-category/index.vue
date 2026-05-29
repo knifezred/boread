@@ -51,38 +51,38 @@ const {
     },
     {
       key: "categoryName",
-      title: $t("page.manage.bookCategory.categoryName"),
+      title: $t("page.admin.library.bookCategory.categoryName"),
       align: "left",
       width: 240,
     },
     {
       key: "description",
-      title: $t("page.manage.bookCategory.description"),
+      title: $t("page.admin.library.bookCategory.description"),
       align: "left",
       ellipsis: { tooltip: true },
       minWidth: 160,
     },
     {
       key: "categoryCode",
-      title: $t("page.manage.bookCategory.categoryCode"),
+      title: $t("page.admin.library.bookCategory.categoryCode"),
       align: "center",
       width: 140,
     },
     {
       key: "parentId",
-      title: $t("page.manage.bookCategory.parentId"),
+      title: $t("page.admin.library.bookCategory.parentId"),
       align: "center",
       width: 90,
     },
     {
       key: "sortOrder",
-      title: $t("page.manage.bookCategory.sortOrder"),
+      title: $t("page.admin.library.bookCategory.sortOrder"),
       align: "center",
       width: 80,
     },
     {
       key: "status",
-      title: $t("page.manage.bookCategory.categoryStatus"),
+      title: $t("page.admin.library.bookCategory.categoryStatus"),
       align: "center",
       width: 80,
       render: (row: Api.SystemManage.BookCategory) => {
@@ -111,7 +111,7 @@ const {
             size="small"
             onClick={() => handleAddChild(row)}
           >
-            {$t("page.manage.bookCategory.addChildCategory")}
+            {$t("page.admin.library.bookCategory.addChildCategory")}
           </NButton>
           <NButton
             type="primary"
@@ -177,7 +177,7 @@ async function handleBatchDelete() {
 <template>
   <div class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
     <NCard
-      :title="$t('page.manage.bookCategory.title')"
+      :title="$t('page.admin.library.bookCategory.title')"
       :bordered="false"
       size="small"
       class="card-wrapper sm:flex-1-hidden"

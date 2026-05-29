@@ -14,7 +14,7 @@ const submitting = ref(false);
 const expandedRowKeys = ref<number[]>([]);
 const allRowKeys = ref<number[]>([]);
 
-const title = computed(() => `${$t('page.manage.role.menuAuth')} - ${props.roleName}`);
+const title = computed(() => `${$t('page.admin.system.role.menuAuth')} - ${props.roleName}`);
 
 interface TableTreeNode {
   id: number;
@@ -110,7 +110,7 @@ function findNodeById(nodes: TableTreeNode[], id: number): TableTreeNode | null 
 
 const columns = computed(() => [
   {
-    title: $t('page.manage.menu.title'),
+    title: $t('page.admin.system.menu.title'),
     key: 'menuName',
     width: 220,
     treeNode: true,
@@ -122,7 +122,7 @@ const columns = computed(() => [
       }),
   },
   {
-    title: $t('page.manage.menu.button'),
+    title: $t('page.admin.system.menu.button'),
     key: 'buttons',
     render: (row: TableTreeNode) =>
       row.buttons?.length

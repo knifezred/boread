@@ -40,7 +40,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'id',
-      title: $t('page.manage.menu.menuName'),
+      title: $t('page.admin.system.menu.menuName'),
       align: 'left',
       render: row => {
         const { i18nKey, menuName } = row;
@@ -52,7 +52,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'menuType',
-      title: $t('page.manage.menu.menuType'),
+      title: $t('page.admin.system.menu.menuType'),
       align: 'center',
       width: 80,
       render: row => {
@@ -68,7 +68,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'icon',
-      title: $t('page.manage.menu.icon'),
+      title: $t('page.admin.system.menu.icon'),
       align: 'center',
       width: 60,
       render: row => {
@@ -85,19 +85,19 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'routeName',
-      title: $t('page.manage.menu.routeName'),
+      title: $t('page.admin.system.menu.routeName'),
       align: 'center',
       minWidth: 120
     },
     {
       key: 'routePath',
-      title: $t('page.manage.menu.routePath'),
+      title: $t('page.admin.system.menu.routePath'),
       align: 'center',
       minWidth: 120
     },
     {
       key: 'status',
-      title: $t('page.manage.menu.menuStatus'),
+      title: $t('page.admin.system.menu.menuStatus'),
       align: 'center',
       width: 80,
       render: row => {
@@ -117,7 +117,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'hideInMenu',
-      title: $t('page.manage.menu.hideInMenu'),
+      title: $t('page.admin.system.menu.hideInMenu'),
       align: 'center',
       width: 80,
       render: row => {
@@ -135,13 +135,13 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: 'parentId',
-      title: $t('page.manage.menu.parentId'),
+      title: $t('page.admin.system.menu.parentId'),
       width: 90,
       align: 'center'
     },
     {
       key: 'order',
-      title: $t('page.manage.menu.order'),
+      title: $t('page.admin.system.menu.order'),
       align: 'center',
       width: 60
     },
@@ -154,7 +154,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
         <div class="flex-center justify-end gap-8px">
           {row.menuType === '1' && (
             <NButton type="primary" ghost size="small" onClick={() => handleAddChildMenu(row)}>
-              {$t('page.manage.menu.addChildMenu')}
+              {$t('page.admin.system.menu.addChildMenu')}
             </NButton>
           )}
           <NButton type="primary" ghost size="small" onClick={() => handleEdit(row)}>
@@ -234,7 +234,7 @@ init();
 
 <template>
   <div ref="wrapperRef" class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
-    <NCard :title="$t('page.manage.menu.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard :title="$t('page.admin.system.menu.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <TableHeaderOperation v-model:columns="columnChecks" :disabled-delete="checkedRowKeys.length === 0"
           :loading="loading" @add="handleAdd" @delete="handleBatchDelete" @refresh="getData" />

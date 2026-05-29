@@ -44,13 +44,13 @@ const { columns, columnChecks, data, getData, getDataByPage, loading, mobilePagi
     },
     {
       key: 'userName',
-      title: $t('page.manage.user.userName'),
+      title: $t('page.admin.system.user.userName'),
       align: 'center',
       minWidth: 100
     },
     {
       key: 'userGender',
-      title: $t('page.manage.user.userGender'),
+      title: $t('page.admin.system.user.userGender'),
       align: 'center',
       width: 100,
       render: row => {
@@ -70,25 +70,25 @@ const { columns, columnChecks, data, getData, getDataByPage, loading, mobilePagi
     },
     {
       key: 'nickName',
-      title: $t('page.manage.user.nickName'),
+      title: $t('page.admin.system.user.nickName'),
       align: 'center',
       minWidth: 100
     },
     {
       key: 'userPhone',
-      title: $t('page.manage.user.userPhone'),
+      title: $t('page.admin.system.user.userPhone'),
       align: 'center',
       width: 120
     },
     {
       key: 'userEmail',
-      title: $t('page.manage.user.userEmail'),
+      title: $t('page.admin.system.user.userEmail'),
       align: 'center',
       minWidth: 200
     },
     {
       key: 'status',
-      title: $t('page.manage.user.userStatus'),
+      title: $t('page.admin.system.user.userStatus'),
       align: 'center',
       width: 100,
       render: row => {
@@ -166,7 +166,7 @@ function edit(id: number) {
 <template>
   <div class="min-h-500px flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
     <UserSearch v-model:model="searchParams" @search="getDataByPage" />
-    <NCard :title="$t('page.manage.user.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard :title="$t('page.admin.system.user.title')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <TableHeaderOperation
           v-model:columns="columnChecks"

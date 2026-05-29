@@ -55,25 +55,25 @@ const {
     },
     {
       key: 'userName',
-      title: $t('page.manage.log.userName'),
+      title: $t('page.admin.system.log.userName'),
       align: 'center',
       minWidth: 100
     },
     {
       key: 'loginIp',
-      title: $t('page.manage.log.loginIp'),
+      title: $t('page.admin.system.log.loginIp'),
       align: 'center',
       width: 140
     },
     {
       key: 'loginType',
-      title: $t('page.manage.log.loginType'),
+      title: $t('page.admin.system.log.loginType'),
       align: 'center',
       width: 100
     },
     {
       key: 'loginResult',
-      title: $t('page.manage.log.loginResult'),
+      title: $t('page.admin.system.log.loginResult'),
       align: 'center',
       width: 100
     },
@@ -109,25 +109,25 @@ const {
     },
     {
       key: 'userName',
-      title: $t('page.manage.log.userName'),
+      title: $t('page.admin.system.log.userName'),
       align: 'center',
       minWidth: 100
     },
     {
       key: 'module',
-      title: $t('page.manage.log.module'),
+      title: $t('page.admin.system.log.module'),
       align: 'center',
       width: 120
     },
     {
       key: 'action',
-      title: $t('page.manage.log.action'),
+      title: $t('page.admin.system.log.action'),
       align: 'center',
       width: 120
     },
     {
       key: 'clientIp',
-      title: $t('page.manage.log.clientIp'),
+      title: $t('page.admin.system.log.clientIp'),
       align: 'center',
       width: 140
     },
@@ -145,12 +145,12 @@ const {
   <div class="min-h-500px flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
     <NCard :bordered="false" size="small" class="card-wrapper">
       <NTabs v-model:value="activeTab" type="line" animated>
-        <NTabPane name="login" :tab="$t('page.manage.log.loginLog')" />
-        <NTabPane name="operation" :tab="$t('page.manage.log.operationLog')" />
+        <NTabPane name="login" :tab="$t('page.admin.system.log.loginLog')" />
+        <NTabPane name="operation" :tab="$t('page.admin.system.log.operationLog')" />
       </NTabs>
     </NCard>
 
-    <NCard v-if="activeTab === 'login'" :title="$t('page.manage.log.loginLog')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard v-if="activeTab === 'login'" :title="$t('page.admin.system.log.loginLog')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <NButton size="small" @click="getLoginData">
           <template #icon><icon-ic-round-refresh class="text-icon" /></template>
@@ -171,7 +171,7 @@ const {
       />
     </NCard>
 
-    <NCard v-if="activeTab === 'operation'" :title="$t('page.manage.log.operationLog')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
+    <NCard v-if="activeTab === 'operation'" :title="$t('page.admin.system.log.operationLog')" :bordered="false" size="small" class="card-wrapper sm:flex-1-hidden">
       <template #header-extra>
         <NButton size="small" @click="getOperationData">
           <template #icon><icon-ic-round-refresh class="text-icon" /></template>

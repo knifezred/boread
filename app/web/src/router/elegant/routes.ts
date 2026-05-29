@@ -45,37 +45,9 @@ export const generatedRoutes: GeneratedRoute[] = [
     component: 'layout.base',
     meta: {
       title: 'admin',
-      i18nKey: 'route.admin',
+      i18nKey: 'route.admin'
     },
     children: [
-      {
-        name: 'admin_book',
-        path: '/admin/book',
-        meta: {
-          title: 'admin_book',
-          i18nKey: 'route.admin_book'
-        },
-        children: [
-          {
-            name: 'admin_book_category',
-            path: '/admin/book/category',
-            component: 'view.admin_book_category',
-            meta: {
-              title: 'admin_book_category',
-              i18nKey: 'route.admin_book_category'
-            }
-          },
-          {
-            name: 'admin_book_tag',
-            path: '/admin/book/tag',
-            component: 'view.admin_book_tag',
-            meta: {
-              title: 'admin_book_tag',
-              i18nKey: 'route.admin_book_tag'
-            }
-          }
-        ]
-      },
       {
         name: 'admin_dashboard',
         path: '/admin/dashboard',
@@ -84,6 +56,34 @@ export const generatedRoutes: GeneratedRoute[] = [
           title: 'admin_dashboard',
           i18nKey: 'route.admin_dashboard'
         }
+      },
+      {
+        name: 'admin_library',
+        path: '/admin/library',
+        meta: {
+          title: 'admin_library',
+          i18nKey: 'route.admin_library'
+        },
+        children: [
+          {
+            name: 'admin_library_book-category',
+            path: '/admin/library/book-category',
+            component: 'view.admin_library_book-category',
+            meta: {
+              title: 'admin_library_book-category',
+              i18nKey: 'route.admin_library_book-category'
+            }
+          },
+          {
+            name: 'admin_library_book-tag',
+            path: '/admin/library/book-tag',
+            component: 'view.admin_library_book-tag',
+            meta: {
+              title: 'admin_library_book-tag',
+              i18nKey: 'route.admin_library_book-tag'
+            }
+          }
+        ]
       },
       {
         name: 'admin_system',
@@ -167,7 +167,8 @@ export const generatedRoutes: GeneratedRoute[] = [
     component: 'layout.base$view.home',
     meta: {
       title: 'home',
-      i18nKey: 'route.home'
+      i18nKey: 'route.home',
+      hideInMenu: true
     }
   },
   {

@@ -38,35 +38,35 @@ function search() {
           <NGrid responsive="screen" item-responsive>
             <NFormItemGi
               span="24 s:12 m:6"
-              :label="$t('page.manage.role.roleName')"
+              :label="$t('page.admin.system.role.roleName')"
               path="roleName"
               class="pr-24px"
             >
               <NInput
                 v-model:value="model.roleName"
-                :placeholder="$t('page.manage.role.form.roleName')"
+                :placeholder="$t('page.admin.system.role.form.roleName')"
               />
             </NFormItemGi>
             <NFormItemGi
               span="24 s:12 m:6"
-              :label="$t('page.manage.role.roleCode')"
+              :label="$t('page.admin.system.role.roleCode')"
               path="roleCode"
               class="pr-24px"
             >
               <NInput
                 v-model:value="model.roleCode"
-                :placeholder="$t('page.manage.role.form.roleCode')"
+                :placeholder="$t('page.admin.system.role.form.roleCode')"
               />
             </NFormItemGi>
             <NFormItemGi
               span="24 s:12 m:6"
-              :label="$t('page.manage.role.roleStatus')"
+              :label="$t('page.admin.system.role.roleStatus')"
               path="status"
               class="pr-24px"
             >
               <NSelect
                 v-model:value="model.status"
-                :placeholder="$t('page.manage.role.form.roleStatus')"
+                :placeholder="$t('page.admin.system.role.form.roleStatus')"
                 :options="translateOptions(enableStatusOptions)"
                 clearable
               />

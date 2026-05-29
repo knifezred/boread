@@ -36,9 +36,9 @@ const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
   const titles: Record<OperateType, string> = {
-    add: $t('page.manage.dept.addDept'),
-    addChild: $t('page.manage.dept.addChildDept'),
-    edit: $t('page.manage.dept.editDept')
+    add: $t('page.admin.system.dept.addDept'),
+    addChild: $t('page.admin.system.dept.addChildDept'),
+    edit: $t('page.admin.system.dept.editDept')
   };
   return titles[props.operateType];
 });
@@ -128,22 +128,22 @@ watch(visible, () => {
   <NModal v-model:show="visible" :title="title" preset="card" class="w-600px">
     <NScrollbar class="h-360px pr-20px">
       <NForm ref="formRef" :model="model" :rules="rules" label-placement="left" :label-width="100">
-        <NFormItem :label="$t('page.manage.dept.parentId')" path="parentId">
+        <NFormItem :label="$t('page.admin.system.dept.parentId')" path="parentId">
           <NInputNumber v-model:value="model.parentId" :min="0" disabled class="w-full" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dept.deptName')" path="deptName">
-          <NInput v-model:value="model.deptName" :placeholder="$t('page.manage.dept.form.deptName')" />
+        <NFormItem :label="$t('page.admin.system.dept.deptName')" path="deptName">
+          <NInput v-model:value="model.deptName" :placeholder="$t('page.admin.system.dept.form.deptName')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dept.deptCode')" path="deptCode">
-          <NInput v-model:value="model.deptCode" :placeholder="$t('page.manage.dept.form.deptCode')" />
+        <NFormItem :label="$t('page.admin.system.dept.deptCode')" path="deptCode">
+          <NInput v-model:value="model.deptCode" :placeholder="$t('page.admin.system.dept.form.deptCode')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dept.leader')" path="leader">
-          <NInput v-model:value="model.leader" :placeholder="$t('page.manage.dept.form.leader')" />
+        <NFormItem :label="$t('page.admin.system.dept.leader')" path="leader">
+          <NInput v-model:value="model.leader" :placeholder="$t('page.admin.system.dept.form.leader')" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dept.sortOrder')" path="sortOrder">
+        <NFormItem :label="$t('page.admin.system.dept.sortOrder')" path="sortOrder">
           <NInputNumber v-model:value="model.sortOrder" :min="0" class="w-full" />
         </NFormItem>
-        <NFormItem :label="$t('page.manage.dept.status')" path="status">
+        <NFormItem :label="$t('page.admin.system.dept.status')" path="status">
           <NRadioGroup v-model:value="model.status">
             <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
           </NRadioGroup>
