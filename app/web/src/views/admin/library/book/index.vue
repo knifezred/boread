@@ -1,7 +1,8 @@
 <script setup lang="tsx">
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import type { Ref } from "vue"
-import { NButton, NPopconfirm, NTag, NSpace, NSelect, NInput } from "naive-ui"
+import { NButton, NPopconfirm, NTag, NSpace, NSelect, NInput, NTree } from "naive-ui"
+import type { TreeOption } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
 import {
   bookStatusRecord,
@@ -26,32 +27,52 @@ const appStore = useAppStore();
 
 const { bool: visible, setTrue: openModal } = useBoolean();
 
-const categoryOptions = ref<CommonType.Option<number>[]>([]);
-loadCategoryOptions();
+/** 分类树原始数据 */
+const categoryTree = ref<Api.SystemManage.BookCategory[]>([]);
+/** 当前选中的分类 ID，0 表示"全部" */
+const selectedCategory = ref<number>(0);
+/** NTree 的选中 key */
+const treeSelectedKey = ref<string | number>("0");
+/** NTree 展开的 key 列表，保持展开状态 */
+const expandedKeys = ref<Array<string | number>>(["0"]);
+
+/** 将分类树转为 NTree 的 TreeOption */
+const treeOptions = computed<TreeOption[]>(() => {
+  function toOptions(nodes: Api.SystemManage.BookCategory[]): TreeOption[] {
+    return nodes.map(n => ({
+      key: n.id,
+      label: n.categoryName,
+      children: n.children?.length ? toOptions(n.children) : undefined,
+    }));
+  }
+  const allOption: TreeOption = { key: "0", label: $t("page.admin.library.book.totalCategories"), children: toOptions(categoryTree.value) };
+  return [allOption];
+});
+
+loadCategoryTree();
 
 const { options: serialStatusOptions, labelMap: serialStatusLabelMap } = useDictItems("book_serial_status");
 const { options: visibilityOptions, labelMap: visibilityLabelMap } = useDictItems("book_visibility");
 
-async function loadCategoryOptions() {
+/** 加载分类树 */
+async function loadCategoryTree() {
   const { data, error } = await fetchGetCategoryTree();
   if (!error && data) {
-    categoryOptions.value = flattenTree(data, 0);
+    categoryTree.value = data;
+    // 初始全展开
+    expandedKeys.value = collectAllTreeKeys(data, ["0"]);
   }
 }
 
-function flattenTree(
-  nodes: Api.SystemManage.BookCategory[],
-  depth: number,
-): CommonType.Option<number>[] {
-  let result: CommonType.Option<number>[] = [];
+/** 递归收集所有树节点 key，前面加上 "0" 根节点 */
+function collectAllTreeKeys(nodes: Api.SystemManage.BookCategory[], keys: Array<string | number> = []): Array<string | number> {
   for (const n of nodes) {
-    const prefix = "\u3000".repeat(depth);
-    result.push({ value: n.id, label: `${prefix}${n.categoryName}` });
+    keys.push(n.id);
     if (n.children?.length) {
-      result = result.concat(flattenTree(n.children, depth + 1));
+      collectAllTreeKeys(n.children, keys);
     }
   }
-  return result;
+  return keys;
 }
 
 const searchParams = ref<Api.SystemManage.BookSearchParams>({
@@ -238,6 +259,19 @@ const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(
 const operateType = ref<NaiveUI.TableOperateType>("add");
 const editingData: Ref<Api.SystemManage.Book | null> = ref(null);
 
+/** 点击分类树节点切换筛选 */
+function handleTreeSelect(keys: Array<string | number>) {
+  const key = keys[0];
+  if (key === undefined || key === "0") {
+    selectedCategory.value = 0;
+    searchParams.value.categoryId = null;
+  } else {
+    selectedCategory.value = Number(key);
+    searchParams.value.categoryId = Number(key);
+  }
+  getDataByPage(1);
+}
+
 function handleAdd() {
   operateType.value = "add";
   editingData.value = null;
@@ -283,91 +317,102 @@ function handleReset() {
     serialStatus: null,
     tagId: null,
   };
+  selectedCategory.value = 0;
+  treeSelectedKey.value = "0";
   getDataByPage(1);
 }
 </script>
 
 <template>
-  <div class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
-    <NCard :bordered="false" size="small">
-      <NSpace wrap :size="[12, 12]">
-        <NInput
-          v-model:value="searchParams.title"
-          :placeholder="$t('page.admin.library.book.bookName')"
-          clearable
-          style="width: 160px"
-          @keyup.enter="handleSearch"
-        />
-        <NInput
-          v-model:value="searchParams.author"
-          :placeholder="$t('page.admin.library.book.author')"
-          clearable
-          style="width: 160px"
-          @keyup.enter="handleSearch"
-        />
-        <NSelect
-          v-model:value="searchParams.serialStatus"
-          :placeholder="$t('page.admin.library.book.form.serialStatus')"
-          :options="serialStatusOptions"
-          clearable
-          style="width: 130px"
-        />
-        <NSelect
-          v-model:value="searchParams.visibility"
-          :placeholder="$t('page.admin.library.book.form.visibility')"
-          :options="visibilityOptions"
-          clearable
-          style="width: 130px"
-        />
-        <NSelect
-          v-model:value="searchParams.categoryId"
-          :placeholder="$t('page.admin.library.book.categoryId')"
-          :options="categoryOptions"
-          clearable
-          filterable
-          style="width: 160px"
-        />
-        <NButton type="primary" @click="handleSearch">
-          {{ $t("common.search") }}
-        </NButton>
-        <NButton @click="handleReset">{{ $t("common.reset") }}</NButton>
-      </NSpace>
+  <div class="flex gap-16px overflow-hidden lt-sm:flex-col h-full">
+    <!-- 左侧分类树 -->
+    <NCard :bordered="false" size="small" class="tree-card w-240px shrink-0">
+      <NTree
+        :data="treeOptions"
+        :selected-keys="[selectedCategory === 0 ? '0' : selectedCategory]"
+        :expanded-keys="expandedKeys"
+        class="max-h-[calc(100vh-248px)] overflow-y-auto"
+        selectable
+        @update:selected-keys="handleTreeSelect"
+        @update:expanded-keys="expandedKeys = $event"
+      />
     </NCard>
-    <NCard
-      :title="$t('page.admin.library.book.title')"
-      :bordered="false"
-      size="small"
-      class="card-wrapper sm:flex-1-hidden"
-    >
-      <template #header-extra>
-        <TableHeaderOperation
-          v-model:columns="columnChecks"
-          :disabled-delete="checkedRowKeys.length === 0"
-          :loading="loading"
-          @add="handleAdd"
-          @delete="handleBatchDelete"
-          @refresh="getData"
-        />
-      </template>
-      <NDataTable
-        v-model:checked-row-keys="checkedRowKeys"
-        :columns="columns"
-        :data="data"
+    <!-- 右侧搜索+表格 -->
+    <div class="flex-col-stretch gap-16px flex-1 overflow-hidden">
+      <NCard :bordered="false" size="small">
+        <NSpace wrap :size="[12, 12]">
+          <NInput
+            v-model:value="searchParams.title"
+            :placeholder="$t('page.admin.library.book.bookName')"
+            clearable
+            style="width: 160px"
+            @keyup.enter="handleSearch"
+          />
+          <NInput
+            v-model:value="searchParams.author"
+            :placeholder="$t('page.admin.library.book.author')"
+            clearable
+            style="width: 160px"
+            @keyup.enter="handleSearch"
+          />
+          <NSelect
+            v-model:value="searchParams.serialStatus"
+            :placeholder="$t('page.admin.library.book.form.serialStatus')"
+            :options="serialStatusOptions"
+            clearable
+            style="width: 130px"
+          />
+          <NSelect
+            v-model:value="searchParams.visibility"
+            :placeholder="$t('page.admin.library.book.form.visibility')"
+            :options="visibilityOptions"
+            clearable
+            style="width: 130px"
+          />
+          <NButton type="primary" @click="handleSearch">
+            {{ $t("common.search") }}
+          </NButton>
+          <NButton @click="handleReset">{{ $t("common.reset") }}</NButton>
+        </NSpace>
+      </NCard>
+      <NCard
+        :title="$t('page.admin.library.book.title')"
+        :bordered="false"
         size="small"
-        :flex-height="!appStore.isMobile"
-        :scroll-x="1200"
-        :loading="loading"
-        :row-key="(row) => row.id"
-        remote
-        :pagination="pagination"
-        class="sm:h-full"
-      />
-      <BookOperateModal
-        v-model:visible="visible"
-        :operate-type="operateType"
-        :row-data="editingData"
-        @submitted="getDataByPage"
-      />
-    </NCard>
+        class="card-wrapper sm:flex-1-hidden"
+      >
+        <template #header-extra>
+          <TableHeaderOperation
+            v-model:columns="columnChecks"
+            :disabled-delete="checkedRowKeys.length === 0"
+            :loading="loading"
+            @add="handleAdd"
+            @delete="handleBatchDelete"
+            @refresh="getData"
+          />
+        </template>
+        <NDataTable
+          v-model:checked-row-keys="checkedRowKeys"
+          :columns="columns"
+          :data="data"
+          size="small"
+          :flex-height="!appStore.isMobile"
+          :scroll-x="1200"
+          :loading="loading"
+          :row-key="(row) => row.id"
+          remote
+          :pagination="pagination"
+          class="sm:h-full"
+        />
+        <BookOperateModal
+          v-model:visible="visible"
+          :operate-type="operateType"
+          :row-data="editingData"
+          @submitted="getDataByPage"
+        />
+      </NCard>
+    </div>
   </div>
 </template>
+
+<style scoped></style>

@@ -858,6 +858,7 @@ declare namespace App {
               addBook: string;
               editBook: string;
               bookDetail: string;
+              totalCategories: string;
             };
           };
         };

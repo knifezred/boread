@@ -23,13 +23,14 @@ type BookUpdateStatusRequest struct {
 // BookSearch 书籍分页搜索
 type BookSearch struct {
 	PageRequest
-	Title      string `json:"title"`
-	Author     string `json:"author"`
-	CategoryID *uint64 `json:"categoryId"`
-	Status     string `json:"status"`
-	Visibility string `json:"visibility"`
-	SerialStatus string `json:"serialStatus"`
-	TagID      *uint64 `json:"tagId"`
+	Title        string   `json:"title"`
+	Author       string   `json:"author"`
+	CategoryID   *uint64  `json:"categoryId"`
+	CategoryIDs  []uint64 // 展开后的分类ID列表（含自身+子分类），由 service 层填充
+	Status       string   `json:"status"`
+	Visibility   string   `json:"visibility"`
+	SerialStatus string   `json:"serialStatus"`
+	TagID        *uint64  `json:"tagId"`
 }
 
 // BookResponse 书籍响应 (包含标签列表和分类名称)

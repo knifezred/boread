@@ -46,8 +46,8 @@ func (r *BookRepository) Page(ctx context.Context, req *dto.BookSearch) ([]model
 	if req.Author != "" {
 		tx = tx.Where("author LIKE ?", "%"+req.Author+"%")
 	}
-	if req.CategoryID != nil {
-		tx = tx.Where("category_id = ?", *req.CategoryID)
+	if len(req.CategoryIDs) > 0 {
+		tx = tx.Where("category_id IN ?", req.CategoryIDs)
 	}
 	if req.Status != "" {
 		tx = tx.Where("status = ?", req.Status)

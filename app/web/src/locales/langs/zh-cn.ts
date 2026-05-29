@@ -601,6 +601,7 @@ const local: App.I18n.Schema = {
           addBook: "新增小说",
           editBook: "编辑小说",
           bookDetail: "小说详情",
+          totalCategories: "全部分类",
         },
       },
     },

@@ -52,6 +52,30 @@ func (r *BookCategoryRepository) ListAll(ctx context.Context) ([]model.BookCateg
 	return rows, nil
 }
 
+// GetDescendantIDs 递归获取指定分类及其所有子分类的 ID 列表
+func (r *BookCategoryRepository) GetDescendantIDs(ctx context.Context, categoryID uint64) ([]uint64, error) {
+	allRows, err := r.ListAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// 按 parent_id 建立邻接表
+	children := make(map[uint64][]uint64, len(allRows))
+	for _, c := range allRows {
+		children[c.ParentID] = append(children[c.ParentID], c.ID)
+	}
+	result := []uint64{categoryID}
+	queue := []uint64{categoryID}
+	for len(queue) > 0 {
+		pid := queue[0]
+		queue = queue[1:]
+		for _, cid := range children[pid] {
+			result = append(result, cid)
+			queue = append(queue, cid)
+		}
+	}
+	return result, nil
+}
+
 func (r *BookCategoryRepository) HasChildren(ctx context.Context, id uint64) (bool, error) {
 	var n int64
 	err := r.db.WithContext(ctx).Model(&model.BookCategory{}).Where("parent_id = ?", id).Count(&n).Error

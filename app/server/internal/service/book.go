@@ -257,6 +257,14 @@ func (s *BookService) GetByID(ctx context.Context, id uint64) (*dto.BookResponse
 
 func (s *BookService) Page(ctx context.Context, req *dto.BookSearch) (*dto.PageResponse, error) {
 	req.Normalize()
+	// 展开分类：选中父分类时同时查所有子分类
+	if req.CategoryID != nil && *req.CategoryID > 0 {
+		ids, err := s.categoryRepo.GetDescendantIDs(ctx, *req.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+		req.CategoryIDs = ids
+	}
 	rows, total, err := s.bookRepo.Page(ctx, req)
 	if err != nil {
 		return nil, err
