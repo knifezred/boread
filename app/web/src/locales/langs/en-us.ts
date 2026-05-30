@@ -249,6 +249,8 @@ const local: App.I18n.Schema = {
     "admin_library_book-category": 'Book Categories',
     "admin_library_book-tag": 'Book Tags',
     "admin_library_book": 'Book Management',
+    "admin_library_book-chapter-rule": 'Chapter Rules',
+    "admin_library_book-filter-rule": 'Filter Rules',
     home: "Home",
     system: "System Management",
     library: "Library Management"

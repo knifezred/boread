@@ -43,6 +43,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagRepo := repository.NewBookTagRepository(db)
 	bookRepo := repository.NewBookRepository(db)
 	bookTagRelRepo := repository.NewBookTagRelRepository(db)
+	bookFileRepo := repository.NewBookFileRepository(db)
+	bookUploadRepo := repository.NewBookUploadRepository(db)
+	bookChapterRepo := repository.NewBookChapterRepository(db)
+	bookChapterRuleRepo := repository.NewBookChapterRuleRepository(db)
+	bookFilterRuleRepo := repository.NewBookContentFilterRuleRepository(db)
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, db)
@@ -55,6 +60,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookCategorySvc := service.NewBookCategoryService(bookCategoryRepo)
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
 	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo)
+	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
@@ -67,6 +73,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookCategoryHandler := v1.NewBookCategoryHandler(bookCategorySvc)
 	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
 	bookHandler := v1.NewBookHandler(bookSvc)
+	bookFileHandler := v1.NewBookFileHandler(bookFileSvc)
 
 	api := r.Group("/api")
 	{
@@ -163,6 +170,31 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.PUT("/book/:id", middleware.RequireButton(authSvc, "book:update"), bookHandler.Update)
 			manage.PUT("/book/:id/status", middleware.RequireButton(authSvc, "book:update"), bookHandler.UpdateStatus)
 			manage.DELETE("/book/:id", middleware.RequireButton(authSvc, "book:delete"), bookHandler.Delete)
+
+			// --- Book File ---
+			manage.POST("/book/upload", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.Upload)
+			manage.POST("/book/confirm-import", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ConfirmImport)
+			manage.POST("/book/scan", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanAll)
+			manage.POST("/book/scan-path", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanPath)
+			manage.POST("/book/scan/:id", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanByID)
+			manage.GET("/book/:id/chapter/:chapterNo", bookFileHandler.GetChapterContent)
+			manage.POST("/book/upload/page", bookFileHandler.PageUpload)
+			manage.POST("/book/file/page", bookFileHandler.PageFile)
+			manage.POST("/book/chapter/page", bookFileHandler.PageChapter)
+
+			// --- Book Chapter Rule ---
+			manage.GET("/book/chapter-rule/:id", bookFileHandler.GetChapterRuleByID)
+			manage.POST("/book/chapter-rule/page", bookFileHandler.PageChapterRule)
+			manage.POST("/book/chapter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateChapterRule)
+			manage.PUT("/book/chapter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateChapterRule)
+			manage.DELETE("/book/chapter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteChapterRule)
+
+			// --- Book Filter Rule ---
+			manage.GET("/book/filter-rule/:id", bookFileHandler.GetFilterRuleByID)
+			manage.POST("/book/filter-rule/page", bookFileHandler.PageFilterRule)
+			manage.POST("/book/filter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateFilterRule)
+			manage.PUT("/book/filter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateFilterRule)
+			manage.DELETE("/book/filter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteFilterRule)
 		}
 	}
 

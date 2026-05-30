@@ -110,7 +110,6 @@ CREATE TABLE `book` (
   KEY `idx_author` (`author`),
   KEY `idx_title_author` (`title`, `author`),
   KEY `idx_category` (`category_id`),
-  KEY `idx_owner` (`owner_type`, `owner_id`),
   KEY `idx_dept_id` (`dept_id`),
   KEY `idx_status_visibility` (`status`, `visibility`),
   KEY `idx_deleted_at` (`deleted_at`)

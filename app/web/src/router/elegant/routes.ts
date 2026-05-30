@@ -84,6 +84,24 @@ export const generatedRoutes: GeneratedRoute[] = [
             }
           },
           {
+            name: 'admin_library_book-chapter-rule',
+            path: '/admin/library/book-chapter-rule',
+            component: 'view.admin_library_book-chapter-rule',
+            meta: {
+              title: 'admin_library_book-chapter-rule',
+              i18nKey: 'route.admin_library_book-chapter-rule'
+            }
+          },
+          {
+            name: 'admin_library_book-filter-rule',
+            path: '/admin/library/book-filter-rule',
+            component: 'view.admin_library_book-filter-rule',
+            meta: {
+              title: 'admin_library_book-filter-rule',
+              i18nKey: 'route.admin_library_book-filter-rule'
+            }
+          },
+          {
             name: 'admin_library_book-tag',
             path: '/admin/library/book-tag',
             component: 'view.admin_library_book-tag',

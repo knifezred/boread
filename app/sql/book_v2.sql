@@ -5,8 +5,8 @@
 -- Notes:
 --   1. 章节内容存本地文件, DB 只存 byte_offset + byte_length 索引
 --   2. book_file 支持多文件聚合, is_primary 标记默认版本
---   3. book_parse_rule 定义章节切分规则, 支持全局默认和单书覆盖
---   4. content_filter_rule 定义入库/出库时的内容净化规则
+--   3. book_chapter_rule 定义章节切分规则, 支持全局默认和单书覆盖
+--   4. book_content_filter_rule 定义入库/出库时的内容净化规则
 -- =====================================================================
 
 USE `boread`;
@@ -33,8 +33,6 @@ CREATE TABLE `book_file` (
   `is_primary`        TINYINT(1)      NOT NULL DEFAULT 0                COMMENT '是否为主版本 (阅读器默认使用, 同一 book 最多一个)',
   `file_status`       CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '解析状态: 1-待处理, 2-处理中, 3-解析成功, 4-解析失败',
   `parse_message`     VARCHAR(512)    NULL     DEFAULT NULL             COMMENT '解析结果/失败原因',
-  `uploader_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '上传者 id (book_upload.id 或 reader.id)',
-  `uploader_type`     CHAR(1)         NULL     DEFAULT NULL             COMMENT '上传者类型: 1-sys_user, 2-reader, 3-system(本地扫描)',
   `create_by`         BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`         BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
@@ -72,11 +70,11 @@ CREATE TABLE `book_chapter` (
   `update_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_book_chapter_no` (`book_id`, `chapter_no`),
+  UNIQUE KEY `uk_book_file_chapter` (`book_id`, `file_id`, `chapter_no`),
   KEY `idx_book_id` (`book_id`),
   KEY `idx_file_id` (`file_id`),
   KEY `idx_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='聚合章节索引表 (内容存文件)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节索引表（按文件存储，支持多版本切换）';
 
 -- ---------------------------------------------------------------------
 -- Table: book_upload (上传/解析任务)
@@ -94,27 +92,24 @@ CREATE TABLE `book_upload` (
   `parse_status`      CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '解析状态: 1-待解析, 2-解析中, 3-解析成功, 4-解析失败',
   `parse_message`     VARCHAR(512)    NULL     DEFAULT NULL             COMMENT '解析结果/失败原因',
   `chapter_count`     INT UNSIGNED    NULL     DEFAULT NULL             COMMENT '解析出的章节数 (成功时)',
-  `uploader_id`       BIGINT UNSIGNED NOT NULL                          COMMENT '上传者 id',
-  `uploader_type`     CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '上传者类型: 1-sys_user, 2-reader',
   `create_by`         BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`         BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
   `update_time`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `deleted_at`        DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
-  KEY `idx_uploader` (`uploader_type`, `uploader_id`),
   KEY `idx_book_id` (`book_id`),
   KEY `idx_file_md5` (`file_md5`),
   KEY `idx_parse_status` (`parse_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='书籍上传/解析任务表';
 
 -- ---------------------------------------------------------------------
--- Table: book_parse_rule (章节识别规则)
+-- Table: book_chapter_rule (章节识别规则)
 -- 用于解析 txt 时切分章节, 支持多条规则按优先级匹配
 -- scope_type 区分全局默认还是单书覆盖
 -- ---------------------------------------------------------------------
-DROP TABLE IF EXISTS `book_parse_rule`;
-CREATE TABLE `book_parse_rule` (
+DROP TABLE IF EXISTS `book_chapter_rule`;
+CREATE TABLE `book_chapter_rule` (
   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
   `rule_name`       VARCHAR(64)     NOT NULL                          COMMENT '规则名称',
   `scope_type`      CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '作用域: 1-全局默认, 2-单书覆盖',
@@ -138,12 +133,12 @@ CREATE TABLE `book_parse_rule` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节识别规则表';
 
 -- ---------------------------------------------------------------------
--- Table: content_filter_rule (内容净化规则)
+-- Table: book_content_filter_rule (内容净化规则)
 -- 入库时(解析阶段) 或 出库时(读章节时) 应用
 -- action: 1-替换  2-拦截整章  3-标记审核
 -- ---------------------------------------------------------------------
-DROP TABLE IF EXISTS `content_filter_rule`;
-CREATE TABLE `content_filter_rule` (
+DROP TABLE IF EXISTS `book_content_filter_rule`;
+CREATE TABLE `book_content_filter_rule` (
   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
   `rule_name`       VARCHAR(64)     NOT NULL                          COMMENT '规则名称',
   `match_type`      CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '匹配方式: 1-关键词, 2-正则',

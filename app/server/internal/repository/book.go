@@ -68,6 +68,16 @@ func (r *BookRepository) Page(ctx context.Context, req *dto.BookSearch) ([]model
 	return rows, total, nil
 }
 
+// FindByTitleAndAuthor 按书名和作者精确查找
+func (r *BookRepository) FindByTitleAndAuthor(ctx context.Context, title, author string) (*model.Book, error) {
+	var m model.Book
+	err := r.db.WithContext(ctx).Where("title = ? AND author = ?", title, author).First(&m).Error
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
+}
+
 // ListByIDs 批量查询 (用于标签关联)
 func (r *BookRepository) ListByIDs(ctx context.Context, ids []uint64) ([]model.Book, error) {
 	if len(ids) == 0 {

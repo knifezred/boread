@@ -10,3 +10,4 @@ logs/
 *.zip
 *.exe
 app/server/configs/config.yaml
+app/server/storage/

@@ -11,6 +11,20 @@ type Config struct {
 	Database DatabaseConfig `yaml:"database"`
 	JWT      JWTConfig      `yaml:"jwt"`
 	Log      LogConfig      `yaml:"log"`
+	Meta     MetaConfig     `yaml:"meta"`
+}
+
+type MetaConfig struct {
+	Rules []MetaExtractRule `yaml:"rules"`
+}
+
+type MetaExtractRule struct {
+	Name        string `yaml:"name"`
+	Pattern     string `yaml:"pattern"`
+	TitleGroup  string `yaml:"titleGroup"`
+	AuthorGroup string `yaml:"authorGroup"`
+	Source      string `yaml:"source"`
+	Priority    int    `yaml:"priority"`
 }
 
 type ServerConfig struct {
