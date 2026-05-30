@@ -29,7 +29,7 @@ async function handleUpload(file: File) {
   importError.value = "";
   const { error, data } = await fetchUploadBookFile(file, (p) => { uploadProgress.value = p; });
   if (error) {
-    importError.value = error.message || $t("common.operateFail");
+    importError.value = error.message || $t("common.operateFailed");
   } else {
     uploadResult.value = data;
     confirmModel.value = { title: data.suggestedTitle, author: data.suggestedAuthor };
@@ -53,7 +53,7 @@ async function handleConfirm() {
     author: confirmModel.value.author,
   });
   if (error) {
-    importError.value = error.message || $t("common.operateFail");
+    importError.value = error.message || $t("common.operateFailed");
     importing.value = false;
     return;
   }

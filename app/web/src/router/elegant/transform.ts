@@ -182,6 +182,8 @@ const routeMap: RouteMap = {
   "admin_system_role": "/admin/system/role",
   "admin_system_user": "/admin/system/user",
   "admin_system_user-detail": "/admin/system/user-detail/:id",
+  "book-detail": "/book-detail/:id",
+  "book-reader": "/book-reader",
   "home": "/home",
   "iframe-page": "/iframe-page/:url",
   "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?"

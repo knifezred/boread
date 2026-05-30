@@ -252,7 +252,7 @@ const local: App.I18n.Schema = {
     "admin_library_book-chapter-rule": "章节识别规则",
     "admin_library_book-filter-rule": "内容净化规则",
     admin_dashboard: "首页",
-    home: "首页",
+    home: "我的书库",
     system: "系统管理",
     library: "书库管理",
   },

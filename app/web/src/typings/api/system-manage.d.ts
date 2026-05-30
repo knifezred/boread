@@ -320,8 +320,6 @@ declare namespace Api {
       aggregateStatus: AggregateStatus;
       avgRating: number;
       ratingCount: number;
-      ownerId: number;
-      ownerType: string;
       deptId: number | null;
       tagIds?: number[];
       tags?: { id: number; tagName: string }[];
