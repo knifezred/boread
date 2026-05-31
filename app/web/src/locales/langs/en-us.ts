@@ -381,7 +381,12 @@ const local: App.I18n.Schema = {
         similarRecommend: 'Similar Recommendations',
         more: 'More',
         books: 'books',
-        bookExperience: 'Book Experience'
+        bookExperience: 'Book Experience',
+        reParse: 'Re-parse',
+        reParseTitle: 'Re-parse Chapters',
+        reParseConfirm: 'This will delete existing chapter index and re-parse from the content file. Continue?',
+        reParseSuccess: 'Chapters re-parsed: {old} → {new}',
+        reParseFailed: 'Failed to re-parse chapters',
       },
       reader: {
         prevChapter: 'Prev',

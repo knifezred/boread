@@ -279,6 +279,15 @@ export function fetchGetPublicChapterList(bookId: string | number) {
   });
 }
 
+/** 重新识别章节 */
+export function fetchReParseChapters(bookId: number) {
+  return request<Api.BookManage.ReParseResponse>({
+    url: "/manage/book/re-parse",
+    method: "post",
+    data: { bookId },
+  });
+}
+
 // -------- Book Chapter Rule --------
 
 /** 章节识别规则分页 */

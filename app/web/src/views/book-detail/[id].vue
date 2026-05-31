@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NTag, NSpace, NSpin, NPagination } from 'naive-ui'
 import BookCard from "@/components/book-card.vue"
-import { fetchGetBook, fetchGetChapterList } from "@/service/api"
+import { fetchGetBook, fetchGetChapterList, fetchReParseChapters } from "@/service/api"
 import { $t } from "@/locales"
 import { formatWordCount } from '@/utils/book'
 
@@ -91,6 +91,33 @@ async function loadChapters(page = 1) {
     chapterLoading.value = false
   }
 }
+
+async function handleReParse() {
+  const dialogRef = window.$dialog?.warning({
+    title: $t("page.book.detail.reParseTitle"),
+    content: $t("page.book.detail.reParseConfirm"),
+    positiveText: $t("common.confirm"),
+    negativeText: $t("common.cancel"),
+    onPositiveClick: async () => {
+      try {
+        const { data } = await fetchReParseChapters(Number(bookId))
+        if (data) {
+          window.$message?.success(
+            $t("page.book.detail.reParseSuccess", { old: data.oldCount, new: data.newCount })
+          )
+          bookInfo.value.totalChapters = data.newCount
+          bookInfo.value.totalWords = data.totalWords
+          await loadChapters(1)
+        }
+        dialogRef?.destroy()
+      } catch (err: any) {
+        window.$message?.error(err.message || $t("page.book.detail.reParseFailed"))
+        dialogRef?.destroy()
+      }
+    }
+  })
+}
+
 
 onMounted(async () => {
   loading.value = true
@@ -240,11 +267,16 @@ onBeforeUnmount(() => {
               <div class="flex items-center gap-3 w-full">
                 <span class="text-xl font-semibold text-gray-900">{{ $t("page.book.detail.catalog") }}</span>
                 <span class="text-sm text-gray-400 font-normal">{{ $t("page.book.detail.totalChapters", { total: chapterTotal }) }}</span>
-                <div
-                  class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer px-2 py-1 rd-1 transition-all duration-200 ml-auto hover:bg-gray-100 hover:text-gray-700"
-                  @click="toggleSort">
-                  <SvgIcon :icon="sortAsc ? 'solar:sort-from-top-linear' : 'solar:sort-from-bottom-linear'" size="16" />
-                  <span>{{ sortAsc ? $t("page.book.detail.ascSort") : $t("page.book.detail.descSort") }}</span>
+                <div class="ml-auto flex items-center gap-2">
+                  <NButton size="tiny" quaternary @click="handleReParse">
+                    {{ $t("page.book.detail.reParse") }}
+                  </NButton>
+                  <div
+                    class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer px-2 py-1 rd-1 transition-all duration-200 hover:bg-gray-100 hover:text-gray-700"
+                    @click="toggleSort">
+                    <SvgIcon :icon="sortAsc ? 'solar:sort-from-top-linear' : 'solar:sort-from-bottom-linear'" size="16" />
+                    <span>{{ sortAsc ? $t("page.book.detail.ascSort") : $t("page.book.detail.descSort") }}</span>
+                  </div>
                 </div>
               </div>
             </template>

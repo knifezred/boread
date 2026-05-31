@@ -171,14 +171,14 @@ func (s *BookFileService) ConfirmImport(ctx context.Context, req *dto.ConfirmImp
 	// 获取章节识别规则（全局 + 书籍级）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
 
-	// 执行解析
-	parser := NewChapterParser(rules)
-	parseResult := parser.Parse(data)
-
-	// 应用入库过滤规则
+	// 先应用入库过滤规则，再在过滤后的数据上解析章节
+	// 确保字节偏移与存储到文件的内容一致
 	filterRules, _ := s.filterRuleRepo.ListByStage(ctx, model.FilterStageInput)
 	filter := NewContentFilter(filterRules)
 	filteredData := applyFilterToContent(data, filter)
+
+	parser := NewChapterParser(rules)
+	parseResult := parser.Parse(filteredData)
 
 	// 事务入库
 	var bookID uint64
@@ -379,6 +379,16 @@ func (s *BookFileService) scanLocalFile(ctx context.Context, fpath string, userI
 	// 提取元数据
 	title, author := extractMetaFromContent(data, originalName)
 
+	// 先应用入库过滤规则，再在过滤后的数据上解析章节
+	// 确保字节偏移与存储到文件的内容一致
+	filterRules, _ := s.filterRuleRepo.ListByStage(ctx, model.FilterStageInput)
+	filter := NewContentFilter(filterRules)
+	filteredData := applyFilterToContent(data, filter)
+
+	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
+	parser := NewChapterParser(rules)
+	parseResult := parser.Parse(filteredData)
+
 	// 匹配或创建 Book
 	var bookID uint64
 	var chapterCount uint32
@@ -398,16 +408,6 @@ func (s *BookFileService) scanLocalFile(ctx context.Context, fpath string, userI
 				return err
 			}
 		}
-
-		// 获取章节规则并解析
-		rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
-		parser := NewChapterParser(rules)
-		parseResult := parser.Parse(data)
-
-		// 入库过滤
-		filterRules, _ := s.filterRuleRepo.ListByStage(ctx, model.FilterStageInput)
-		filter := NewContentFilter(filterRules)
-		filteredData := applyFilterToContent(data, filter)
 
 		// 写内容文件
 		contentRelPath := filepath.Join(StorageBaseDir, fmt.Sprintf("content_%d.txt", book.ID))
@@ -528,14 +528,14 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 	// 获取章节识别规则
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0) // bookID=0 取全局规则
 
-	// 执行解析
-	parser := NewChapterParser(rules)
-	parseResult := parser.Parse(data)
-
-	// 应用入库过滤规则
+	// 先应用入库过滤规则，再在过滤后的数据上解析章节
+	// 确保字节偏移与存储到文件的内容一致
 	filterRules, _ := s.filterRuleRepo.ListByStage(ctx, model.FilterStageInput)
 	filter := NewContentFilter(filterRules)
 	filteredData := applyFilterToContent(data, filter)
+
+	parser := NewChapterParser(rules)
+	parseResult := parser.Parse(filteredData)
 
 	// 事务入库
 	var bookID uint64
@@ -635,6 +635,89 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 }
 
 // ==================== 章节内容读取 ====================
+
+// ReParseChapters 重新识别章节
+// 读取已入库的内容文件，重新解析章节索引并替换
+func (s *BookFileService) ReParseChapters(ctx context.Context, req *dto.ReParseRequest) (*dto.ReParseResponse, error) {
+	book, err := s.bookRepo.GetByID(ctx, req.BookID)
+	if err != nil {
+		return nil, fmt.Errorf("书籍不存在: %w", err)
+	}
+	if book.PrimaryFileID == nil {
+		return nil, errors.New("该书没有主文件，无法重新识别章节")
+	}
+	file, err := s.bookFileRepo.GetByID(ctx, *book.PrimaryFileID)
+	if err != nil {
+		return nil, ErrBookFileNotFound
+	}
+	if file.ContentPath == nil {
+		return nil, errors.New("文件路径为空")
+	}
+	data, err := os.ReadFile(*file.ContentPath)
+	if err != nil {
+		return nil, fmt.Errorf("读取内容文件失败: %w", err)
+	}
+
+	// 获取章节识别规则
+	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
+
+	// 在已过滤的内容上重新解析
+	parser := NewChapterParser(rules)
+	parseResult := parser.Parse(data)
+
+	oldCount := book.TotalChapters
+	newCount := uint32(len(parseResult.Chapters))
+
+	// 事务替换章节索引
+	err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// 1. 硬删除旧章节（唯一索引 uk_book_file_chapter 不含 deleted_at）
+		//    必须用 Unscoped() 彻底删除，否则软删除的记录会阻塞新插入
+		if err := tx.Unscoped().Where("book_id = ?", book.ID).Delete(&model.BookChapter{}).Error; err != nil {
+			return fmt.Errorf("删除旧章节失败: %w", err)
+		}
+		// 2. 创建新章节
+		chapters := make([]model.BookChapter, newCount)
+		for i, seg := range parseResult.Chapters {
+			chapters[i] = model.BookChapter{
+				BookID:     book.ID,
+				FileID:     *book.PrimaryFileID,
+				ChapterNo:  uint32(i + 1),
+				Title:      seg.Title,
+				ByteOffset: seg.ByteOffset,
+				ByteLength: seg.ByteLength,
+				WordCount:  seg.WordCount,
+				Status:     model.ChapterPublished,
+			}
+		}
+		if err := tx.Create(&chapters).Error; err != nil {
+			return fmt.Errorf("创建新章节失败: %w", err)
+		}
+		// 3. 更新书籍统计
+		totalWords := sumWords(parseResult.Chapters)
+		if err := tx.Model(&model.Book{}).Where("id = ?", book.ID).Updates(map[string]interface{}{
+			"total_chapters": newCount,
+			"total_words":    totalWords,
+		}).Error; err != nil {
+			return fmt.Errorf("更新书籍统计失败: %w", err)
+		}
+		// 4. 更新文件记录的章节数
+		if err := tx.Model(&model.BookFile{}).Where("id = ?", file.ID).Update("chapter_count", newCount).Error; err != nil {
+			return fmt.Errorf("更新文件章节数失败: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ReParseResponse{
+		BookID:     book.ID,
+		BookTitle:  book.Title,
+		OldCount:   oldCount,
+		NewCount:   newCount,
+		TotalWords: sumWords(parseResult.Chapters),
+	}, nil
+}
 
 // GetChapterContent 读取指定章节的文本内容
 func (s *BookFileService) GetChapterContent(ctx context.Context, bookID uint64, chapterNo uint32) (*dto.ChapterContentResponse, error) {

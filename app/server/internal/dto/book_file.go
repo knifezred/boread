@@ -95,6 +95,22 @@ type ChapterContentResponse struct {
 	Content string `json:"content"`
 }
 
+// ==================== 重新识别章节 ====================
+
+// ReParseRequest 重新识别章节请求
+type ReParseRequest struct {
+	BookID uint64 `json:"bookId" binding:"required"`
+}
+
+// ReParseResponse 重新识别章节响应
+type ReParseResponse struct {
+	BookID     uint64 `json:"bookId"`
+	BookTitle  string `json:"bookTitle"`
+	OldCount   uint32 `json:"oldCount"`
+	NewCount   uint32 `json:"newCount"`
+	TotalWords uint32 `json:"totalWords"`
+}
+
 // ==================== 章节识别规则 ====================
 
 // ChapterRuleRequest 规则请求

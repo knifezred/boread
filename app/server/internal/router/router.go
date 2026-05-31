@@ -183,6 +183,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.POST("/book/file/page", bookFileHandler.PageFile)
 			manage.POST("/book/chapter/page", bookFileHandler.PageChapter)
 			manage.POST("/book/chapter/list", bookFileHandler.ListChapter)
+			manage.POST("/book/re-parse", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.ReParseChapters)
 
 			// --- Book Chapter Rule ---
 			manage.GET("/book/chapter-rule/:id", bookFileHandler.GetChapterRuleByID)

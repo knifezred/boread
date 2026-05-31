@@ -239,6 +239,15 @@ declare namespace Api {
 
     // ==================== Book Chapter Rule ====================
 
+    /** re-parse chapters response */
+    type ReParseResponse = {
+      bookId: number;
+      bookTitle: string;
+      oldCount: number;
+      newCount: number;
+      totalWords: number;
+    };
+
     /** book chapter rule */
     type BookChapterRule = Common.CommonRecord<{
       ruleName: string;

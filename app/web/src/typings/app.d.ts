@@ -635,6 +635,11 @@ declare namespace App {
             more: string;
             books: string;
             bookExperience: string;
+            reParse: string;
+            reParseTitle: string;
+            reParseConfirm: string;
+            reParseSuccess: string;
+            reParseFailed: string;
           };
           reader: {
             prevChapter: string;

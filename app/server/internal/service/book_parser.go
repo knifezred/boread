@@ -23,9 +23,10 @@ import (
 
 // ChapterMatch 单个章节匹配结果
 type ChapterMatch struct {
-	Title      string
-	ByteOffset uint64
-	LineNumber int
+	Title          string
+	ByteOffset     uint64 // 标题行起始字节偏移
+	TitleEndOffset uint64 // 标题行结束（下一行起始）字节偏移
+	LineNumber     int
 }
 
 // ParseResult 整文件解析结果
@@ -69,21 +70,39 @@ func (p *ChapterParser) Parse(content []byte) *ParseResult {
 	}
 
 	// 2. 按标题位置切分章节
+	// 每个章节的内容从标题行的下一行开始，到下一章节标题行结束
 	segments := make([]ChapterSegment, 0, len(matches))
 	for i, m := range matches {
+		// 内容起始位置：标题行结束（下一行起始）
+		contentStart := m.TitleEndOffset
+		if contentStart > uint64(len(content)) {
+			contentStart = uint64(len(content))
+		}
+
+		// 内容结束位置：下一章节标题行起始
 		var endOffset uint64
 		if i+1 < len(matches) {
 			endOffset = matches[i+1].ByteOffset
 		} else {
 			endOffset = uint64(len(content))
 		}
-		seg := content[m.ByteOffset:endOffset]
-		segments = append(segments, ChapterSegment{
-			Title:      m.Title,
-			ByteOffset: m.ByteOffset,
-			ByteLength: uint32(len(seg)),
-			WordCount:  countWords(seg),
-		})
+
+		if contentStart < endOffset {
+			seg := content[contentStart:endOffset]
+			segments = append(segments, ChapterSegment{
+				Title:      m.Title,
+				ByteOffset: contentStart,
+				ByteLength: uint32(len(seg)),
+				WordCount:  countWords(seg),
+			})
+		} else {
+			segments = append(segments, ChapterSegment{
+				Title:      m.Title,
+				ByteOffset: contentStart,
+				ByteLength: 0,
+				WordCount:  0,
+			})
+		}
 	}
 	return &ParseResult{Chapters: segments}
 }
@@ -139,9 +158,11 @@ func (p *ChapterParser) scanWithRegex(content []byte, re *regexp.Regexp, titleGr
 		if titleGroup > 0 && titleGroup < len(subs) {
 			title = subs[titleGroup]
 		}
+		titleEnd := offset + uint64(lineBytes) + 1
 		matches = append(matches, ChapterMatch{
-			Title:      title,
-			ByteOffset: offset,
+			Title:          title,
+			ByteOffset:     offset,
+			TitleEndOffset: titleEnd,
 		})
 		offset += uint64(lineBytes) + 1
 	}
@@ -179,10 +200,12 @@ func (p *ChapterParser) matchBuiltin(content []byte) []ChapterMatch {
 		}
 		for _, pat := range patterns {
 			if pat.MatchString(trimmed) {
+				titleEnd := offset + uint64(lineBytes) + 1
 				matches = append(matches, ChapterMatch{
-					Title:      trimmed,
-					ByteOffset: offset,
-					LineNumber: lineNum,
+					Title:          trimmed,
+					ByteOffset:     offset,
+					TitleEndOffset: titleEnd,
+					LineNumber:     lineNum,
 				})
 				break
 			}
@@ -216,9 +239,9 @@ type ContentFilter struct {
 }
 
 type compiledFilterRule struct {
-	rule        model.BookContentFilterRule
-	regex       *regexp.Regexp
-	keywords    []string // 关键词匹配时的列表
+	rule     model.BookContentFilterRule
+	regex    *regexp.Regexp
+	keywords []string // 关键词匹配时的列表
 }
 
 // NewContentFilter 创建内容过滤器

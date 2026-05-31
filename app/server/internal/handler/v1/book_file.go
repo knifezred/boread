@@ -163,6 +163,29 @@ func (h *BookFileHandler) GetChapterContent(c *gin.Context) {
 	response.Success(c, resp)
 }
 
+// ReParseChapters 重新识别章节
+// @Summary   重新识别章节（删除旧章节索引，重新解析并创建）
+// @Tags      book-file
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    body  body  dto.ReParseRequest  true  "请求参数"
+// @Success  200  {object}  response.Response{data=dto.ReParseResponse}
+// @Router   /api/manage/book/re-parse [post]
+func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
+	var req dto.ReParseRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 1001, err.Error())
+		return
+	}
+	resp, err := h.svc.ReParseChapters(c.Request.Context(), &req)
+	if err != nil {
+		response.Error(c, mapFileErr(err), err.Error())
+		return
+	}
+	response.Success(c, resp)
+}
+
 // ==================== 上传记录 ====================
 
 // PageUpload 上传记录分页
