@@ -8,6 +8,7 @@ type BookCategory struct {
 	CategoryCode string       `gorm:"column:category_code;size:64;not null" json:"categoryCode"`
 	Description  string       `gorm:"column:description;size:255" json:"description"`
 	SortOrder    int          `gorm:"column:sort_order;default:0" json:"sortOrder"`
+	IsHot        bool         `gorm:"column:is_hot;default:false" json:"isHot"`
 	Status       EnableStatus `gorm:"column:status;type:char(1);default:'1'" json:"status"`
 }
 

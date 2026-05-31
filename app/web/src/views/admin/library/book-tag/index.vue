@@ -1,18 +1,18 @@
 <script setup lang="tsx">
-import { ref } from 'vue';
-import type { Ref } from 'vue';
-import { NButton, NPopconfirm } from 'naive-ui';
-import { useBoolean } from '@sa/hooks';
-import { fetchGetTagList, fetchDeleteTag } from '@/service/api';
-import { useAppStore } from '@/store/modules/app';
-import { defaultTransform, useNaivePaginatedTable, useTableOperate } from '@/hooks/common/table';
-import { $t } from '@/locales';
-import TagOperateModal from './modules/tag-operate-modal.vue';
+import { ref } from 'vue'
+import type { Ref } from 'vue'
+import { NButton, NPopconfirm } from 'naive-ui'
+import { useBoolean } from '@sa/hooks'
+import { fetchGetTagList, fetchDeleteTag } from '@/service/api'
+import { useAppStore } from '@/store/modules/app'
+import { defaultTransform, useNaivePaginatedTable, useTableOperate } from '@/hooks/common/table'
+import { $t } from '@/locales'
+import TagOperateModal from './modules/tag-operate-modal.vue'
 
 const appStore = useAppStore();
 const { bool: visible, setTrue: openModal } = useBoolean();
 
-const searchParams = ref<Api.SystemManage.TagSearchParams>({
+const searchParams = ref<Api.BookManage.TagSearchParams>({
   current: 1, size: 10, tagName: null,
 });
 
@@ -28,7 +28,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     { key: 'usageCount', title: $t('page.admin.library.bookTag.usageCount'), align: 'center', width: 120 },
     {
       key: 'operate', title: $t('common.operate'), align: 'center', width: 180,
-      render: (row: Api.SystemManage.BookTag) => (
+      render: (row: Api.BookManage.BookTag) => (
         <div class="flex-center gap-8px">
           <NButton type="primary" ghost size="small" onClick={() => handleEdit(row)}>{$t('common.edit')}</NButton>
           <NPopconfirm onPositiveClick={() => handleDelete(row.id)}>
@@ -43,10 +43,10 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
 const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(data, 'id', getData);
 
 const operateType = ref<NaiveUI.TableOperateType>('add');
-const editingData: Ref<Api.SystemManage.BookTag | null> = ref(null);
+const editingData: Ref<Api.BookManage.BookTag | null> = ref(null);
 
 function handleAdd() { operateType.value = 'add'; editingData.value = null; openModal(); }
-function handleEdit(item: Api.SystemManage.BookTag) { operateType.value = 'edit'; editingData.value = { ...item }; openModal(); }
+function handleEdit(item: Api.BookManage.BookTag) { operateType.value = 'edit'; editingData.value = { ...item }; openModal(); }
 async function handleDelete(id: number) { const { error } = await fetchDeleteTag(id); if (!error) onDeleted(); }
 async function handleBatchDelete() { onBatchDeleted(); }
 </script>

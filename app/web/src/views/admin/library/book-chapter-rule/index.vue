@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { ref } from "vue"
 import type { Ref } from "vue"
-import { NButton, NPopconfirm, NTag, NSpace, NInput, NSelect } from "naive-ui"
+import { NButton, NPopconfirm, NTag } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
 import {
   fetchGetChapterRuleList,
@@ -17,7 +17,7 @@ defineOptions({ name: "BookChapterRule" });
 const appStore = useAppStore();
 const { bool: visible, setTrue: openModal } = useBoolean();
 
-const searchParams = ref<Api.SystemManage.ChapterRuleSearchParams>({
+const searchParams = ref<Api.BookManage.ChapterRuleSearchParams>({
   current: 1, size: 10, ruleName: null, scopeType: null, bookId: null, status: null,
 });
 
@@ -44,7 +44,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     },
     {
       key: "operate", title: $t("common.operate"), align: "center", width: 180,
-      render: (row: Api.SystemManage.BookChapterRule) => (
+      render: (row: Api.BookManage.BookChapterRule) => (
         <div class="flex-center gap-8px">
           <NButton type="primary" ghost size="small" onClick={() => handleEdit(row)}>{$t("common.edit")}</NButton>
           <NPopconfirm onPositiveClick={() => handleDelete(row.id)}>
@@ -58,10 +58,10 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
 
 const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(data, "id", getData);
 const operateType = ref<NaiveUI.TableOperateType>("add");
-const editingData: Ref<Api.SystemManage.BookChapterRule | null> = ref(null);
+const editingData: Ref<Api.BookManage.BookChapterRule | null> = ref(null);
 
 function handleAdd() { operateType.value = "add"; editingData.value = null; openModal(); }
-function handleEdit(item: Api.SystemManage.BookChapterRule) { operateType.value = "edit"; editingData.value = { ...item }; openModal(); }
+function handleEdit(item: Api.BookManage.BookChapterRule) { operateType.value = "edit"; editingData.value = { ...item }; openModal(); }
 async function handleDelete(id: number) { const { error } = await fetchDeleteChapterRule(id); if (!error) onDeleted(); }
 async function handleBatchDelete() { onBatchDeleted(); }
 </script>

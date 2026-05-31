@@ -1,16 +1,16 @@
 <script setup lang="tsx">
 import { computed, ref, watch } from "vue";
 import {
-  NButton,
-  NForm,
-  NFormItem,
-  NInput,
-  NInputNumber,
-  NModal,
-  NScrollbar,
-  NRadioGroup,
-  NRadio,
-  NSpace,
+    NButton,
+    NForm,
+    NFormItem,
+    NInput,
+    NInputNumber,
+    NModal,
+    NScrollbar,
+    NRadioGroup,
+    NRadio,
+    NSpace,
 } from "naive-ui";
 import { enableStatusOptions } from "@/constants/business";
 import { useFormRules, useNaiveForm } from "@/hooks/common/form";
@@ -23,7 +23,7 @@ export type OperateType = NaiveUI.TableOperateType | "addChild";
 
 interface Props {
   operateType: OperateType;
-  rowData?: Api.SystemManage.BookCategory | null;
+  rowData?: Api.BookManage.BookCategory | null;
 }
 
 const props = defineProps<Props>();
@@ -32,7 +32,7 @@ interface Emits {
 }
 const emit = defineEmits<Emits>();
 const visible = defineModel<boolean>("visible", { default: false });
-const { formRef, validate, restoreValidation } = useNaiveForm();
+const { validate, restoreValidation } = useNaiveForm();
 const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
@@ -51,6 +51,7 @@ type Model = {
   categoryCode: string;
   description: string;
   sortOrder: number;
+  isHot: boolean;
   status: Api.Common.EnableStatus;
 };
 const model = ref<Model>(createDefaultModel());
@@ -62,6 +63,7 @@ function createDefaultModel(): Model {
     categoryCode: "",
     description: "",
     sortOrder: 0,
+    isHot: false,
     status: "1",
   };
 }
@@ -162,6 +164,14 @@ watch(visible, () => {
             v-model:value="model.sortOrder"
             :min="0"
             class="w-full"
+          />
+        </NFormItem>
+        <NFormItem
+          :label="$t('page.admin.library.bookCategory.isHot')"
+          path="isHot"
+        >
+          <NSwitch
+            v-model:value="model.isHot"
           />
         </NFormItem>
         <NFormItem

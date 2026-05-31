@@ -7,7 +7,7 @@ import { fetchCreateTag, fetchUpdateTag } from '@/service/api';
 
 defineOptions({ name: 'TagOperateModal' });
 
-interface Props { operateType: NaiveUI.TableOperateType; rowData?: Api.SystemManage.BookTag | null; }
+interface Props { operateType: NaiveUI.TableOperateType; rowData?: Api.BookManage.BookTag | null; }
 const props = defineProps<Props>();
 interface Emits { (e: 'submitted'): void; }
 const emit = defineEmits<Emits>();

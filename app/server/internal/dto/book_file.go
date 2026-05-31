@@ -11,14 +11,14 @@ type FileUploadRequest struct {
 
 // FileUploadResponse 文件上传响应
 type FileUploadResponse struct {
-	UploadID        uint64  `json:"uploadId"`
-	OriginalName    string  `json:"originalName"`
-	FileSize        uint64  `json:"fileSize"`
-	SourceFormat    *string `json:"sourceFormat,omitempty"`
-	SuggestedTitle  string  `json:"suggestedTitle"`
-	SuggestedAuthor string  `json:"suggestedAuthor"`
-	MatchedBookID   *uint64 `json:"matchedBookId,omitempty"`
-	MatchedBookTitle string `json:"matchedBookTitle,omitempty"`
+	UploadID         uint64  `json:"uploadId"`
+	OriginalName     string  `json:"originalName"`
+	FileSize         uint64  `json:"fileSize"`
+	SourceFormat     *string `json:"sourceFormat,omitempty"`
+	SuggestedTitle   string  `json:"suggestedTitle"`
+	SuggestedAuthor  string  `json:"suggestedAuthor"`
+	MatchedBookID    *uint64 `json:"matchedBookId,omitempty"`
+	MatchedBookTitle string  `json:"matchedBookTitle,omitempty"`
 }
 
 // ConfirmImportRequest 确认入库请求
@@ -44,8 +44,8 @@ type ConfirmImportResponse struct {
 // UploadSearch 上传任务搜索
 type UploadSearch struct {
 	PageRequest
-	OriginalName string `json:"originalName"`
-	ParseStatus  string `json:"parseStatus"`
+	OriginalName string  `json:"originalName"`
+	ParseStatus  string  `json:"parseStatus"`
 	BookID       *uint64 `json:"bookId"`
 }
 
@@ -79,6 +79,11 @@ type ChapterSearch struct {
 	ChapterNo *uint32 `json:"chapterNo"`
 }
 
+// ChapterListRequest 章节列表请求（不分页）
+type ChapterListRequest struct {
+	BookID uint64 `json:"bookId"` // 书籍ID
+}
+
 // ChapterResponse 章节响应
 type ChapterResponse struct {
 	model.BookChapter
@@ -109,10 +114,10 @@ type ChapterRuleRequest struct {
 // ChapterRuleSearch 规则搜索
 type ChapterRuleSearch struct {
 	PageRequest
-	RuleName  string `json:"ruleName"`
-	ScopeType string `json:"scopeType"`
+	RuleName  string  `json:"ruleName"`
+	ScopeType string  `json:"scopeType"`
 	BookID    *uint64 `json:"bookId"`
-	Status    string `json:"status"`
+	Status    string  `json:"status"`
 }
 
 // ChapterRuleResponse 规则响应
@@ -177,8 +182,8 @@ type ScanPathRequest struct {
 
 // ScanPathResponse 扫描路径响应
 type ScanPathResponse struct {
-	Total      int          `json:"total"`
-	Imported   int          `json:"imported"`
-	Failed     int          `json:"failed"`
-	Results    []ScanResult `json:"results"`
+	Total    int          `json:"total"`
+	Imported int          `json:"imported"`
+	Failed   int          `json:"failed"`
+	Results  []ScanResult `json:"results"`
 }

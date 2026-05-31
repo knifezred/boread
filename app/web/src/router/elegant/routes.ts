@@ -195,18 +195,20 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'book-detail',
       i18nKey: 'route.book-detail',
-      hideInMenu: true
+      hideInMenu: true,
+      constant: true
     },
     props: true
   },
   {
     name: 'book-reader',
     path: '/book-reader',
-    component: 'layout.base$view.book-reader',
+    component: 'layout.blank$view.book-reader',
     meta: {
       title: 'book-reader',
       i18nKey: 'route.book-reader',
-      hideInMenu: true
+      hideInMenu: true,
+      constant: true
     }
   },
   {

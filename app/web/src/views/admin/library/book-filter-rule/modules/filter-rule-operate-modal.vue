@@ -9,19 +9,19 @@ defineOptions({ name: "FilterRuleOperateModal" });
 
 interface Props {
   operateType: NaiveUI.TableOperateType;
-  rowData?: Api.SystemManage.BookContentFilterRule | null;
+  rowData?: Api.BookManage.BookContentFilterRule | null;
 }
 const props = defineProps<Props>();
 interface Emits { (e: "submitted"): void }
 const emit = defineEmits<Emits>();
 const visible = defineModel<boolean>("visible", { default: false });
-const { formRef, validate, restoreValidation } = useNaiveForm();
+const { validate, restoreValidation } = useNaiveForm();
 const { defaultRequiredRule } = useFormRules();
 const submitting = ref(false);
 
 const title = computed(() => props.operateType === "add" ? $t("page.admin.library.bookFilterRule.addRule") : $t("page.admin.library.bookFilterRule.editRule"));
 
-const model = ref<Api.SystemManage.FilterRuleRequest>({
+const model = ref<Api.BookManage.FilterRuleRequest>({
   ruleName: "", matchType: "1", pattern: "", action: "1", replacement: "***", applyStage: "1", category: null, severity: "1", description: null, status: "1",
 });
 

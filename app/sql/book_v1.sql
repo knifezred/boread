@@ -43,6 +43,7 @@ CREATE TABLE `book_category` (
   `category_code` VARCHAR(64)     NOT NULL                          COMMENT '分类编码',
   `description`   VARCHAR(255)    NULL     DEFAULT NULL             COMMENT '分类描述',
   `sort_order`    INT             NOT NULL DEFAULT 0                COMMENT '排序',
+  `is_hot`        TINYINT UNSIGNED NOT NULL DEFAULT 0                COMMENT '热门分类',
   `status`        CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-启用, 2-禁用',
   `create_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',

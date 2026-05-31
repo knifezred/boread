@@ -873,6 +873,19 @@ func (s *BookFileService) PageChapter(ctx context.Context, req *dto.ChapterSearc
 	return dto.NewPageResponse(records, total, &req.PageRequest), nil
 }
 
+// ListChapter 不分页章节列表
+func (s *BookFileService) ListChapter(ctx context.Context, req *dto.ChapterListRequest) ([]dto.ChapterResponse, error) {
+	rows, err := s.chapterRepo.ListByBookID(ctx, req.BookID)
+	if err != nil {
+		return nil, err
+	}
+	records := make([]dto.ChapterResponse, len(rows))
+	for i, r := range rows {
+		records[i] = dto.ChapterResponse{BookChapter: r}
+	}
+	return records, nil
+}
+
 // ==================== 辅助函数 ====================
 
 // tryDecodeToUTF8 尝试将 GBK 编码数据转为 UTF-8，检测失败则返回原数据

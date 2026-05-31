@@ -7,6 +7,13 @@ export const enableStatusRecord: Record<Api.Common.EnableStatus, App.I18n.I18nKe
 
 export const enableStatusOptions = transformRecordToOption(enableStatusRecord);
 
+export const yesOrNoRecord: Record<'Y' | 'N', App.I18n.I18nKey> = {
+  Y: 'common.yesOrNo.yes',
+  N: 'common.yesOrNo.no'
+};
+
+export const yesOrNoOptions = transformRecordToOption(yesOrNoRecord);
+
 export const userGenderRecord: Record<Api.SystemManage.UserGender, App.I18n.I18nKey> = {
   '1': 'page.admin.system.user.gender.male',
   '2': 'page.admin.system.user.gender.female'
@@ -38,7 +45,7 @@ export const dataScopeRecord: Record<Api.SystemManage.DataScope, App.I18n.I18nKe
 
 export const dataScopeOptions = transformRecordToOption(dataScopeRecord);
 
-export const bookStatusRecord: Record<Api.SystemManage.BookListingStatus, App.I18n.I18nKey> = {
+export const bookStatusRecord: Record<Api.BookManage.BookListingStatus, App.I18n.I18nKey> = {
   '1': 'page.admin.library.book.statusListed',
   '2': 'page.admin.library.book.statusUnlisted',
   '3': 'page.admin.library.book.statusReviewing',

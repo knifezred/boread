@@ -366,7 +366,7 @@ declare namespace App {
         enable: string;
         disable: string;
         operateSuccess: string;
-        operateFailed: string;
+        operateFail: string;
         createTime: string;
         updateTime: string;
         pleaseCheckValue: string;
@@ -586,7 +586,79 @@ declare namespace App {
           };
           creativity: string;
         };
-
+        book: {
+          filter: {
+            category: string;
+            serialStatus: string;
+            wordCount: string;
+            tags: string;
+            updateTime: string;
+          };
+          home: {
+            all: string;
+            searchPlaceholder: string;
+            importBooks: string;
+            relatedWorks: string;
+            noContent: string;
+            uncategorized: string;
+            noIntro: string;
+            latestChapter: string;
+            oneWeek: string;
+            oneMonth: string;
+            threeMonths: string;
+            oneYear: string;
+            sortPopular: string;
+            sortCollect: string;
+            sortWord: string;
+            sortVote: string;
+            sortMonthly: string;
+          };
+          detail: {
+            breadcrumbHome: string;
+            bookInfo: string;
+            catalog: string;
+            author: string;
+            updateTime: string;
+            latestChapter: string;
+            words: string;
+            chapters: string;
+            rating: string;
+            readNow: string;
+            addToShelf: string;
+            totalChapters: string;
+            ascSort: string;
+            descSort: string;
+            latest: string;
+            noChapters: string;
+            authorOtherWorks: string;
+            similarRecommend: string;
+            more: string;
+            books: string;
+            bookExperience: string;
+          };
+          reader: {
+            prevChapter: string;
+            nextChapter: string;
+            catalog: string;
+            detail: string;
+            addShelf: string;
+            dayMode: string;
+            nightMode: string;
+            phone: string;
+            words: string;
+            type: string;
+            status: string;
+            unknown: string;
+            ongoing: string;
+            finished: string;
+            writtenBy: string;
+            loading: string;
+            noContent: string;
+          };
+          catalog: {
+            title: string;
+          };
+        };
         admin: {
           system: {
             common: {
@@ -801,6 +873,7 @@ declare namespace App {
               parentId: string;
               sortOrder: string;
               categoryStatus: string;
+              isHot: string;
               form: {
                 categoryName: string;
                 categoryCode: string;

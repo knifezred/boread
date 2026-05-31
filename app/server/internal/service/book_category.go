@@ -54,6 +54,9 @@ func (s *BookCategoryService) Create(ctx context.Context, req *dto.CategoryReque
 		SortOrder:    req.SortOrder,
 		Status:       status,
 	}
+	if req.IsHot != nil {
+		m.IsHot = *req.IsHot
+	}
 	m.CreateBy = &userID
 	m.UpdateBy = &userID
 	if err := s.repo.Create(ctx, m); err != nil {
@@ -91,6 +94,9 @@ func (s *BookCategoryService) Update(ctx context.Context, id uint64, req *dto.Ca
 	m.CategoryCode = req.CategoryCode
 	m.Description = req.Description
 	m.SortOrder = req.SortOrder
+	if req.IsHot != nil {
+		m.IsHot = *req.IsHot
+	}
 	if req.Status != "" {
 		m.Status = req.Status
 	}
@@ -140,6 +146,7 @@ func buildCategoryTree(rows []model.BookCategory) []*dto.CategoryNode {
 			CategoryCode: r.CategoryCode,
 			Description:  r.Description,
 			SortOrder:    r.SortOrder,
+			IsHot:        r.IsHot,
 			Status:       r.Status,
 			Children:     []*dto.CategoryNode{},
 		}
@@ -167,7 +174,7 @@ func buildCategoryTree(rows []model.BookCategory) []*dto.CategoryNode {
 // Page 分类分页列表 (树形, 基于顶级分类分页 + 递归加载子级)
 func (s *BookCategoryService) Page(ctx context.Context, req *dto.CategorySearch) (*dto.PageResponse, error) {
 	req.Normalize()
-	topRows, total, err := s.repo.PageTop(ctx, req.CategoryName, req.CategoryCode, string(req.Status), req.Current, req.Size)
+	topRows, total, err := s.repo.PageTop(ctx, req.CategoryName, req.CategoryCode, req.ParentID, req.IsHot, string(req.Status), req.Current, req.Size)
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +191,7 @@ func (s *BookCategoryService) Page(ctx context.Context, req *dto.CategorySearch)
 			CategoryCode: r.CategoryCode,
 			Description:  r.Description,
 			SortOrder:    r.SortOrder,
+			IsHot:        r.IsHot,
 			Status:       r.Status,
 			Children:     []*dto.CategoryNode{},
 		}
@@ -212,6 +220,7 @@ func (s *BookCategoryService) loadChildrenRecursively(ctx context.Context, nodeM
 			CategoryCode: c.CategoryCode,
 			Description:  c.Description,
 			SortOrder:    c.SortOrder,
+			IsHot:        c.IsHot,
 			Status:       c.Status,
 			Children:     []*dto.CategoryNode{},
 		}
@@ -223,4 +232,21 @@ func (s *BookCategoryService) loadChildrenRecursively(ctx context.Context, nodeM
 	if len(childMap) > 0 {
 		s.loadChildrenRecursively(ctx, childMap)
 	}
+}
+
+// GetHotCategories 获取所有已启用的热门分类
+func (s *BookCategoryService) GetHotCategories(ctx context.Context) ([]dto.HotCategoryItem, error) {
+	rows, err := s.repo.ListHot(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]dto.HotCategoryItem, len(rows))
+	for i, r := range rows {
+		items[i] = dto.HotCategoryItem{
+			ID:           r.ID,
+			CategoryName: r.CategoryName,
+			CategoryCode: r.CategoryCode,
+		}
+	}
+	return items, nil
 }

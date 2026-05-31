@@ -15,7 +15,7 @@ const searchParams = ref({ current: 1, size: 10, bookId: props.bookId || null, f
 
 const { columns, data, pagination, loading, getDataByPage } = useNaivePaginatedTable({
   api: () => fetchGetChapterList(searchParams.value),
-  onPaginationParamsChange: (params) => { searchParams.value.current = params.page; searchParams.value.size = params.pageSize; },
+  onPaginationParamsChange: (params) => { searchParams.value.current = params.page || 1; searchParams.value.size = params.pageSize || 10; },
   transform: (response) => defaultTransform(response),
   columns: () => [
     { key: "chapterNo", title: $t("page.admin.library.book.chapterNo"), align: "center", width: 80 },

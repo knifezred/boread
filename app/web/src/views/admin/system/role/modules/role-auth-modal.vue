@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { h, computed, ref, watch } from 'vue'
-import { NDataTable, NCheckbox, NSpace, NButton } from 'naive-ui'
-import { fetchGetMenuTree, fetchGetRoleMenuIds, fetchGetRoleButtonIds, fetchGrantRoleMenus, fetchGrantRoleButtons } from '@/service/api'
-import { $t } from '@/locales'
+import { h, computed, ref, watch } from 'vue';
+import { NDataTable, NCheckbox, NSpace, NButton } from 'naive-ui';
+import { fetchGetMenuTree, fetchGetRoleMenuIds, fetchGetRoleButtonIds, fetchGrantRoleMenus, fetchGrantRoleButtons } from '@/service/api';
+import { $t } from '@/locales';
 
 defineOptions({ name: 'RoleAuthModal' });
 
@@ -177,7 +177,7 @@ async function handleSubmit() {
       fetchGrantRoleButtons(props.roleId, buttonIds),
     ]);
     if (menuRes.error || buttonRes.error) {
-      window.$message?.error?.(menuRes.error?.message || buttonRes.error?.message || $t('common.operateFailed'));
+      window.$message?.error?.(menuRes.error?.message || buttonRes.error?.message || $t('common.operateFail'));
       return;
     }
     window.$message?.success?.($t('common.modifySuccess'));

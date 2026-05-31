@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NTag, NSpace, NSpin, NPagination } from 'naive-ui'
 import BookCard from "@/components/book-card.vue"
 import { fetchGetBook, fetchGetChapterList } from "@/service/api"
+import { $t } from "@/locales"
+import { formatWordCount } from '@/utils/book'
 
 defineOptions({ name: 'BookDetail' })
 
@@ -11,7 +13,7 @@ const route = useRoute()
 const router = useRouter()
 const bookId = route.params.id as string
 
-const bookInfo = ref<Api.SystemManage.Book>({
+const bookInfo = ref<Api.BookManage.Book>({
   id: 0,
   title: '',
   author: '',
@@ -37,8 +39,8 @@ const bookInfo = ref<Api.SystemManage.Book>({
 
 const loading = ref(false)
 
-const relatedBooks = ref<Api.SystemManage.Book[]>([])
-const chapters = ref<Api.SystemManage.BookChapter[]>([])
+const relatedBooks = ref<Api.BookManage.Book[]>([])
+const chapters = ref<Api.BookManage.BookChapter[]>([])
 const chapterTotal = ref(0)
 const chapterPage = ref(1)
 const chapterSize = ref(100)
@@ -66,8 +68,8 @@ function scrollToSection(id: string) {
   }
 }
 
-function goToReader() {
-  router.push({ name: 'book-reader', query: { id: bookInfo.value.id } })
+function goToReader(chapterNo = 1) {
+  router.push({ name: 'book-reader', query: { id: bookInfo.value.id, chapterNo: String(chapterNo) } })
 }
 
 async function loadChapters(page = 1) {
@@ -120,7 +122,6 @@ onMounted(async () => {
     loading.value = false
   }
 
-  // 等待 DOM 渲染完成后初始化 IntersectionObserver
   await nextTick()
   const sections = ['section-info', 'section-catalog']
   const els = sections.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[]
@@ -147,11 +148,9 @@ onBeforeUnmount(() => {
 <template>
   <div class="min-h-screen bg-gray-100 px-10 py-5 font-sans">
     <div class="flex items-center gap-2 text-sm text-gray-400 mb-5">
-      <span>首页</span>
+      <span>{{ $t("page.book.detail.breadcrumbHome") }}</span>
       <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
-      <span>仙侠频道</span>
-      <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
-      <span>修真文明</span>
+      <span>{{ bookInfo.categoryName || $t("page.book.home.uncategorized") }}</span>
       <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
       <span class="text-gray-700">{{ bookInfo.title }}</span>
     </div>
@@ -162,15 +161,17 @@ onBeforeUnmount(() => {
           class="px-4 py-3 text-[15px] cursor-pointer rd-1 relative transition-all duration-200 hover:bg-white"
           :class="activeSection === 'section-info' ? 'bg-white text-primary font-medium' : 'text-gray-500 hover:text-gray-700'"
           @click="scrollToSection('section-info')">
-          <span class="absolute left-0 top-0 bottom-0 w-[3px] rd-0 rd-r-2px" :class="activeSection === 'section-info' ? 'bg-primary' : 'bg-transparent'"></span>
-          作品信息
+          <span class="absolute left-0 top-0 bottom-0 w-[3px] rd-0 rd-r-2px"
+            :class="activeSection === 'section-info' ? 'bg-primary' : 'bg-transparent'"></span>
+          {{ $t("page.book.detail.bookInfo") }}
         </div>
         <div
           class="px-4 py-3 text-[15px] cursor-pointer rd-1 relative transition-all duration-200 hover:bg-white"
           :class="activeSection === 'section-catalog' ? 'bg-white text-primary font-medium' : 'text-gray-500 hover:text-gray-700'"
           @click="scrollToSection('section-catalog')">
-          <span class="absolute left-0 top-0 bottom-0 w-[3px] rd-0 rd-r-2px" :class="activeSection === 'section-catalog' ? 'bg-primary' : 'bg-transparent'"></span>
-          目录
+          <span class="absolute left-0 top-0 bottom-0 w-[3px] rd-0 rd-r-2px"
+            :class="activeSection === 'section-catalog' ? 'bg-primary' : 'bg-transparent'"></span>
+          {{ $t("page.book.detail.catalog") }}
         </div>
       </aside>
 
@@ -190,40 +191,41 @@ onBeforeUnmount(() => {
               <div class="flex-1" v-if="bookInfo">
                 <h1 class="text-4xl font-bold mb-4 text-gray-900">{{ bookInfo.title }}</h1>
                 <div class="flex gap-6 text-sm text-gray-500 mb-3">
-                  <span>作者: {{ bookInfo.author }}</span>
-                  <span>更新时间: {{ bookInfo.updateTime }}</span>
+                  <span>{{ $t("page.book.detail.author") }}: {{ bookInfo.author }}</span>
+                  <span>{{ $t("page.book.detail.updateTime") }}: {{ bookInfo.updateTime }}</span>
                 </div>
                 <div class="text-sm text-gray-500 mb-3">
-                  <span>最新章节: </span>
-                  <span class="text-primary no-underline">{{ latestChapter || '加载中...' }}</span>
+                  <span>{{ $t("page.book.detail.latestChapter") }}: </span>
+                  <span class="text-primary no-underline">{{ latestChapter || $t("page.book.reader.loading") }}</span>
                 </div>
                 <div class="flex gap-2 mb-4" v-if="bookInfo.tags?.length">
                   <NTag v-for="tag in bookInfo.tags" :key="tag.id" size="small" round type="info" ghost>
                     {{ tag.tagName }}
                   </NTag>
                 </div>
-                <p class="text-sm text-gray-600 leading-relaxed mb-5">{{ bookInfo.intro ? bookInfo.intro.slice(0, 60) + '...' : '' }}</p>
+                <p class="text-sm text-gray-600 leading-relaxed mb-5">{{ bookInfo.intro ? bookInfo.intro.slice(0, 60) +
+                  '...' : '' }}</p>
                 <div class="flex gap-8 mb-6">
                   <div class="text-center">
-                    <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.totalWords }}</span>
-                    <span class="text-xs text-gray-400">字</span>
+                    <span class="block text-xl font-semibold text-gray-900">{{ formatWordCount(bookInfo.totalWords) }}</span>
+                    <span class="text-xs text-gray-400">{{ $t("page.book.detail.words") }}</span>
                   </div>
                   <div class="text-center">
                     <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.totalChapters }}</span>
-                    <span class="text-xs text-gray-400">章节</span>
+                    <span class="text-xs text-gray-400">{{ $t("page.book.detail.chapters") }}</span>
                   </div>
                   <div class="text-center">
                     <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.avgRating }}</span>
-                    <span class="text-xs text-gray-400">评分</span>
+                    <span class="text-xs text-gray-400">{{ $t("page.book.detail.rating") }}</span>
                   </div>
                 </div>
                 <div class="flex items-center">
                   <NSpace size="medium">
-                    <NButton size="large" ghost type="primary" @click="goToReader">
-                      免费试读
+                    <NButton size="large" ghost type="primary" @click="goToReader(1)">
+                      {{ $t("page.book.detail.readNow") }}
                     </NButton>
                     <NButton size="large" ghost type="primary">
-                      加入书架
+                      {{ $t("page.book.detail.addToShelf") }}
                     </NButton>
                   </NSpace>
                 </div>
@@ -236,20 +238,22 @@ onBeforeUnmount(() => {
           <NCard class="rd-12px shadow-sm" :bordered="false" size="huge">
             <template #header>
               <div class="flex items-center gap-3 w-full">
-                <span class="text-xl font-semibold text-gray-900">目录</span>
-                <span class="text-sm text-gray-400 font-normal">共 {{ chapterTotal }} 章</span>
+                <span class="text-xl font-semibold text-gray-900">{{ $t("page.book.detail.catalog") }}</span>
+                <span class="text-sm text-gray-400 font-normal">{{ $t("page.book.detail.totalChapters", { total: chapterTotal }) }}</span>
                 <div
                   class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer px-2 py-1 rd-1 transition-all duration-200 ml-auto hover:bg-gray-100 hover:text-gray-700"
                   @click="toggleSort">
                   <SvgIcon :icon="sortAsc ? 'solar:sort-from-top-linear' : 'solar:sort-from-bottom-linear'" size="16" />
-                  <span>{{ sortAsc ? '正序' : '倒序' }}</span>
+                  <span>{{ sortAsc ? $t("page.book.detail.ascSort") : $t("page.book.detail.descSort") }}</span>
                 </div>
               </div>
             </template>
 
             <div class="flex items-center gap-3 px-5 py-4 bg-amber-50 rd-2 mb-5" v-if="latestChapter">
-              <span class="text-amber-600 font-medium">最新</span>
-              <span class="font-medium text-gray-900 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{ latestChapter }}</span>
+              <span class="text-amber-600 font-medium">{{ $t("page.book.detail.latest") }}</span>
+              <span class="font-medium text-gray-900 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{
+                latestChapter
+              }}</span>
             </div>
 
             <NSpin :show="chapterLoading">
@@ -265,7 +269,7 @@ onBeforeUnmount(() => {
             </NSpin>
 
             <div v-if="!chapters.length && !chapterLoading" class="py-10 text-center text-sm text-gray-400">
-              暂无章节信息
+              {{ $t("page.book.detail.noChapters") }}
             </div>
 
             <div class="flex justify-center mt-8" v-if="chapterTotal > chapterSize">
@@ -283,21 +287,8 @@ onBeforeUnmount(() => {
         <NCard class="rd-12px shadow-sm" :bordered="false" size="small">
           <template #header>
             <div class="flex justify-between items-center w-full">
-              <span>作品阅历</span>
-              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">更多</a>
-            </div>
-          </template>
-          <div class="flex flex-col gap-1 py-3 border-b border-gray-100 last:border-b-0">
-            <span class="text-xs text-gray-400">2026-05-27</span>
-            <span class="text-sm text-gray-700">累积获得五千个收藏</span>
-          </div>
-        </NCard>
-
-        <NCard class="rd-12px shadow-sm" :bordered="false" size="small">
-          <template #header>
-            <div class="flex justify-between items-center w-full">
-              <span>相似小说推荐</span>
-              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">更多</a>
+              <span>{{ $t("page.book.detail.authorOtherWorks") }}</span>
+              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ relatedBooks.length }} {{ $t("page.book.detail.books") }}</a>
             </div>
           </template>
           <div class="flex flex-col gap-4">
@@ -307,7 +298,28 @@ onBeforeUnmount(() => {
               </div>
               <div class="flex-1 overflow-hidden">
                 <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
-                <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}</div>
+                <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </NCard>
+        <NCard class="rd-12px shadow-sm" :bordered="false" size="small">
+          <template #header>
+            <div class="flex justify-between items-center w-full">
+              <span>{{ $t("page.book.detail.similarRecommend") }}</span>
+              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more") }}</a>
+            </div>
+          </template>
+          <div class="flex flex-col gap-4">
+            <div v-for="book in relatedBooks" :key="book.id" class="flex gap-3">
+              <div class="shrink-0 w-50px">
+                <BookCard :book="book" class="small-book-card" />
+              </div>
+              <div class="flex-1 overflow-hidden">
+                <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
+                <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                </div>
               </div>
             </div>
           </div>

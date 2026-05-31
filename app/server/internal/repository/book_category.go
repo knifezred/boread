@@ -82,14 +82,17 @@ func (r *BookCategoryRepository) HasChildren(ctx context.Context, id uint64) (bo
 	return n > 0, err
 }
 
-func (r *BookCategoryRepository) PageTop(ctx context.Context, name, code, status string, current, size int) ([]model.BookCategory, int64, error) {
+func (r *BookCategoryRepository) PageTop(ctx context.Context, name string, code string, parentID uint64, isHot *bool, status string, current, size int) ([]model.BookCategory, int64, error) {
 	var rows []model.BookCategory
-	tx := r.db.WithContext(ctx).Model(&model.BookCategory{}).Where("parent_id = 0")
+	tx := r.db.WithContext(ctx).Model(&model.BookCategory{}).Where("parent_id = ?", parentID)
 	if name != "" {
 		tx = tx.Where("category_name LIKE ?", "%"+name+"%")
 	}
 	if code != "" {
 		tx = tx.Where("category_code LIKE ?", "%"+code+"%")
+	}
+	if isHot != nil {
+		tx = tx.Where("is_hot = ?", *isHot)
 	}
 	if status != "" {
 		tx = tx.Where("status = ?", status)
@@ -110,6 +113,19 @@ func (r *BookCategoryRepository) ListByIDs(ctx context.Context, ids []uint64) ([
 	}
 	var rows []model.BookCategory
 	if err := r.db.WithContext(ctx).Model(&model.BookCategory{}).Where("parent_id IN ?", ids).Order("sort_order ASC").Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+// ListHot 查询所有已启用的热门分类，按 sort_order 排序
+func (r *BookCategoryRepository) ListHot(ctx context.Context) ([]model.BookCategory, error) {
+	var rows []model.BookCategory
+	if err := r.db.WithContext(ctx).Model(&model.BookCategory{}).
+		Where("is_hot = ?", true).
+		Where("status = ?", model.StatusEnabled).
+		Order("sort_order ASC").
+		Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	return rows, nil

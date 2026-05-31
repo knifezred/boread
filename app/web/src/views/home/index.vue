@@ -1,61 +1,148 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { NButton, NGrid, NGi, NModal, NSpace, NInput, NScrollbar, NEmpty, NSpin, NPagination } from "naive-ui"
-import { fetchGetBookList, fetchGetChapterList, fetchGetChapterContent } from "@/service/api"
-import BookCard from "@/components/book-card.vue"
+import { NButton, NInput, NScrollbar, NSpin, NPagination } from "naive-ui"
+import { fetchGetBookList, fetchGetHotCategoryList, fetchGetTagList } from "@/service/api"
 import { useRouter } from "vue-router"
-defineOptions({ name: "HomePage" });
+import { useDictItems } from "@/hooks/business/dict"
+import { formatWordCount } from "@/utils/book"
+import { $t } from "@/locales"
+
+defineOptions({ name: "HomePage" })
 
 const router = useRouter()
+
+const { options: serialStatusOptions, labelMap: serialStatusLabelMap } = useDictItems("book_serial_status")
+const { options: wordCountOptions } = useDictItems("book_total_words")
+
+/** 从分类树中提取的筛选选项 */
+const categoryOptions = ref<{ label: string; value: string }[]>([])
+
+/** 加载热门分类列表，不需要子父关系 */
+async function loadCategoryOptions() {
+  const { data } = await fetchGetHotCategoryList()
+  if (!data) return
+  categoryOptions.value = [
+    { label: $t("page.book.home.all"), value: "" },
+    ...data.map(n => ({ label: n.categoryName, value: String(n.id) }))
+  ]
+}
+
+/** 标签列表选项 */
+const tagOptions = ref<{ label: string; value: string }[]>([])
+
+async function loadTagOptions() {
+  const { data } = await fetchGetTagList({
+    size: 15,
+    current: 1
+  })
+  if (!data) return
+  tagOptions.value = [
+    { label: $t("page.book.home.all"), value: "" },
+    ...data.records.map(n => ({ label: n.tagName, value: String(n.id) }))
+  ]
+}
+
+/** 搜索关键词 */
 const searchKeyword = ref("")
-const activeMenu = ref("library") // library-书库 folder-文件夹 shelf-我的书架 share-共享书架 random-随机推荐
-const books = ref<Api.SystemManage.Book[]>([])
+/** 书籍列表 */
+const books = ref<Api.BookManage.Book[]>([])
+/** 加载状态 */
 const loading = ref(false)
+/** 总数 */
 const total = ref(0)
+/** 当前页 */
 const current = ref(1)
+/** 每页条数 */
 const size = ref(20)
 
-// 导航菜单配置
-const menuItems = [
-  { key: 'library', label: '书库', icon: 'solar:notebook-square-linear' },
-  { key: 'folder', label: '文件夹', icon: 'solar:folder-linear' },
-  { key: 'shelf', label: '我的书架', icon: 'solar:book-linear' },
-  { key: 'share', label: '共享书架', icon: 'solar:cash-out-linear' },
-  { key: 'random', label: '随机推荐', icon: 'solar:atom-linear' },
-]
+/**
+ * 筛选配置（对齐后端 BookSearch 字段）
+ */
+const filterConfig = computed(() => ({
+  categories: categoryOptions.value.length > 1 ? categoryOptions.value : [
+    { label: $t("page.book.home.all"), value: "" }
+  ],
+  serialStatus: [
+    { label: $t("page.book.home.all"), value: "" },
+    ...serialStatusOptions.value.map(opt => ({ label: opt.label as string, value: opt.value as string }))
+  ],
+  wordCount: [
+    { label: $t("page.book.home.all"), value: "" },
+    ...wordCountOptions.value.map(opt => ({ label: opt.label as string, value: opt.value as string }))
+  ],
+  tags: tagOptions.value.length > 1 ? tagOptions.value : [
+    { label: $t("page.book.home.all"), value: "" }
+  ],
+  updateTime: [
+    { label: $t("page.book.home.all"), value: "" },
+    { label: $t("page.book.home.oneWeek"), value: "7d" },
+    { label: $t("page.book.home.oneMonth"), value: "30d" },
+    { label: $t("page.book.home.threeMonths"), value: "90d" },
+    { label: $t("page.book.home.oneYear"), value: "1y" }
+  ],
+  sortOptions: [
+    { label: $t("page.book.home.sortPopular"), value: "popular" },
+    { label: $t("page.book.home.sortCollect"), value: "collect" },
+    { label: $t("page.book.home.sortWord"), value: "word" },
+    { label: $t("page.book.home.sortVote"), value: "vote" },
+    { label: $t("page.book.home.sortMonthly"), value: "monthly" }
+  ]
+}))
 
-// 响应式列数
-const responsiveCols = computed(() => {
-  const w = window.innerWidth
-  if (w < 640) return 2
-  if (w < 960) return 3
-  if (w < 1200) return 4
-  if (w < 1600) return 5
-  return 6
+/** 筛选条件 */
+const filters = ref<Api.BookManage.BookFilterParams>({
+  categoryId: 0,
+  serialStatus: "",
+  wordCount: "",
+  tagId: "",
+  updateTime: "",
+  title: "",
+  sortBy: "",
+  sortOrder: ""
 })
 
-// 章节弹窗
-const chapterModalVisible = ref(false)
-const chapterBook = ref<Api.SystemManage.Book | null>(null)
-const chapters = ref<any[]>([])
-const chapterLoading = ref(false)
-const chapterTotal = ref(0)
-const chapterPage = ref(1)
-
-// 阅读弹窗
-const readerVisible = ref(false)
-const readerTitle = ref("")
-const readerContent = ref("")
-const readerLoading = ref(false)
-
-onMounted(() => {
+onMounted(async () => {
+  await Promise.all([loadCategoryOptions(), loadTagOptions()])
   loadBooks()
 })
 
+/** 解析字数范围，支持 "10-20" 区间或 "500+" 开头区间 */
+function parseWordCountRange(wordCount: string) {
+  if (!wordCount) return { minWords: null, maxWords: null }
+  if (wordCount.endsWith("+")) {
+    return { minWords: Number(wordCount.slice(0, -1)), maxWords: null }
+  }
+  const [min, max] = wordCount.split("-")
+  return { minWords: Number(min), maxWords: Number(max) }
+}
+
+/** 解析更新时间范围 */
+function parseUpdateTimeRange(updateTime: string) {
+  if (!updateTime) return { updateTimeFrom: null, updateTimeTo: null }
+  const [from, to] = updateTime.split("-")
+  return { updateTimeFrom: Number(from), updateTimeTo: Number(to) }
+}
+
+/**
+ * 加载书籍列表
+ * @param page 页码
+ */
 async function loadBooks(page = 1) {
   loading.value = true
   current.value = page
-  const params: any = { current: page, size: size.value }
+  const { minWords, maxWords } = parseWordCountRange(filters.value.wordCount)
+  const { updateTimeFrom, updateTimeTo } = parseUpdateTimeRange(filters.value.updateTime)
+  const params: Record<string, unknown> = {
+    current: page,
+    size: size.value,
+    categoryId: filters.value.categoryId || null,
+    serialStatus: filters.value.serialStatus || null,
+    tagId: filters.value.tagId || null,
+    minWords,
+    maxWords,
+    updateTimeFrom,
+    updateTimeTo
+  }
   if (searchKeyword.value.trim()) {
     params.title = searchKeyword.value.trim()
   }
@@ -67,369 +154,162 @@ async function loadBooks(page = 1) {
   loading.value = false
 }
 
+/** 搜索 */
 function handleSearch() {
   loadBooks(1)
 }
 
-function switchMenu(key: string) {
-  activeMenu.value = key
-  // 不同菜单可以加载不同数据，暂时统一加载书库
+/** 筛选条件变更 */
+function handleFilterChange() {
   loadBooks(1)
 }
 
-function showChapters(book: Api.SystemManage.Book) {
+/** 排序切换 */
+function handleSortChange(_value: string) {
+  loadBooks(1)
+}
+
+/**
+ * 点击书籍卡片，跳转到详情页
+ * @param book 书籍
+ */
+function showChapters(book: Api.BookManage.Book) {
   router.push(`/book-detail/${book.id}`)
 }
-
-async function loadChapters() {
-  if (!chapterBook.value) return
-  chapterLoading.value = true
-  const { data } = await fetchGetChapterList({ bookId: chapterBook.value.id, current: chapterPage.value, size: 50 })
-  if (data) {
-    chapters.value = data.records || []
-    chapterTotal.value = data.total || 0
-  }
-  chapterLoading.value = false
-}
-
-async function readChapter(chapter: any) {
-  if (!chapterBook.value) return
-  readerLoading.value = true
-  readerVisible.value = true
-  readerTitle.value = `${chapterBook.value.title} - ${chapter.title}`
-  const { data } = await fetchGetChapterContent(chapterBook.value.id, chapter.chapterNo)
-  if (data) {
-    readerContent.value = data.content || "（内容为空）"
-  } else {
-    readerContent.value = "（加载失败）"
-  }
-  readerLoading.value = false
-}
-
-
 </script>
 
 <template>
-  <div class="gallery-layout">
-    <!-- 左侧边栏导航 -->
-    <aside class="left-sidebar">
-      <div class="sidebar-menu">
-        <div v-for="item in menuItems" :key="item.key" class="menu-item"
-          :class="{ active: activeMenu === item.key }" @click="switchMenu(item.key)">
-          <SvgIcon class="menu-icon" :icon="item.icon" />
-          <span class="menu-label">{{ item.label }}</span>
-        </div>
+  <div class="flex gap-4 overflow-hidden lt-sm:flex-col h-full bg-layout">
+    <!-- ============ 左侧筛选栏 ============ -->
+    <aside class="w-240px shrink-0 lt-sm:w-full lt-sm:max-h-60 lt-sm:overflow-y-auto">
+      <div class="card-wrapper p-4 bg-container h-full lt-sm:h-auto">
+        <NScrollbar class="h-full">
+          <BookFilter
+            :config="{
+              categories: filterConfig.categories,
+              serialStatus: filterConfig.serialStatus,
+              wordCount: filterConfig.wordCount,
+              tags: filterConfig.tags,
+              updateTime: filterConfig.updateTime
+            }"
+            :model-value="filters"
+            @change="handleFilterChange"
+            @update:model-value="filters = $event" />
+        </NScrollbar>
       </div>
     </aside>
 
-    <!-- 右侧主内容 -->
-    <div class="main-container">
-      <!-- 顶部导航栏 -->
-      <header class="top-header">
-        <div class="header-content">
-          <div class="search-area">
-            <NInput v-model:value="searchKeyword" placeholder="搜索书名、作者" clearable round
-              @keyup.enter="handleSearch" class="search-input" />
+    <!-- ============ 右侧主内容 ============ -->
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+      <!-- 顶部搜索栏 -->
+      <div class="card-wrapper p-4 bg-container mb-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="w-280px lt-sm:w-full">
+            <NInput
+              v-model:value="searchKeyword"
+              :placeholder="$t('page.book.home.searchPlaceholder')"
+              clearable
+              round
+              @keyup.enter="handleSearch" />
           </div>
-          <div class="header-actions">
-            <NButton type="primary" ghost size="medium">
-              <!-- <template #icon><NIcon :component="BookOutline" /></template> -->
-              导入书籍
-            </NButton>
-          </div>
+          <NButton type="primary" round @click="handleSearch">{{ $t("common.search") }}</NButton>
+          <NButton round @click="router.push('/book-reader')">{{ $t("page.book.home.importBooks") }}</NButton>
         </div>
-      </header>
+      </div>
+
+      <!-- 排序栏 -->
+      <div class="card-wrapper px-4 py-3 bg-container mb-4 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-6">
+          <span
+            v-for="item in filterConfig.sortOptions"
+            :key="item.value"
+            class="text-14px cursor-pointer transition-colors duration-200 select-none"
+            :class="filters.sortBy === item.value
+                ? 'text-primary font-600'
+                : 'text-gray-400 hover:text-primary'
+              "
+            @click="handleSortChange(item.value)">
+            {{ item.label }}
+          </span>
+        </div>
+        <div class="text-13px text-gray-400">
+          {{ $t("page.book.home.relatedWorks", { total }) }}
+        </div>
+      </div>
 
       <!-- 内容区域 -->
-      <main class="content-area">
+      <div class="flex-1 overflow-y-auto">
         <NSpin :show="loading">
-          <div v-if="books.length === 0 && !loading" class="empty-container">
-            <div class="empty-icon">
+          <!-- 空状态 -->
+          <div v-if="books.length === 0 && !loading" class="flex flex-col items-center justify-center py-30">
+            <div class="mb-5 opacity-60">
               <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M60 10C45 10 35 20 35 35C35 50 45 60 60 60C75 60 85 50 85 35C85 20 75 10 60 10Z" fill="#E6F4FF"/>
-                <path d="M55 30C55 27.2386 57.2386 25 60 25C62.7614 25 65 27.2386 65 30C65 32.7614 62.7614 35 60 35C57.2386 35 55 32.7614 55 30Z" fill="#B3D8FF"/>
-                <path d="M40 65C40 59.4772 44.4772 55 50 55H70C75.5228 55 80 59.4772 80 65V85C80 87.7614 77.7614 90 75 90H45C42.2386 90 40 87.7614 40 85V65Z" fill="#8EC2FF"/>
-                <path d="M45 75H75C76.6569 75 78 76.3431 78 78C78 79.6569 76.6569 81 75 81H45C43.3431 81 42 79.6569 42 78C42 76.3431 43.3431 75 45 75Z" fill="#E6F4FF"/>
+                <path d="M60 10C45 10 35 20 35 35C35 50 45 60 60 60C75 60 85 50 85 35C85 20 75 10 60 10Z"
+                  fill="#E6F4FF" />
+                <path
+                  d="M55 30C55 27.2386 57.2386 25 60 25C62.7614 25 65 27.2386 65 30C65 32.7614 62.7614 35 60 35C57.2386 35 55 32.7614 55 30Z"
+                  fill="#B3D8FF" />
+                <path
+                  d="M40 65C40 59.4772 44.4772 55 50 55H70C75.5228 55 80 59.4772 80 65V85C80 87.7614 77.7614 90 75 90H45C42.2386 90 40 87.7614 40 85V65Z"
+                  fill="#8EC2FF" />
+                <path
+                  d="M45 75H75C76.6569 75 78 76.3431 78 78C78 79.6569 76.6569 81 75 81H45C43.3431 81 42 79.6569 42 78C42 76.3431 43.3431 75 45 75Z"
+                  fill="#E6F4FF" />
               </svg>
             </div>
-            <p class="empty-text">暂无内容</p>
+            <p class="text-16px text-gray-400">{{ $t("page.book.home.noContent") }}</p>
           </div>
-          <div v-else class="book-grid-container">
-            <NGrid :x-gap="24" :y-gap="32" :cols="responsiveCols" class="book-grid">
-              <NGi v-for="book in books" :key="book.id">
+
+          <!-- 书籍网格 -->
+          <div v-else class="grid grid-cols-3 gap-6 lt-sm:grid-cols-1">
+            <div
+              v-for="book in books"
+              :key="book.id"
+              class="flex gap-4 p-4 bg-container rd-2 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-1"
+              @click="showChapters(book)">
+              <!-- 封面 -->
+              <div class="w-100px shrink-0">
                 <BookCard
-                  :book="{
-                    ...book,
-                    status: book.serialStatus === '2' ? 'finished' : 'serial'
-                  }"
-                  :show-status-tag="true"
-                  @click="showChapters(book)"
-                />
-              </NGi>
-            </NGrid>
+                  :book="book" />
+              </div>
+
+              <!-- 书籍信息 -->
+              <div class="flex-1 flex flex-col gap-2 min-w-12">
+                <h3 class="text-lg m-0 truncate">
+                  {{ book.title }}
+                </h3>
+                <div class="flex items-center gap-2 text-gray-400 text-xs">
+                  <span>{{ book.author }}</span>
+                  <span class="mx-1">|</span>
+                  <span>{{ book.categoryName || $t("page.book.home.uncategorized") }}</span>
+                  <span class="text-gray-400 mx-1">|</span>
+                  <span>{{ serialStatusLabelMap[book.serialStatus] }}</span>
+                </div>
+                <p class="flex-1 text-sm text-gray-500 m-0 leading-6 line-clamp-3 whitespace-pre-line">
+                  {{ book.intro || $t("page.book.home.noIntro") }}
+                </p>
+                <div class="flex items-center gap-2 justify-left text-xs text-gray-400">
+                  <span>{{ formatWordCount(book.totalWords) }}</span>
+                  <span class="text-gray-400 mx-1">|</span>
+                  <span>{{ $t("page.book.home.latestChapter") }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </NSpin>
 
         <!-- 分页 -->
-        <div v-if="books.length > 0" class="pagination-bar">
-          <NPagination :page="current" :page-size="size" :item-count="total" :page-sizes="[12, 24, 48, 60]"
-            show-size-picker @update:page="loadBooks" @update:page-size="(s) => { size = s; loadBooks(1) }" />
+        <div v-if="books.length > 0" class="flex justify-center mt-12 pb-4">
+          <NPagination
+            :page="current"
+            :page-size="size"
+            :item-count="total"
+            :page-sizes="[12, 24, 48, 60]"
+            show-size-picker
+            @update:page="loadBooks"
+            @update:page-size="(s) => { size = s; loadBooks(1) }" />
         </div>
-      </main>
+      </div>
     </div>
-
-    <!-- 章节列表弹窗 -->
-    <NModal v-model:show="chapterModalVisible" :title="chapterBook?.title || ''" preset="card" class="w-600px"
-      @update:show="(val) => { if (val && chapterBook) loadChapters() }">
-      <NScrollbar class="max-h-400px">
-        <div v-if="chapterLoading" class="flex-center py-24px">
-          <NSpin />
-        </div>
-        <div v-else>
-          <div v-for="(ch, idx) in chapters" :key="ch.id || idx" class="chapter-item" @click="readChapter(ch)">
-            <span class="chapter-no">第 {{ ch.chapterNo }} 章</span>
-            <span class="chapter-title">{{ ch.title }}</span>
-            <span class="chapter-words">
-              {{ ch.wordCount ? (ch.wordCount > 1000 ? (ch.wordCount / 1000).toFixed(1) + 'k' : ch.wordCount) + '字' : '' }}
-            </span>
-          </div>
-          <div v-if="chapters.length === 0" class="flex-center py-24px">
-            <NEmpty description="暂无章节" />
-          </div>
-        </div>
-      </NScrollbar>
-      <template #footer>
-        <NSpace justify="end">
-          <NButton @click="chapterModalVisible = false">关闭</NButton>
-        </NSpace>
-      </template>
-    </NModal>
-
-    <!-- 阅读器弹窗 -->
-    <NModal v-model:show="readerVisible" :title="readerTitle" preset="card" class="w-800px" :style="{ maxHeight: '80vh' }"
-      :loading="readerLoading">
-      <NScrollbar class="reader-content">
-        <div class="reader-text">{{ readerContent }}</div>
-      </NScrollbar>
-      <template #footer>
-        <NSpace justify="end">
-          <NButton @click="readerVisible = false">关闭</NButton>
-        </NSpace>
-      </template>
-    </NModal>
   </div>
 </template>
-
-<style scoped>
-.gallery-layout {
-  display: flex;
-  height: 100vh;
-  background-color: #fff;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  overflow: hidden;
-}
-
-/* 左侧边栏 */
-.left-sidebar {
-  width: 200px;
-  flex-shrink: 0;
-  background-color: #f8f9fa;
-  padding: 20px 0;
-  border-right: 1px solid #f0f0f0;
-}
-
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #666;
-  font-size: 15px;
-}
-
-.menu-item:hover {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.menu-item.active {
-  background-color: #e6f4ff;
-  color: #2f96f3;
-  font-weight: 500;
-}
-
-.menu-icon {
-  font-size: 20px;
-}
-
-/* 右侧主容器 */
-.main-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* 顶部导航 */
-.top-header {
-  height: 64px;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-}
-
-.header-content {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.search-area {
-  width: 40%;
-  max-width: 400px;
-}
-
-.search-input {
-  width: 100%;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
-/* 内容区域 */
-.content-area {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-}
-
-/* 空状态 */
-.empty-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120px 0;
-}
-
-.empty-icon {
-  margin-bottom: 20px;
-  opacity: 0.6;
-}
-
-.empty-text {
-  font-size: 16px;
-  color: #999;
-}
-
-/* 书籍网格 */
-.book-grid-container {
-  width: 100%;
-}
-
-.book-grid {
-  width: 100%;
-}
-
-/* 分页 */
-.pagination-bar {
-  display: flex;
-  justify-content: center;
-  margin-top: 48px;
-}
-
-/* 章节列表 */
-.chapter-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background-color 0.15s;
-  gap: 12px;
-}
-
-.chapter-item:hover {
-  background-color: #f5f5f5;
-}
-
-.chapter-no {
-  font-size: 13px;
-  color: #999;
-  min-width: 72px;
-}
-
-.chapter-title {
-  flex: 1;
-  font-size: 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chapter-words {
-  font-size: 12px;
-  color: #bbb;
-}
-
-/* 阅读器 */
-.reader-content {
-  max-height: 60vh;
-  padding: 0 16px;
-}
-
-.reader-text {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #333;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-/* 响应式适配 */
-@media (max-width: 960px) {
-  .left-sidebar {
-    width: 60px;
-  }
-  .menu-label {
-    display: none;
-  }
-  .header-content {
-    flex-direction: column;
-    gap: 12px;
-    padding: 12px 0;
-  }
-  .search-area {
-    width: 100%;
-    max-width: 100%;
-  }
-  .top-header {
-    height: auto;
-  }
-  .content-area {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 640px) {
-  .left-sidebar {
-    display: none;
-  }
-  .reader-content {
-    max-height: 50vh;
-  }
-}
-</style>

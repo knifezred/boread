@@ -1,9 +1,9 @@
 <script setup lang="tsx">
 import { ref } from "vue"
 import type { Ref } from "vue"
-import { NButton, NPopconfirm, NTag } from "naive-ui"
+import { NButton, NPopconfirm, NTag, NSpace, NSelect, NInput } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
-import { enableStatusRecord } from "@/constants/business"
+import { enableStatusOptions, enableStatusRecord } from "@/constants/business"
 import { fetchGetCategoryList, fetchDeleteCategory } from "@/service/api"
 import { useAppStore } from "@/store/modules/app"
 import {
@@ -20,11 +20,15 @@ const appStore = useAppStore();
 
 const { bool: visible, setTrue: openModal } = useBoolean();
 
-const searchParams = ref<Api.SystemManage.CategorySearchParams>({
+/** isHot 筛选值: "true"/"false"/null，传给后端时转为 boolean */
+const isHotValue = ref<string | null>(null)
+
+const searchParams = ref<Api.BookManage.CategorySearchParams>({
   current: 1,
   size: 10,
   categoryName: null,
   categoryCode: null,
+  isHot: null,
   status: null,
 });
 
@@ -37,7 +41,15 @@ const {
   getData,
   getDataByPage,
 } = useNaivePaginatedTable({
-  api: () => fetchGetCategoryList(searchParams.value),
+  api: () => {
+    const params = { ...searchParams.value };
+    if (isHotValue.value !== null) {
+      params.isHot = isHotValue.value === "true";
+    } else {
+      params.isHot = null;
+    }
+    return fetchGetCategoryList(params);
+  },
   onPaginationParamsChange: (params) => {
     searchParams.value.current = params.page;
     searchParams.value.size = params.pageSize;
@@ -75,11 +87,23 @@ const {
       width: 80,
     },
     {
+      key: "isHot",
+      title: $t("page.admin.library.bookCategory.isHot"),
+      align: "center",
+      width: 100,
+      render: (row: Api.BookManage.BookCategory) => {
+        if (row.isHot) {
+          return <NTag type="error" bordered={false}>{$t('common.yesOrNo.yes')}</NTag>;
+        }
+        return <NTag type="default" bordered={false}>{$t('common.yesOrNo.no')}</NTag>;
+      },
+    },
+    {
       key: "status",
       title: $t("page.admin.library.bookCategory.categoryStatus"),
       align: "center",
       width: 80,
-      render: (row: Api.SystemManage.BookCategory) => {
+      render: (row: Api.BookManage.BookCategory) => {
         if (row.status === null) return null;
         const tagMap: Record<Api.Common.EnableStatus, NaiveUI.ThemeColor> = {
           1: "success",
@@ -97,7 +121,7 @@ const {
       title: $t("common.operate"),
       align: "center",
       width: 260,
-      render: (row: Api.SystemManage.BookCategory) => (
+      render: (row: Api.BookManage.BookCategory) => (
         <div class="flex-center justify-end gap-8px">
           <NButton
             type="primary"
@@ -138,7 +162,23 @@ const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(
 );
 
 const operateType = ref<OperateType>("add");
-const editingData: Ref<Api.SystemManage.BookCategory | null> = ref(null);
+const editingData: Ref<Api.BookManage.BookCategory | null> = ref(null);
+
+function handleSearch() {
+  getDataByPage(1);
+}
+
+function handleReset() {
+  isHotValue.value = null
+  searchParams.value = {
+    current: 1,
+    size: 10,
+    categoryName: null,
+    categoryCode: null,
+    isHot: null,
+    status: null,
+  };
+}
 
 function handleAdd() {
   operateType.value = "add";
@@ -146,13 +186,13 @@ function handleAdd() {
   openModal();
 }
 
-function handleEdit(item: Api.SystemManage.BookCategory) {
+function handleEdit(item: Api.BookManage.BookCategory) {
   operateType.value = "edit";
   editingData.value = { ...item };
   openModal();
 }
 
-function handleAddChild(item: Api.SystemManage.BookCategory) {
+function handleAddChild(item: Api.BookManage.BookCategory) {
   operateType.value = "addChild";
   editingData.value = { ...item };
   openModal();
@@ -170,6 +210,20 @@ async function handleBatchDelete() {
 
 <template>
   <div class="flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
+    <NCard :bordered="false" size="small">
+      <NSpace wrap :size="[12, 12]">
+        <NInput v-model:value="searchParams.categoryName" :placeholder="$t('page.admin.library.bookCategory.categoryName')" clearable
+          style="width: 160px" @keyup.enter="handleSearch" />
+        <NInput v-model:value="searchParams.categoryCode" :placeholder="$t('page.admin.library.bookCategory.categoryCode')" clearable
+          style="width: 140px" @keyup.enter="handleSearch" />
+        <NSelect v-model:value="isHotValue" :placeholder="$t('page.admin.library.bookCategory.isHot')"
+          :options="[{value: 'true', label: $t('common.yesOrNo.yes')}, {value: 'false', label: $t('common.yesOrNo.no')}]" clearable style="width: 130px" />
+        <NSelect v-model:value="searchParams.status" :placeholder="$t('page.admin.library.bookCategory.categoryStatus')"
+          :options="enableStatusOptions" clearable style="width: 130px" />
+        <NButton type="primary" @click="handleSearch">{{ $t("common.search") }}</NButton>
+        <NButton @click="handleReset">{{ $t("common.reset") }}</NButton>
+      </NSpace>
+    </NCard>
     <NCard
       :title="$t('page.admin.library.bookCategory.title')"
       :bordered="false"
@@ -192,7 +246,7 @@ async function handleBatchDelete() {
         :data="data"
         size="small"
         :flex-height="!appStore.isMobile"
-        :scroll-x="960"
+        :scroll-x="1060"
         :loading="loading"
         :row-key="(row) => row.id"
         remote

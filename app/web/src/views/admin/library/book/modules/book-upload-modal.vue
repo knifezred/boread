@@ -16,8 +16,8 @@ const step = ref<"upload" | "confirm">("upload");
 const uploading = ref(false);
 const uploadProgress = ref(0);
 const importing = ref(false);
-const uploadResult = ref<Api.SystemManage.FileUploadResponse | null>(null);
-const importResult = ref<Api.SystemManage.ConfirmImportResponse | null>(null);
+const uploadResult = ref<Api.BookManage.FileUploadResponse | null>(null);
+const importResult = ref<Api.BookManage.ConfirmImportResponse | null>(null);
 const confirmModel = ref({ title: "", author: "" });
 const importError = ref("");
 
@@ -29,7 +29,7 @@ async function handleUpload(file: File) {
   importError.value = "";
   const { error, data } = await fetchUploadBookFile(file, (p) => { uploadProgress.value = p; });
   if (error) {
-    importError.value = error.message || $t("common.operateFailed");
+    importError.value = error.message || $t("common.operateFail");
   } else {
     uploadResult.value = data;
     confirmModel.value = { title: data.suggestedTitle, author: data.suggestedAuthor };
@@ -38,9 +38,10 @@ async function handleUpload(file: File) {
   uploading.value = false;
 }
 
-function handleFileSelect(options: { file: { file: File } }) {
-  handleUpload(options.file.file);
-  return true;
+function handleFileSelect({ file }: { file: { file?: File | null } }) {
+  if (file.file) {
+    handleUpload(file.file);
+  }
 }
 
 async function handleConfirm() {
@@ -53,7 +54,7 @@ async function handleConfirm() {
     author: confirmModel.value.author,
   });
   if (error) {
-    importError.value = error.message || $t("common.operateFailed");
+    importError.value = error.message || $t("common.operateFail");
     importing.value = false;
     return;
   }

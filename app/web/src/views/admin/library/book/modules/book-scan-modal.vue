@@ -11,7 +11,7 @@ const emit = defineEmits<{ (e: "scanned"): void }>();
 
 const scanPath = ref("");
 const scanning = ref(false);
-const scanResult = ref<Api.SystemManage.ScanPathResponse | null>(null);
+const scanResult = ref<Api.BookManage.ScanPathResponse | null>(null);
 const scanError = ref("");
 
 async function handleScan() {

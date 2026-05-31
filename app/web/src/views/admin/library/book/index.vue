@@ -4,9 +4,6 @@ import type { Ref } from "vue"
 import { NButton, NPopconfirm, NTag, NSpace, NSelect, NInput, NTree } from "naive-ui"
 import type { TreeOption } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
-import {
-  bookStatusRecord,
-} from "@/constants/business"
 import { useDictItems } from "@/hooks/business/dict"
 import {
   fetchGetBookList,
@@ -25,6 +22,7 @@ import BookOperateModal from "./modules/book-operate-modal.vue"
 import BookUploadModal from "./modules/book-upload-modal.vue"
 import BookChapterModal from "./modules/book-chapter-modal.vue"
 import BookScanModal from "./modules/book-scan-modal.vue"
+import { formatWordCount } from "@/utils/book.js"
 
 const appStore = useAppStore()
 
@@ -37,7 +35,7 @@ const chapterBookId = ref(0)
 const chapterBookTitle = ref("")
 
 /** 分类树原始数据 */
-const categoryTree = ref<Api.SystemManage.BookCategory[]>([])
+const categoryTree = ref<Api.BookManage.BookCategory[]>([])
 /** 当前选中的分类 ID，0 表示"全部" */
 const selectedCategory = ref<number>(0)
 /** NTree 的选中 key */
@@ -47,7 +45,7 @@ const expandedKeys = ref<Array<string | number>>(["0"])
 
 /** 将分类树转为 NTree 的 TreeOption */
 const treeOptions = computed<TreeOption[]>(() => {
-  function toOptions(nodes: Api.SystemManage.BookCategory[]): TreeOption[] {
+  function toOptions(nodes: Api.BookManage.BookCategory[]): TreeOption[] {
     return nodes.map(n => ({
       key: n.id,
       label: n.categoryName,
@@ -73,7 +71,7 @@ async function loadCategoryTree() {
 }
 
 /** 递归收集所有树节点 key */
-function collectAllTreeKeys(nodes: Api.SystemManage.BookCategory[], keys: Array<string | number> = []): Array<string | number> {
+function collectAllTreeKeys(nodes: Api.BookManage.BookCategory[], keys: Array<string | number> = []): Array<string | number> {
   for (const n of nodes) {
     keys.push(n.id)
     if (n.children?.length) {
@@ -83,7 +81,7 @@ function collectAllTreeKeys(nodes: Api.SystemManage.BookCategory[], keys: Array<
   return keys
 }
 
-const searchParams = ref<Api.SystemManage.BookSearchParams>({
+const searchParams = ref<Api.BookManage.BookSearchParams>({
   current: 1,
   size: 10,
   title: null,
@@ -144,7 +142,7 @@ const {
       title: $t("page.admin.library.book.serialStatus"),
       align: "center",
       width: 90,
-      render: (row: Api.SystemManage.Book) => {
+      render: (row: Api.BookManage.Book) => {
         const tagMap: Record<string, NaiveUI.ThemeColor> = { "1": "info", "2": "success", "3": "warning" }
         return <NTag type={tagMap[row.serialStatus]}>{serialStatusLabelMap.value[row.serialStatus] ?? row.serialStatus}</NTag>
       },
@@ -154,7 +152,7 @@ const {
       title: $t("page.admin.library.book.visibility"),
       align: "center",
       width: 80,
-      render: (row: Api.SystemManage.Book) => {
+      render: (row: Api.BookManage.Book) => {
         const tagMap: Record<string, NaiveUI.ThemeColor> = { "1": "success", "2": "warning", "3": "info" }
         return <NTag type={tagMap[row.visibility]}>{visibilityLabelMap.value[row.visibility] ?? row.visibility}</NTag>
       },
@@ -170,17 +168,18 @@ const {
       title: $t("page.admin.library.book.totalWords"),
       align: "center",
       width: 80,
+      render: (row: Api.BookManage.Book) => formatWordCount(row.totalWords),
     },
-    {
-      key: "status",
-      title: $t("page.admin.library.book.listingStatus"),
-      align: "center",
-      width: 90,
-      render: (row: Api.SystemManage.Book) => {
-        const tagMap: Record<string, NaiveUI.ThemeColor> = { "1": "success", "2": "warning", "3": "info", "4": "error" }
-        return <NTag type={tagMap[row.status]}>{$t(bookStatusRecord[row.status])}</NTag>
-      },
-    },
+    // {
+    //   key: "status",
+    //   title: $t("page.admin.library.book.listingStatus"),
+    //   align: "center",
+    //   width: 90,
+    //   render: (row: Api.BookManage.Book) => {
+    //     const tagMap: Record<string, NaiveUI.ThemeColor> = { "1": "success", "2": "warning", "3": "info", "4": "error" }
+    //     return <NTag type={tagMap[row.status]}>{$t(bookStatusRecord[row.status])}</NTag>
+    //   },
+    // },
     {
       key: "avgRating",
       title: $t("page.admin.library.book.avgRating"),
@@ -192,7 +191,7 @@ const {
       title: $t("common.operate"),
       align: "center",
       width: 380,
-      render: (row: Api.SystemManage.Book) => (
+      render: (row: Api.BookManage.Book) => (
         <div class="flex-center justify-end gap-8px">
           <NPopconfirm onPositiveClick={() => handleToggleListing(row)}>
             {{
@@ -214,7 +213,7 @@ const {
 const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(data, "id", getData)
 
 const operateType = ref<NaiveUI.TableOperateType>("add")
-const editingData: Ref<Api.SystemManage.Book | null> = ref(null)
+const editingData: Ref<Api.BookManage.Book | null> = ref(null)
 
 function handleTreeSelect(keys: Array<string | number>) {
   const key = keys[0]
@@ -233,7 +232,7 @@ function handleAdd() {
   editingData.value = null
   openModal()
 }
-function handleEdit(item: Api.SystemManage.Book) {
+function handleEdit(item: Api.BookManage.Book) {
   operateType.value = "edit"
   editingData.value = { ...item }
   openModal()
@@ -248,14 +247,14 @@ async function handleScan() {
   openScanModal()
 }
 
-function showChapters(row: Api.SystemManage.Book) {
+function showChapters(row: Api.BookManage.Book) {
   chapterBookId.value = row.id
   chapterBookTitle.value = row.title
   openChapterModal()
 }
 
-async function handleToggleListing(row: Api.SystemManage.Book) {
-  const newStatus: Api.SystemManage.BookListingStatus = row.status === "1" ? "2" : "1"
+async function handleToggleListing(row: Api.BookManage.Book) {
+  const newStatus: Api.BookManage.BookListingStatus = row.status === "1" ? "2" : "1"
   const { error } = await fetchUpdateBookStatus(row.id, { status: newStatus })
   if (!error) {
     window.$message?.success($t("common.updateSuccess"))

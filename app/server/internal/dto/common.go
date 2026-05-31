@@ -15,9 +15,6 @@ func (p *PageRequest) Normalize() {
 	if p.Size <= 0 {
 		p.Size = 10
 	}
-	if p.Size > 200 {
-		p.Size = 200
-	}
 }
 
 // Offset 分页偏移

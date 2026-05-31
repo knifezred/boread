@@ -31,6 +31,10 @@ type BookSearch struct {
 	Visibility   string   `json:"visibility"`
 	SerialStatus string   `json:"serialStatus"`
 	TagID        *uint64  `json:"tagId"`
+	MinWords     *uint32  `json:"minWords"`     // 字数下限（万字）
+	MaxWords     *uint32  `json:"maxWords"`     // 字数上限（万字）
+	UpdateTimeFrom *string `json:"updateTimeFrom"` // 更新时间起始
+	UpdateTimeTo   *string `json:"updateTimeTo"`   // 更新时间截止
 }
 
 // BookResponse 书籍响应 (包含标签列表和分类名称)

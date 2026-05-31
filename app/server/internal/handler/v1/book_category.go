@@ -165,3 +165,18 @@ func mapCategoryErr(err error) int {
 		return 5001
 	}
 }
+
+// HotList 热门分类列表（公开，无需认证）
+// @Summary   热门分类列表
+// @Tags      book-category
+// @Produce   json
+// @Success  200  {object}  response.Response{data=[]dto.HotCategoryItem}
+// @Router   /api/book-category/hot [get]
+func (h *BookCategoryHandler) HotList(c *gin.Context) {
+	items, err := h.svc.GetHotCategories(c.Request.Context())
+	if err != nil {
+		response.Error(c, 5001, err.Error())
+		return
+	}
+	response.Success(c, items)
+}

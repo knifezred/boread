@@ -58,6 +58,21 @@ func (r *BookRepository) Page(ctx context.Context, req *dto.BookSearch) ([]model
 	if req.SerialStatus != "" {
 		tx = tx.Where("serial_status = ?", req.SerialStatus)
 	}
+	if req.TagID != nil && *req.TagID > 0 {
+		tx = tx.Where("id IN (SELECT book_id FROM book_tag_rel WHERE tag_id = ?)", *req.TagID)
+	}
+	if req.MinWords != nil && *req.MinWords > 0 {
+		tx = tx.Where("total_words >= ?", *req.MinWords*10000)
+	}
+	if req.MaxWords != nil && *req.MaxWords > 0 {
+		tx = tx.Where("total_words <= ?", *req.MaxWords*10000)
+	}
+	if req.UpdateTimeFrom != nil && *req.UpdateTimeFrom != "" {
+		tx = tx.Where("update_time >= ?", *req.UpdateTimeFrom)
+	}
+	if req.UpdateTimeTo != nil && *req.UpdateTimeTo != "" {
+		tx = tx.Where("update_time <= ?", *req.UpdateTimeTo)
+	}
 	var total int64
 	if err := tx.Count(&total).Error; err != nil {
 		return nil, 0, err

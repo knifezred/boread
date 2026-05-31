@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch } from "vue"
 import {
   NButton,
   NForm,
@@ -11,23 +11,23 @@ import {
   NRadio,
   NSpace,
   NSelect,
-} from "naive-ui";
-import { useBoolean } from "@sa/hooks";
-import { useFormRules, useNaiveForm } from "@/hooks/common/form";
-import { useDictItems } from "@/hooks/business/dict";
-import { $t } from "@/locales";
+} from "naive-ui"
+import { useBoolean } from "@sa/hooks"
+import { useFormRules, useNaiveForm } from "@/hooks/common/form"
+import { useDictItems } from "@/hooks/business/dict"
+import { $t } from "@/locales"
 import {
   fetchCreateBook,
   fetchUpdateBook,
   fetchGetCategoryTree,
   fetchGetTagList,
-} from "@/service/api";
+} from "@/service/api"
 
 defineOptions({ name: "BookOperateModal" });
 
 interface Props {
   operateType: NaiveUI.TableOperateType;
-  rowData?: Api.SystemManage.Book | null;
+  rowData?: Api.BookManage.Book | null;
 }
 
 const props = defineProps<Props>();
@@ -36,7 +36,7 @@ interface Emits {
 }
 const emit = defineEmits<Emits>();
 const visible = defineModel<boolean>("visible", { default: false });
-const { formRef, validate, restoreValidation } = useNaiveForm();
+const { validate, restoreValidation } = useNaiveForm();
 const { defaultRequiredRule } = useFormRules();
 
 const title = computed(() => {
@@ -55,8 +55,8 @@ type Model = {
   intro: string | null;
   categoryId: number | null;
   language: string;
-  serialStatus: Api.SystemManage.SerialStatus;
-  visibility: Api.SystemManage.Visibility;
+  serialStatus: Api.BookManage.SerialStatus;
+  visibility: Api.BookManage.Visibility;
   tagIds: number[];
 };
 
@@ -107,7 +107,7 @@ async function loadCategoryOptions() {
 }
 
 function flattenTree(
-  nodes: Api.SystemManage.BookCategory[],
+  nodes: Api.BookManage.BookCategory[],
   depth: number,
 ): CommonType.Option<number>[] {
   let result: CommonType.Option<number>[] = [];

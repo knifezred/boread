@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
-import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NRadioGroup, NRadio, NScrollbar, NSpace, NSelect, NAlert } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NRadioGroup, NRadio, NScrollbar, NSpace, NAlert } from "naive-ui"
 import { useFormRules, useNaiveForm } from "@/hooks/common/form"
 import { fetchCreateChapterRule, fetchUpdateChapterRule } from "@/service/api"
 import { $t } from "@/locales"
@@ -9,19 +9,19 @@ defineOptions({ name: "ChapterRuleOperateModal" });
 
 interface Props {
   operateType: NaiveUI.TableOperateType;
-  rowData?: Api.SystemManage.BookChapterRule | null;
+  rowData?: Api.BookManage.BookChapterRule | null;
 }
 const props = defineProps<Props>();
 interface Emits { (e: "submitted"): void }
 const emit = defineEmits<Emits>();
 const visible = defineModel<boolean>("visible", { default: false });
-const { formRef, validate, restoreValidation } = useNaiveForm();
+const { validate, restoreValidation } = useNaiveForm();
 const { defaultRequiredRule } = useFormRules();
 const submitting = ref(false);
 
 const title = computed(() => props.operateType === "add" ? $t("page.admin.library.bookChapterRule.addRule") : $t("page.admin.library.bookChapterRule.editRule"));
 
-const model = ref<Api.SystemManage.ChapterRuleRequest>({
+const model = ref<Api.BookManage.ChapterRuleRequest>({
   ruleName: "", scopeType: "1", bookId: null, pattern: "", titleGroup: 0, minChapterLen: 100, maxChapterLen: 100000, priority: 0, description: null, status: "1",
 });
 

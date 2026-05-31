@@ -238,6 +238,29 @@ func (h *BookFileHandler) PageChapter(c *gin.Context) {
 	response.Success(c, resp)
 }
 
+// ListChapter 章节列表（不分页）
+// @Summary   章节列表
+// @Tags      book-file
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    body  body  dto.ChapterListRequest  true  "请求参数"
+// @Success  200  {object}  response.Response{data=[]dto.ChapterResponse}
+// @Router   /api/manage/book/chapter/list [post]
+func (h *BookFileHandler) ListChapter(c *gin.Context) {
+	var req dto.ChapterListRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 1001, err.Error())
+		return
+	}
+	resp, err := h.svc.ListChapter(c.Request.Context(), &req)
+	if err != nil {
+		response.Error(c, 5001, err.Error())
+		return
+	}
+	response.Success(c, resp)
+}
+
 // ==================== 章节识别规则 ====================
 
 // CreateChapterRule 创建章节识别规则
