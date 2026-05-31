@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NTag, NSpace, NSpin, NPagination } from 'naive-ui'
 import BookCard from "@/components/book-card.vue"
@@ -43,7 +43,7 @@ const relatedBooks = ref<Api.BookManage.Book[]>([])
 const chapters = ref<Api.BookManage.BookChapter[]>([])
 const chapterTotal = ref(0)
 const chapterPage = ref(1)
-const chapterSize = ref(100)
+const chapterSize = ref(42)
 const chapterLoading = ref(false)
 const sortAsc = ref(true)
 
@@ -53,19 +53,22 @@ const sortedChapters = computed(() => {
   return list
 })
 
+const displayLimit = ref(10)
+const showAll = ref(true)
+
+const displayChapters = computed(() => {
+  if (showAll.value) return sortedChapters.value
+  return sortedChapters.value.slice(0, displayLimit.value)
+})
+
+function toggleShowAll() {
+  showAll.value = !showAll.value
+}
+
 const latestChapter = ref('')
-const activeSection = ref('section-info')
-const observer = ref<IntersectionObserver | null>(null)
 
 function toggleSort() {
   sortAsc.value = !sortAsc.value
-}
-
-function scrollToSection(id: string) {
-  const el = document.getElementById(id)
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 }
 
 function goToReader(chapterNo = 1) {
@@ -118,7 +121,6 @@ async function handleReParse() {
   })
 }
 
-
 onMounted(async () => {
   loading.value = true
   try {
@@ -148,65 +150,26 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-
-  await nextTick()
-  const sections = ['section-info', 'section-catalog']
-  const els = sections.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[]
-  if (els.length) {
-    observer.value = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            activeSection.value = entry.target.id
-          }
-        }
-      },
-      { rootMargin: '-80px 0px -50% 0px' }
-    )
-    els.forEach(el => observer.value!.observe(el))
-  }
-})
-
-onBeforeUnmount(() => {
-  observer.value?.disconnect()
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 px-10 py-5 font-sans">
+  <div class="min-h-screen bg-gray-100 lg:px-10 px-4 lg:py-5 py-4 font-sans">
+    <!-- 面包屑 -->
     <div class="flex items-center gap-2 text-sm text-gray-400 mb-5">
       <span>{{ $t("page.book.detail.breadcrumbHome") }}</span>
       <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
       <span>{{ bookInfo.categoryName || $t("page.book.home.uncategorized") }}</span>
       <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
-      <span class="text-gray-700">{{ bookInfo.title }}</span>
+      <span class="text-gray-700 truncate max-w-[200px] lg:max-w-none">{{ bookInfo.title }}</span>
     </div>
 
     <div class="flex gap-6 max-w-1600px mx-auto items-start">
-      <aside class="sticky top-5 w-120px shrink-0 flex flex-col gap-2">
-        <div
-          class="px-4 py-3 text-[15px] cursor-pointer rd-1 relative transition-all duration-200 hover:bg-white"
-          :class="activeSection === 'section-info' ? 'bg-white text-primary font-medium' : 'text-gray-500 hover:text-gray-700'"
-          @click="scrollToSection('section-info')">
-          <span class="absolute left-0 top-0 bottom-0 w-[3px] rd-0 rd-r-2px"
-            :class="activeSection === 'section-info' ? 'bg-primary' : 'bg-transparent'"></span>
-          {{ $t("page.book.detail.bookInfo") }}
-        </div>
-        <div
-          class="px-4 py-3 text-[15px] cursor-pointer rd-1 relative transition-all duration-200 hover:bg-white"
-          :class="activeSection === 'section-catalog' ? 'bg-white text-primary font-medium' : 'text-gray-500 hover:text-gray-700'"
-          @click="scrollToSection('section-catalog')">
-          <span class="absolute left-0 top-0 bottom-0 w-[3px] rd-0 rd-r-2px"
-            :class="activeSection === 'section-catalog' ? 'bg-primary' : 'bg-transparent'"></span>
-          {{ $t("page.book.detail.catalog") }}
-        </div>
-      </aside>
-
-      <main class="flex-1 max-w-900px flex flex-col gap-4">
+      <main class="flex-1 min-w-0 flex flex-col gap-4">
         <section id="section-info">
           <NCard class="rd-12px shadow-sm" :bordered="false" size="huge">
-            <div class="flex gap-8">
-              <div class="shrink-0 w-160px">
+            <div class="flex lg:flex-row flex-col gap-6 lg:gap-8">
+              <div class="shrink-0 lg:w-160px w-120px mx-auto lg:mx-0">
                 <NSpin v-if="loading" show />
                 <BookCard
                   v-else-if="bookInfo"
@@ -215,37 +178,37 @@ onBeforeUnmount(() => {
                   class="only-cover" />
               </div>
 
-              <div class="flex-1" v-if="bookInfo">
-                <h1 class="text-4xl font-bold mb-4 text-gray-900">{{ bookInfo.title }}</h1>
-                <div class="flex gap-6 text-sm text-gray-500 mb-3">
+              <div class="flex-1 text-center lg:text-left" v-if="bookInfo">
+                <h1 class="lg:text-4xl text-2xl font-bold mb-4 text-gray-900">{{ bookInfo.title }}</h1>
+                <div class="flex lg:flex-row flex-col lg:gap-6 gap-1 text-sm mb-3">
                   <span>{{ $t("page.book.detail.author") }}: {{ bookInfo.author }}</span>
-                  <span>{{ $t("page.book.detail.updateTime") }}: {{ formatTime(bookInfo.updateTime) }}</span>
+                  <span class="text-gray-500">{{ $t("page.book.detail.updateTime") }}: {{ formatTime(bookInfo.updateTime) }}</span>
                 </div>
                 <div class="text-sm text-gray-500 mb-3">
                   <span>{{ $t("page.book.detail.latestChapter") }}: </span>
                   <span class="text-primary no-underline">{{ latestChapter || $t("page.book.reader.loading") }}</span>
                 </div>
-                <div class="flex gap-2 mb-4" v-if="bookInfo.tags?.length">
+                <div class="flex gap-2 mb-4 justify-center lg:justify-start" v-if="bookInfo.tags?.length">
                   <NTag v-for="tag in bookInfo.tags" :key="tag.id" size="small" round type="info" ghost>
                     {{ tag.tagName }}
                   </NTag>
                 </div>
-                <div class="flex gap-8 mb-6">
+                <div class="flex lg:gap-8 gap-6 mb-6 justify-center lg:justify-start">
                   <div class="text-center">
                     <span class="block text-xl font-semibold text-gray-900">{{ formatWordCount(bookInfo.totalWords)
-                      }}</span>
+                    }}</span>
                     <span class="text-xs text-gray-400">{{ $t("page.book.detail.words") }}</span>
                   </div>
                   <div class="text-center">
                     <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.totalChapters }}</span>
                     <span class="text-xs text-gray-400">{{ $t("page.book.detail.chapters") }}</span>
                   </div>
-                  <div class="text-center">
+                  <!-- <div class="text-center">
                     <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.avgRating }}</span>
                     <span class="text-xs text-gray-400">{{ $t("page.book.detail.rating") }}</span>
-                  </div>
+                  </div> -->
                 </div>
-                <div class="flex items-center">
+                <div class="flex justify-center lg:justify-start">
                   <NSpace size="medium">
                     <NButton size="large" ghost type="primary" @click="goToReader(1)">
                       {{ $t("page.book.detail.readNow") }}
@@ -259,18 +222,19 @@ onBeforeUnmount(() => {
             </div>
           </NCard>
         </section>
+
         <NCard v-if="bookInfo.intro" class="rd-12px shadow-sm" :bordered="false" size="huge">
           <NH2>{{ $t("page.book.detail.introTitle") }}</NH2>
           <p class="leading-relaxed mb-5 whitespace-break-spaces">{{ bookInfo.intro }}</p>
         </NCard>
+
         <section id="section-catalog">
           <NCard class="rd-12px shadow-sm" :bordered="false" size="huge">
             <template #header>
               <div class="flex items-center gap-3 w-full">
                 <span class="text-xl font-semibold text-gray-900">{{ $t("page.book.detail.catalog") }}</span>
                 <span class="text-sm text-gray-400 font-normal">{{ $t("page.book.detail.totalChapters", {
-                  total:
-                    chapterTotal
+                  total: chapterTotal
                 }) }}</span>
                 <div class="ml-auto flex items-center gap-2">
                   <NButton size="tiny" quaternary @click="handleReParse">
@@ -288,16 +252,16 @@ onBeforeUnmount(() => {
             </template>
 
             <div class="flex items-center gap-3 px-5 py-4 bg-amber-50 rd-2 mb-5" v-if="latestChapter">
-              <span class="text-amber-600 font-medium">{{ $t("page.book.detail.latest") }}</span>
+              <span class="text-amber-600 font-medium shrink-0">{{ $t("page.book.detail.latest") }}</span>
               <span class="font-medium text-gray-900 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{
                 latestChapter
                 }}</span>
             </div>
 
             <NSpin :show="chapterLoading">
-              <div class="grid grid-cols-3 gap-3 gap-x-6">
+              <div class="grid lg:grid-cols-3 grid-cols-1 gap-3 gap-x-6">
                 <div
-                  v-for="ch in sortedChapters"
+                  v-for="ch in displayChapters"
                   :key="ch.id"
                   class="flex items-center gap-1.5 px-3 py-2 rd-1.5 cursor-pointer transition-colors duration-200 text-sm text-gray-700 hover:bg-gray-100"
                   @click="goToReader()">
@@ -305,6 +269,19 @@ onBeforeUnmount(() => {
                 </div>
               </div>
             </NSpin>
+
+            <!-- 移动端展开/收起 -->
+            <div v-if="sortedChapters.length > displayLimit" class="flex justify-center mt-4 lg:hidden">
+              <NButton text size="small" @click="toggleShowAll">
+                {{ showAll ? $t("page.book.detail.collapse") : $t("page.book.detail.expand", {
+                  count:
+                    sortedChapters.length -
+                displayLimit }) }}
+                <template #icon>
+                  <SvgIcon :icon="showAll ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'" size="16" />
+                </template>
+              </NButton>
+            </div>
 
             <div v-if="!chapters.length && !chapterLoading" class="py-10 text-center text-sm text-gray-400">
               {{ $t("page.book.detail.noChapters") }}
@@ -319,9 +296,56 @@ onBeforeUnmount(() => {
             </div>
           </NCard>
         </section>
+
+        <!-- 推荐位（移动端：目录下方） -->
+        <div class="flex flex-col gap-4 lg:hidden">
+          <NCard class="rd-12px shadow-sm" :bordered="false" size="small">
+            <template #header>
+              <div class="flex justify-between items-center w-full">
+                <span>{{ $t("page.book.detail.authorOtherWorks") }}</span>
+                <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ relatedBooks.length }} {{
+                  $t("page.book.detail.books") }}</a>
+              </div>
+            </template>
+            <div class="grid grid-cols-2 gap-4">
+              <div v-for="book in relatedBooks" :key="book.id" class="flex gap-3">
+                <div class="shrink-0 w-50px">
+                  <BookCard :book="book" class="small-book-card" />
+                </div>
+                <div class="flex-1 overflow-hidden">
+                  <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
+                  <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </NCard>
+          <NCard class="rd-12px shadow-sm" :bordered="false" size="small">
+            <template #header>
+              <div class="flex justify-between items-center w-full">
+                <span>{{ $t("page.book.detail.similarRecommend") }}</span>
+                <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more")
+                }}</a>
+              </div>
+            </template>
+            <div class="grid grid-cols-2 gap-4">
+              <div v-for="book in relatedBooks" :key="book.id" class="flex gap-3">
+                <div class="shrink-0 w-50px">
+                  <BookCard :book="book" class="small-book-card" />
+                </div>
+                <div class="flex-1 overflow-hidden">
+                  <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
+                  <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </NCard>
+        </div>
       </main>
 
-      <aside class="max-xl:hidden w-300px shrink-0 flex flex-col gap-4">
+      <!-- 桌面端右侧推荐栏 -->
+      <aside class="max-lg:hidden w-300px shrink-0 flex flex-col gap-4">
         <NCard class="rd-12px shadow-sm" :bordered="false" size="small">
           <template #header>
             <div class="flex justify-between items-center w-full">
@@ -348,7 +372,7 @@ onBeforeUnmount(() => {
             <div class="flex justify-between items-center w-full">
               <span>{{ $t("page.book.detail.similarRecommend") }}</span>
               <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more")
-                }}</a>
+              }}</a>
             </div>
           </template>
           <div class="flex flex-col gap-4">

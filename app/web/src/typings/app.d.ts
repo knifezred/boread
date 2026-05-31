@@ -641,6 +641,8 @@ declare namespace App {
             reParseConfirm: string;
             reParseSuccess: string;
             reParseFailed: string;
+            expand: string;
+            collapse: string;
           };
           reader: {
             prevChapter: string;

@@ -389,6 +389,8 @@ const local: App.I18n.Schema = {
         reParseConfirm: "将删除已有章节索引，根据当前识别规则重新解析。确定继续？",
         reParseSuccess: "章节识别完成：{old}章 → {new}章",
         reParseFailed: "重新识别章节失败",
+        expand: "展开全部（共{count}章）",
+        collapse: "收起",
       },
       reader: {
         prevChapter: "上一章",

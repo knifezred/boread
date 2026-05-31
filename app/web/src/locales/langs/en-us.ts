@@ -387,6 +387,8 @@ const local: App.I18n.Schema = {
         reParseConfirm: 'This will delete existing chapter index and re-parse from the content file. Continue?',
         reParseSuccess: 'Chapters re-parsed: {old} → {new}',
         reParseFailed: 'Failed to re-parse chapters',
+        expand: 'Show all ({count} more)',
+        collapse: 'Collapse',
       },
       reader: {
         prevChapter: 'Prev',
