@@ -7,6 +7,6 @@ export function formatWordCount(count: number) {
   }
 }
 
-export function formatTime(time: number) {
+export function formatTime(time: string) {
   return new Date(time).toLocaleString()
 }

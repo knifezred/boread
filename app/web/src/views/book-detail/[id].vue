@@ -5,7 +5,7 @@ import { NButton, NCard, NTag, NSpace, NSpin, NPagination } from 'naive-ui'
 import BookCard from "@/components/book-card.vue"
 import { fetchGetBook, fetchGetChapterList, fetchReParseChapters } from "@/service/api"
 import { $t } from "@/locales"
-import { formatWordCount } from '@/utils/book'
+import { formatWordCount, formatTime } from '@/utils/book'
 
 defineOptions({ name: 'BookDetail' })
 
@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
                 <h1 class="text-4xl font-bold mb-4 text-gray-900">{{ bookInfo.title }}</h1>
                 <div class="flex gap-6 text-sm text-gray-500 mb-3">
                   <span>{{ $t("page.book.detail.author") }}: {{ bookInfo.author }}</span>
-                  <span>{{ $t("page.book.detail.updateTime") }}: {{ bookInfo.updateTime }}</span>
+                  <span>{{ $t("page.book.detail.updateTime") }}: {{ formatTime(bookInfo.updateTime) }}</span>
                 </div>
                 <div class="text-sm text-gray-500 mb-3">
                   <span>{{ $t("page.book.detail.latestChapter") }}: </span>
@@ -230,11 +230,10 @@ onBeforeUnmount(() => {
                     {{ tag.tagName }}
                   </NTag>
                 </div>
-                <p class="text-sm text-gray-600 leading-relaxed mb-5">{{ bookInfo.intro ? bookInfo.intro.slice(0, 60) +
-                  '...' : '' }}</p>
                 <div class="flex gap-8 mb-6">
                   <div class="text-center">
-                    <span class="block text-xl font-semibold text-gray-900">{{ formatWordCount(bookInfo.totalWords) }}</span>
+                    <span class="block text-xl font-semibold text-gray-900">{{ formatWordCount(bookInfo.totalWords)
+                      }}</span>
                     <span class="text-xs text-gray-400">{{ $t("page.book.detail.words") }}</span>
                   </div>
                   <div class="text-center">
@@ -260,13 +259,19 @@ onBeforeUnmount(() => {
             </div>
           </NCard>
         </section>
-
+        <NCard v-if="bookInfo.intro" class="rd-12px shadow-sm" :bordered="false" size="huge">
+          <NH2>{{ $t("page.book.detail.introTitle") }}</NH2>
+          <p class="leading-relaxed mb-5 whitespace-break-spaces">{{ bookInfo.intro }}</p>
+        </NCard>
         <section id="section-catalog">
           <NCard class="rd-12px shadow-sm" :bordered="false" size="huge">
             <template #header>
               <div class="flex items-center gap-3 w-full">
                 <span class="text-xl font-semibold text-gray-900">{{ $t("page.book.detail.catalog") }}</span>
-                <span class="text-sm text-gray-400 font-normal">{{ $t("page.book.detail.totalChapters", { total: chapterTotal }) }}</span>
+                <span class="text-sm text-gray-400 font-normal">{{ $t("page.book.detail.totalChapters", {
+                  total:
+                    chapterTotal
+                }) }}</span>
                 <div class="ml-auto flex items-center gap-2">
                   <NButton size="tiny" quaternary @click="handleReParse">
                     {{ $t("page.book.detail.reParse") }}
@@ -274,7 +279,8 @@ onBeforeUnmount(() => {
                   <div
                     class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer px-2 py-1 rd-1 transition-all duration-200 hover:bg-gray-100 hover:text-gray-700"
                     @click="toggleSort">
-                    <SvgIcon :icon="sortAsc ? 'solar:sort-from-top-linear' : 'solar:sort-from-bottom-linear'" size="16" />
+                    <SvgIcon :icon="sortAsc ? 'solar:sort-from-top-linear' : 'solar:sort-from-bottom-linear'"
+                      size="16" />
                     <span>{{ sortAsc ? $t("page.book.detail.ascSort") : $t("page.book.detail.descSort") }}</span>
                   </div>
                 </div>
@@ -285,7 +291,7 @@ onBeforeUnmount(() => {
               <span class="text-amber-600 font-medium">{{ $t("page.book.detail.latest") }}</span>
               <span class="font-medium text-gray-900 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{
                 latestChapter
-              }}</span>
+                }}</span>
             </div>
 
             <NSpin :show="chapterLoading">
@@ -320,7 +326,8 @@ onBeforeUnmount(() => {
           <template #header>
             <div class="flex justify-between items-center w-full">
               <span>{{ $t("page.book.detail.authorOtherWorks") }}</span>
-              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ relatedBooks.length }} {{ $t("page.book.detail.books") }}</a>
+              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ relatedBooks.length }} {{
+                $t("page.book.detail.books") }}</a>
             </div>
           </template>
           <div class="flex flex-col gap-4">
@@ -340,7 +347,8 @@ onBeforeUnmount(() => {
           <template #header>
             <div class="flex justify-between items-center w-full">
               <span>{{ $t("page.book.detail.similarRecommend") }}</span>
-              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more") }}</a>
+              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more")
+                }}</a>
             </div>
           </template>
           <div class="flex flex-col gap-4">

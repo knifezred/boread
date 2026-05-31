@@ -49,7 +49,7 @@ watch(visible, (val) => {
     v-model:show="visible"
     preset="card"
     :title="$t('page.book.catalog.title')"
-    class="w-800px h-100vh"
+    class="lg:w-800px w-full h-100vh"
     segmented>
     <NScrollbar class="h-90vh">
       <div class="flex flex-col gap-0.5">

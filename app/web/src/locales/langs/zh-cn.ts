@@ -365,6 +365,7 @@ const local: App.I18n.Schema = {
         breadcrumbHome: "首页",
         bookInfo: "作品信息",
         catalog: "目录",
+        introTitle:"作品简介",
         author: "作者",
         updateTime: "更新时间",
         latestChapter: "最新章节",
@@ -407,6 +408,7 @@ const local: App.I18n.Schema = {
         writtenBy: "著",
         loading: "加载中...",
         noContent: "暂无内容",
+        noMoreChapters: "已无更多章节",
       },
       catalog: {
         title: "目录",

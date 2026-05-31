@@ -616,6 +616,7 @@ declare namespace App {
           detail: {
             breadcrumbHome: string;
             bookInfo: string;
+            introTitle: string;
             catalog: string;
             author: string;
             updateTime: string;
@@ -659,6 +660,7 @@ declare namespace App {
             writtenBy: string;
             loading: string;
             noContent: string;
+            noMoreChapters: string;
           };
           catalog: {
             title: string;

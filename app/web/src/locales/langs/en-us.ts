@@ -405,7 +405,8 @@ const local: App.I18n.Schema = {
         finished: 'Finished',
         writtenBy: 'by',
         loading: 'Loading...',
-        noContent: 'No content'
+        noContent: 'No content',
+        noMoreChapters: 'No more chapters',
       },
       catalog: {
         title: 'Catalog'
