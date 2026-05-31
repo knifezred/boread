@@ -5,6 +5,7 @@ import { NButton, NSpin } from 'naive-ui'
 import { fetchGetBook, fetchGetChapterContent } from "@/service/api"
 import { useBoolean } from '@sa/hooks'
 import { $t } from "@/locales"
+import { formatWordCount } from '@/utils/book'
 import CatalogModal from './modules/catalog-modal.vue'
 
 defineOptions({ name: 'BookReader' })
@@ -127,7 +128,7 @@ onMounted(async () => {
                   <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ $t("page.book.reader.status") }}</span>
                 </div>
                 <div class="flex flex-col gap-1">
-                  <span class="text-base font-medium">{{ bookInfo.totalWords || 0 }}{{ $t("page.book.detail.words") }}</span>
+                  <span class="text-base font-medium">{{ formatWordCount(bookInfo.totalWords || 0) }}</span>
                   <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ $t("page.book.reader.words") }}</span>
                 </div>
               </div>
