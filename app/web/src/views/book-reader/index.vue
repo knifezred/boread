@@ -77,7 +77,7 @@ async function loadOneChapter(no: number): Promise<ChapterItem | null> {
 async function initWindow(centerNo: number) {
   chapters.value = []
   contentLoading.value = true
-  const needed = [centerNo - 1, centerNo, centerNo + 1].filter(n => n >= 1)
+  const needed = [centerNo, centerNo + 1].filter(n => n >= 1)
   const results = await Promise.all(needed.map(n => loadOneChapter(n)))
   chapters.value = results.filter(Boolean) as ChapterItem[]
   chapters.value.sort((a, b) => a.chapterNo - b.chapterNo)
@@ -222,24 +222,31 @@ onBeforeUnmount(() => {
                   <img :src="bookInfo.cover" :alt="bookInfo.title" class="w-full h-full object-cover" />
                 </div>
                 <h1 class="lg:text-3xl text-2xl font-bold mb-2 text-inherit">{{ bookInfo.title }}</h1>
-                <p class="text-sm mb-8" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ bookInfo.author }} {{ $t("page.book.reader.writtenBy") }}</p>
+                <p class="text-sm mb-8" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ bookInfo.author }} {{
+                  $t("page.book.reader.writtenBy") }}</p>
                 <div class="flex justify-center gap-6 lg:gap-16 mb-8">
                   <div class="flex flex-col gap-1">
-                    <span class="text-base font-medium">{{ bookInfo.categoryName || $t("page.book.reader.unknown") }}</span>
-                    <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ $t("page.book.reader.type") }}</span>
+                    <span class="text-base font-medium">{{ bookInfo.categoryName || $t("page.book.reader.unknown")
+                      }}</span>
+                    <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{
+                      $t("page.book.reader.type") }}</span>
                   </div>
                   <div class="flex flex-col gap-1">
-                    <span class="text-base font-medium">{{ bookInfo.serialStatus === '1' ? $t("page.book.reader.ongoing") : $t("page.book.reader.finished") }}</span>
-                    <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ $t("page.book.reader.status") }}</span>
+                    <span class="text-base font-medium">{{ bookInfo.serialStatus === '1' ?
+                      $t("page.book.reader.ongoing") : $t("page.book.reader.finished") }}</span>
+                    <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{
+                      $t("page.book.reader.status") }}</span>
                   </div>
                   <div class="flex flex-col gap-1">
                     <span class="text-base font-medium">{{ formatWordCount(bookInfo.totalWords || 0) }}</span>
-                    <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{ $t("page.book.reader.words") }}</span>
+                    <span class="text-xs" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">{{
+                      $t("page.book.reader.words") }}</span>
                   </div>
                 </div>
                 <div v-if="bookInfo.intro" class="mb-6 max-w-2xl lg:mx-18 text-align-left">
                   <p v-for="(paragraph, index) in bookInfo.intro.split('\n').filter(p => p.trim())" :key="index"
-                    class="text-sm leading-relaxed mb-2 last:mb-0" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">
+                    class="text-sm leading-relaxed mb-2 last:mb-0"
+                    :class="darkMode ? 'text-gray-400' : 'text-gray-500'">
                     {{ paragraph.trim() }}
                   </p>
                 </div>
@@ -344,7 +351,8 @@ onBeforeUnmount(() => {
             :title="$t(darkMode ? 'page.book.reader.dayMode' : 'page.book.reader.nightMode')"
             @click="darkMode = !darkMode">
             <SvgIcon :icon="darkMode ? 'solar:sun-bold' : 'solar:moon-linear'" size="20" />
-            <span class="text-[10px] leading-none">{{ darkMode ? $t("page.book.reader.dayMode") : $t("page.book.reader.nightMode") }}</span>
+            <span class="text-[10px] leading-none">{{ darkMode ? $t("page.book.reader.dayMode") :
+              $t("page.book.reader.nightMode") }}</span>
           </div>
           <div
             class="w-40px h-40px rd-1 flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all duration-200"
@@ -422,7 +430,7 @@ onBeforeUnmount(() => {
   background-attachment: scroll;
 }
 
-.noise-bg > * {
+.noise-bg>* {
   position: relative;
   z-index: 1;
 }

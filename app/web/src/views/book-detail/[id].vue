@@ -156,12 +156,12 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-gray-100 lg:px-10 px-4 lg:py-5 py-4 font-sans">
     <!-- 面包屑 -->
-    <div class="flex items-center gap-2 text-sm text-gray-400 mb-5">
+    <div class="flex items-center gap-2 text-sm mb-5">
       <span>{{ $t("page.book.detail.breadcrumbHome") }}</span>
       <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
       <span>{{ bookInfo.categoryName || $t("page.book.home.uncategorized") }}</span>
       <SvgIcon icon="solar:alt-arrow-right-linear" size="14" />
-      <span class="text-gray-700 truncate max-w-[200px] lg:max-w-none">{{ bookInfo.title }}</span>
+      <span>{{ bookInfo.title }}</span>
     </div>
 
     <div class="flex gap-6 max-w-1600px mx-auto items-start">
@@ -179,12 +179,13 @@ onMounted(async () => {
               </div>
 
               <div class="flex-1 text-center lg:text-left" v-if="bookInfo">
-                <h1 class="lg:text-4xl text-2xl font-bold mb-4 text-gray-900">{{ bookInfo.title }}</h1>
+                <h1 class="lg:text-4xl text-2xl font-bold mb-4">{{ bookInfo.title }}</h1>
                 <div class="flex lg:flex-row flex-col lg:gap-6 gap-1 text-sm mb-3">
                   <span>{{ $t("page.book.detail.author") }}: {{ bookInfo.author }}</span>
-                  <span class="text-gray-500">{{ $t("page.book.detail.updateTime") }}: {{ formatTime(bookInfo.updateTime) }}</span>
+                  <span>{{ $t("page.book.detail.updateTime") }}: {{
+                    formatTime(bookInfo.updateTime) }}</span>
                 </div>
-                <div class="text-sm text-gray-500 mb-3">
+                <div class="text-sm mb-3">
                   <span>{{ $t("page.book.detail.latestChapter") }}: </span>
                   <span class="text-primary no-underline">{{ latestChapter || $t("page.book.reader.loading") }}</span>
                 </div>
@@ -193,21 +194,22 @@ onMounted(async () => {
                     {{ tag.tagName }}
                   </NTag>
                 </div>
-                <div class="flex lg:gap-8 gap-6 mb-6 justify-center lg:justify-start">
-                  <div class="text-center">
-                    <span class="block text-xl font-semibold text-gray-900">{{ formatWordCount(bookInfo.totalWords)
+                <div class="flex lg:gap-8 gap-6 justify-center lg:justify-start my-6">
+                  <div class="inline-flex items-end gap-1.5">
+                    <span class="text-xl">{{ formatWordCount(bookInfo.totalWords)
                     }}</span>
-                    <span class="text-xs text-gray-400">{{ $t("page.book.detail.words") }}</span>
+                    <span class="text-xs">{{ $t("page.book.detail.words") }}</span>
                   </div>
-                  <div class="text-center">
-                    <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.totalChapters }}</span>
-                    <span class="text-xs text-gray-400">{{ $t("page.book.detail.chapters") }}</span>
+                  <div class="inline-flex items-end gap-1.5">
+                    <span class="text-xl">{{ bookInfo.totalChapters }}</span>
+                    <span class="text-xs">{{ $t("page.book.detail.chapters") }}</span>
                   </div>
-                  <!-- <div class="text-center">
-                    <span class="block text-xl font-semibold text-gray-900">{{ bookInfo.avgRating }}</span>
-                    <span class="text-xs text-gray-400">{{ $t("page.book.detail.rating") }}</span>
+                  <!-- <div class="inline-flex items-end gap-1.5">
+                    <span class="text-xl">{{ bookInfo.avgRating }}</span>
+                    <span class="text-xs">{{ $t("page.book.detail.rating") }}</span>
                   </div> -->
                 </div>
+
                 <div class="flex justify-center lg:justify-start">
                   <NSpace size="medium">
                     <NButton size="large" ghost type="primary" @click="goToReader(1)">
@@ -232,8 +234,8 @@ onMounted(async () => {
           <NCard class="rd-12px shadow-sm" :bordered="false" size="huge">
             <template #header>
               <div class="flex items-center gap-3 w-full">
-                <span class="text-xl font-semibold text-gray-900">{{ $t("page.book.detail.catalog") }}</span>
-                <span class="text-sm text-gray-400 font-normal">{{ $t("page.book.detail.totalChapters", {
+                <span class="text-xl font-semibold">{{ $t("page.book.detail.catalog") }}</span>
+                <span class="text-sm font-normal">{{ $t("page.book.detail.totalChapters", {
                   total: chapterTotal
                 }) }}</span>
                 <div class="ml-auto flex items-center gap-2">
@@ -241,7 +243,7 @@ onMounted(async () => {
                     {{ $t("page.book.detail.reParse") }}
                   </NButton>
                   <div
-                    class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer px-2 py-1 rd-1 transition-all duration-200 hover:bg-gray-100 hover:text-gray-700"
+                    class="flex items-center gap-1 text-xs cursor-pointer px-2 py-1 rd-1 transition-all duration-200 hover:bg-gray-100"
                     @click="toggleSort">
                     <SvgIcon :icon="sortAsc ? 'solar:sort-from-top-linear' : 'solar:sort-from-bottom-linear'"
                       size="16" />
@@ -251,20 +253,13 @@ onMounted(async () => {
               </div>
             </template>
 
-            <div class="flex items-center gap-3 px-5 py-4 bg-amber-50 rd-2 mb-5" v-if="latestChapter">
-              <span class="text-amber-600 font-medium shrink-0">{{ $t("page.book.detail.latest") }}</span>
-              <span class="font-medium text-gray-900 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{
-                latestChapter
-                }}</span>
-            </div>
-
             <NSpin :show="chapterLoading">
               <div class="grid lg:grid-cols-3 grid-cols-1 gap-3 gap-x-6">
                 <div
                   v-for="ch in displayChapters"
                   :key="ch.id"
-                  class="flex items-center gap-1.5 px-3 py-2 rd-1.5 cursor-pointer transition-colors duration-200 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="goToReader()">
+                  class="flex items-center gap-1.5 px-3 py-2 rd-1.5 cursor-pointer transition-colors duration-200 text-sm hover:bg-gray-100"
+                  @click="goToReader(ch.chapterNo)">
                   <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{ ch.title }}</span>
                 </div>
               </div>
@@ -276,14 +271,15 @@ onMounted(async () => {
                 {{ showAll ? $t("page.book.detail.collapse") : $t("page.book.detail.expand", {
                   count:
                     sortedChapters.length -
-                displayLimit }) }}
+                    displayLimit
+                }) }}
                 <template #icon>
                   <SvgIcon :icon="showAll ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'" size="16" />
                 </template>
               </NButton>
             </div>
 
-            <div v-if="!chapters.length && !chapterLoading" class="py-10 text-center text-sm text-gray-400">
+            <div v-if="!chapters.length && !chapterLoading" class="py-10 text-center text-sm">
               {{ $t("page.book.detail.noChapters") }}
             </div>
 
@@ -303,7 +299,7 @@ onMounted(async () => {
             <template #header>
               <div class="flex justify-between items-center w-full">
                 <span>{{ $t("page.book.detail.authorOtherWorks") }}</span>
-                <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ relatedBooks.length }} {{
+                <a href="#" class="text-xs no-underline hover:text-primary">{{ relatedBooks.length }} {{
                   $t("page.book.detail.books") }}</a>
               </div>
             </template>
@@ -313,8 +309,8 @@ onMounted(async () => {
                   <BookCard :book="book" class="small-book-card" />
                 </div>
                 <div class="flex-1 overflow-hidden">
-                  <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
-                  <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                  <div class="text-sm font-medium mb-1 truncate">{{ book.title }}</div>
+                  <div class="text-xs leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
                   </div>
                 </div>
               </div>
@@ -324,7 +320,7 @@ onMounted(async () => {
             <template #header>
               <div class="flex justify-between items-center w-full">
                 <span>{{ $t("page.book.detail.similarRecommend") }}</span>
-                <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more")
+                <a href="#" class="text-xs no-underline hover:text-primary">{{ $t("page.book.detail.more")
                 }}</a>
               </div>
             </template>
@@ -334,8 +330,8 @@ onMounted(async () => {
                   <BookCard :book="book" class="small-book-card" />
                 </div>
                 <div class="flex-1 overflow-hidden">
-                  <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
-                  <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                  <div class="text-sm font-medium mb-1 truncate">{{ book.title }}</div>
+                  <div class="text-xs leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
                   </div>
                 </div>
               </div>
@@ -350,7 +346,7 @@ onMounted(async () => {
           <template #header>
             <div class="flex justify-between items-center w-full">
               <span>{{ $t("page.book.detail.authorOtherWorks") }}</span>
-              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ relatedBooks.length }} {{
+              <a href="#" class="text-xs no-underline hover:text-primary">{{ relatedBooks.length }} {{
                 $t("page.book.detail.books") }}</a>
             </div>
           </template>
@@ -360,8 +356,8 @@ onMounted(async () => {
                 <BookCard :book="book" class="small-book-card" />
               </div>
               <div class="flex-1 overflow-hidden">
-                <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
-                <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                <div class="text-sm font-medium mb-1 truncate">{{ book.title }}</div>
+                <div class="text-xs leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
                 </div>
               </div>
             </div>
@@ -371,7 +367,7 @@ onMounted(async () => {
           <template #header>
             <div class="flex justify-between items-center w-full">
               <span>{{ $t("page.book.detail.similarRecommend") }}</span>
-              <a href="#" class="text-xs text-gray-400 no-underline hover:text-primary">{{ $t("page.book.detail.more")
+              <a href="#" class="text-xs no-underline hover:text-primary">{{ $t("page.book.detail.more")
               }}</a>
             </div>
           </template>
@@ -381,8 +377,8 @@ onMounted(async () => {
                 <BookCard :book="book" class="small-book-card" />
               </div>
               <div class="flex-1 overflow-hidden">
-                <div class="text-sm font-medium text-gray-900 mb-1 truncate">{{ book.title }}</div>
-                <div class="text-xs text-gray-400 leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
+                <div class="text-sm font-medium mb-1 truncate">{{ book.title }}</div>
+                <div class="text-xs leading-relaxed line-clamp-2">{{ book.intro?.slice(0, 40) || '' }}
                 </div>
               </div>
             </div>
