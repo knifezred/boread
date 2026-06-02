@@ -5,19 +5,19 @@ import "time"
 // SysUser 后台用户表 (sys_user)
 type SysUser struct {
 	BaseModel
-	DeptID        *uint64      `gorm:"column:dept_id;index" json:"deptId,omitempty"`
+	DeptID        *uint64      `gorm:"column:dept_id;index" json:"deptId"`
 	UserName      string       `gorm:"column:user_name;size:64;not null" json:"userName"`
 	Password      string       `gorm:"column:password;size:128;not null" json:"-"`
-	PwdUpdatedAt  *time.Time   `gorm:"column:pwd_updated_at" json:"pwdUpdatedAt,omitempty"`
+	PwdUpdatedAt  *time.Time   `gorm:"column:pwd_updated_at" json:"pwdUpdatedAt"`
 	PwdErrorCount uint16       `gorm:"column:pwd_error_count;default:0" json:"-"`
-	LockedUntil   *time.Time   `gorm:"column:locked_until" json:"lockedUntil,omitempty"`
-	UserGender    *string      `gorm:"column:user_gender;type:char(1)" json:"userGender,omitempty"`
+	LockedUntil   *time.Time   `gorm:"column:locked_until" json:"lockedUntil"`
+	UserGender    *string      `gorm:"column:user_gender;type:char(1)" json:"userGender"`
 	NickName      string       `gorm:"column:nick_name;size:64;default:''" json:"nickName"`
-	UserPhone     *string      `gorm:"column:user_phone;size:20;index" json:"userPhone,omitempty"`
-	UserEmail     *string      `gorm:"column:user_email;size:128;index" json:"userEmail,omitempty"`
-	Avatar        *string      `gorm:"column:avatar;size:255" json:"avatar,omitempty"`
-	LastLoginTime *time.Time   `gorm:"column:last_login_time" json:"lastLoginTime,omitempty"`
-	LastLoginIP   *string      `gorm:"column:last_login_ip;size:64" json:"lastLoginIp,omitempty"`
+	UserPhone     *string      `gorm:"column:user_phone;size:20;index" json:"userPhone"`
+	UserEmail     *string      `gorm:"column:user_email;size:128;index" json:"userEmail"`
+	Avatar        *string      `gorm:"column:avatar;size:255" json:"avatar"`
+	LastLoginTime *time.Time   `gorm:"column:last_login_time" json:"lastLoginTime"`
+	LastLoginIP   *string      `gorm:"column:last_login_ip;size:64" json:"lastLoginIp"`
 	Status        EnableStatus `gorm:"column:status;type:char(1);default:'1'" json:"status"`
 	Version       uint64       `gorm:"column:version;default:0" json:"-"`
 }

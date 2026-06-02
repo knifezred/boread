@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { NButton, NInput, NScrollbar, NSpin, NPagination } from "naive-ui";
+import { ref, computed, onMounted } from "vue"
+import { NButton, NInput, NScrollbar, NSpin, NPagination } from "naive-ui"
 import {
   fetchGetBookList,
   fetchGetHotCategoryList,
   fetchGetTagList,
-} from "@/service/api";
-import { useRouter } from "vue-router";
-import { useDictItems } from "@/hooks/business/dict";
-import { formatWordCount } from "@/utils/book";
-import { $t } from "@/locales";
+} from "@/service/api"
+import { useRouter } from "vue-router"
+import { useDictItems } from "@/hooks/business/dict"
+import { formatWordCount } from "@/utils/book"
+import { $t } from "@/locales"
 
 defineOptions({ name: "HomePage" });
 
@@ -321,7 +321,7 @@ function showChapters(book: Api.BookManage.Book) {
                 >
                   <span>{{ formatWordCount(book.totalWords) }}</span>
                   <span class="text-gray-400 mx-1">|</span>
-                  <span>{{ $t("page.book.home.latestChapter") }}</span>
+                  <span>{{ book.latestChapterTitle }}</span>
                 </div>
               </div>
             </div>

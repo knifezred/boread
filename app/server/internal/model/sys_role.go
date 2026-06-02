@@ -16,7 +16,7 @@ type SysRole struct {
 	BaseModel
 	RoleName  string       `gorm:"column:role_name;size:64;not null" json:"roleName"`
 	RoleCode  string       `gorm:"column:role_code;size:64;not null" json:"roleCode"`
-	RoleDesc  *string      `gorm:"column:role_desc;size:255" json:"roleDesc,omitempty"`
+	RoleDesc  *string      `gorm:"column:role_desc;size:255" json:"roleDesc"`
 	DataScope DataScope    `gorm:"column:data_scope;type:char(1);default:'5'" json:"dataScope"`
 	IsSystem  bool         `gorm:"column:is_system;default:0" json:"isSystem"`
 	SortOrder int          `gorm:"column:sort_order;default:0" json:"sortOrder"`

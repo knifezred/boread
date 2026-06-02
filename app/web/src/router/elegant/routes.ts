@@ -212,6 +212,15 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
+    name: 'bookshelf',
+    path: '/bookshelf',
+    component: 'layout.base$view.bookshelf',
+    meta: {
+      title: 'bookshelf',
+      i18nKey: 'route.bookshelf'
+    }
+  },
+  {
     name: 'home',
     path: '/home',
     component: 'layout.base$view.home',

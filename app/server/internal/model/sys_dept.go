@@ -7,7 +7,7 @@ type SysDept struct {
 	Ancestors string       `gorm:"column:ancestors;size:512;default:''" json:"ancestors"`
 	DeptName  string       `gorm:"column:dept_name;size:64;not null" json:"deptName"`
 	DeptCode  string       `gorm:"column:dept_code;size:64;not null" json:"deptCode"`
-	Leader    *string      `gorm:"column:leader;size:64" json:"leader,omitempty"`
+	Leader    *string      `gorm:"column:leader;size:64" json:"leader"`
 	SortOrder int          `gorm:"column:sort_order;default:0" json:"sortOrder"`
 	Status    EnableStatus `gorm:"column:status;type:char(1);default:'1'" json:"status"`
 }

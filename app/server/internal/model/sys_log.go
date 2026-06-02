@@ -30,13 +30,13 @@ const (
 type SysLoginLog struct {
 	ID          uint64        `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UserType    LoginUserType `gorm:"column:user_type;type:char(1);default:'1'" json:"userType"`
-	UserID      *uint64       `gorm:"column:user_id" json:"userId,omitempty"`
+	UserID      *uint64       `gorm:"column:user_id" json:"userId"`
 	UserName    string        `gorm:"column:user_name;size:64;not null" json:"userName"`
-	LoginIP     *string       `gorm:"column:login_ip;size:64" json:"loginIp,omitempty"`
-	UserAgent   *string       `gorm:"column:user_agent;type:text" json:"userAgent,omitempty"`
+	LoginIP     *string       `gorm:"column:login_ip;size:64" json:"loginIp"`
+	UserAgent   *string       `gorm:"column:user_agent;type:text" json:"userAgent"`
 	LoginType   LoginType     `gorm:"column:login_type;type:char(1);default:'1'" json:"loginType"`
 	LoginResult LoginResult   `gorm:"column:login_result;type:char(1);not null" json:"loginResult"`
-	Message     *string       `gorm:"column:message;size:255" json:"message,omitempty"`
+	Message     *string       `gorm:"column:message;size:255" json:"message"`
 	LoginTime   time.Time     `gorm:"column:login_time;autoCreateTime:milli" json:"loginTime"`
 }
 
@@ -49,14 +49,14 @@ type SysOperationLog struct {
 	UserName      string    `gorm:"column:user_name;size:64;not null" json:"userName"`
 	Module        string    `gorm:"column:module;size:64;not null" json:"module"`
 	Action        string    `gorm:"column:action;size:32;not null" json:"action"`
-	TargetID      *uint64   `gorm:"column:target_id" json:"targetId,omitempty"`
-	TargetName    *string   `gorm:"column:target_name;size:128" json:"targetName,omitempty"`
-	RequestURL    *string   `gorm:"column:request_url;size:255" json:"requestUrl,omitempty"`
-	RequestMethod *string   `gorm:"column:request_method;size:16" json:"requestMethod,omitempty"`
-	RequestBody   *string   `gorm:"column:request_body;type:text" json:"requestBody,omitempty"`
-	ResponseCode  *int      `gorm:"column:response_code" json:"responseCode,omitempty"`
-	ClientIP      *string   `gorm:"column:client_ip;size:64" json:"clientIp,omitempty"`
-	UserAgent     *string   `gorm:"column:user_agent;type:text" json:"userAgent,omitempty"`
+	TargetID      *uint64   `gorm:"column:target_id" json:"targetId"`
+	TargetName    *string   `gorm:"column:target_name;size:128" json:"targetName"`
+	RequestURL    *string   `gorm:"column:request_url;size:255" json:"requestUrl"`
+	RequestMethod *string   `gorm:"column:request_method;size:16" json:"requestMethod"`
+	RequestBody   *string   `gorm:"column:request_body;type:text" json:"requestBody"`
+	ResponseCode  *int      `gorm:"column:response_code" json:"responseCode"`
+	ClientIP      *string   `gorm:"column:client_ip;size:64" json:"clientIp"`
+	UserAgent     *string   `gorm:"column:user_agent;type:text" json:"userAgent"`
 	CostMs        uint32    `gorm:"column:cost_ms;default:0" json:"costMs"`
 	OperateTime   time.Time `gorm:"column:operate_time;autoCreateTime:milli" json:"operateTime"`
 }

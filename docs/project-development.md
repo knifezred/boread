@@ -1,6 +1,6 @@
 # Boread 小说阅读平台 — AI 辅助开发文档
 
-> 开发者：单人 + AI  
+> 开发者：单人 + AI
 > 版本：1.0.0 | 更新：2026-05-27 | 状态：开发中
 
 ---
@@ -99,7 +99,7 @@ boread/
 ### 2.3 通用注意事项（喂给 AI 前确认）
 
 - **后端新增路由** → 在 `router.go` 中注册，写操作加 `middleware.RequireButton`
-- **后端新增 DTO** → `json:"xxx"` 标签，不用 `form:"xxx"`
+- **后端新增 DTO** → `json:"xxx"` 标签，不用 `form:"xxx"`；**响应结构体严禁使用 `,omitempty`**（零值被省略后前端读到 `undefined` 引发 TypeError）
 - **后端新增 Model** → 嵌入 `model.BaseModel`，无需手写 `id/createTime/updateTime`
 - **后端分页结构** → 返回 `dto.PageResponse`，前端 `Common.PaginatingQueryRecord<T>`
 - **前端新增页面** → 更新 4 文件：`routes.ts` + `imports.ts` + `transform.ts` + `elegant-router.d.ts`

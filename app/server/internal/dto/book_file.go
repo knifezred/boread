@@ -14,11 +14,11 @@ type FileUploadResponse struct {
 	UploadID         uint64  `json:"uploadId"`
 	OriginalName     string  `json:"originalName"`
 	FileSize         uint64  `json:"fileSize"`
-	SourceFormat     *string `json:"sourceFormat,omitempty"`
+	SourceFormat     *string `json:"sourceFormat"`
 	SuggestedTitle   string  `json:"suggestedTitle"`
 	SuggestedAuthor  string  `json:"suggestedAuthor"`
-	MatchedBookID    *uint64 `json:"matchedBookId,omitempty"`
-	MatchedBookTitle string  `json:"matchedBookTitle,omitempty"`
+	MatchedBookID    *uint64 `json:"matchedBookId"`
+	MatchedBookTitle string  `json:"matchedBookTitle"`
 }
 
 // ConfirmImportRequest 确认入库请求
@@ -36,7 +36,7 @@ type ConfirmImportResponse struct {
 	BookAuthor   string  `json:"bookAuthor"`
 	ChapterCount uint32  `json:"chapterCount"`
 	ParseStatus  string  `json:"parseStatus"`
-	ParseMessage *string `json:"parseMessage,omitempty"`
+	ParseMessage *string `json:"parseMessage"`
 }
 
 // ==================== 上传任务 ====================
@@ -179,9 +179,9 @@ type ScanResult struct {
 	OriginalName string  `json:"originalName"`
 	FileSize     uint64  `json:"fileSize"`
 	ParseStatus  string  `json:"parseStatus"`
-	ParseMessage *string `json:"parseMessage,omitempty"`
-	BookID       *uint64 `json:"bookId,omitempty"`
-	ChapterCount *uint32 `json:"chapterCount,omitempty"`
+	ParseMessage *string `json:"parseMessage"`
+	BookID       *uint64 `json:"bookId"`
+	ChapterCount *uint32 `json:"chapterCount"`
 }
 
 // ScanAllResponse 批量扫描响应

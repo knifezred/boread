@@ -253,6 +253,7 @@ const local: App.I18n.Schema = {
     "admin_library_book-filter-rule": "内容净化规则",
     admin_dashboard: "看板",
     home: "我的书库",
+    bookshelf: "我的书架",
     system: "系统管理",
     library: "书库管理",
     "book-detail": "小说详情",
@@ -365,7 +366,7 @@ const local: App.I18n.Schema = {
         breadcrumbHome: "首页",
         bookInfo: "作品信息",
         catalog: "目录",
-        introTitle:"作品简介",
+        introTitle: "作品简介",
         author: "作者",
         updateTime: "更新时间",
         latestChapter: "最新章节",
@@ -374,6 +375,8 @@ const local: App.I18n.Schema = {
         rating: "评分",
         readNow: "立即阅读",
         addToShelf: "加入书架",
+        addShelfSuccess: "已加入书架",
+        addShelfFailed: "加入书架失败",
         totalChapters: "共 {total} 章",
         ascSort: "正序",
         descSort: "倒序",
@@ -415,6 +418,22 @@ const local: App.I18n.Schema = {
       catalog: {
         title: "目录",
       },
+    },
+    bookshelf: {
+      title: "我的书架",
+      all: "全部",
+      empty: "书架空空如也，快去添加书籍吧",
+      top: "置顶",
+      setTop: "置顶",
+      cancelTop: "取消置顶",
+      changeGroup: "修改分组",
+      remove: "移出书架",
+      searchPlaceholder: "搜索书名",
+      groupName: "分组名称",
+      groupPlaceholder: "请输入分组名称",
+      addToBookshelf: "加入书架",
+      notRead: "未读",
+      finished: "已读完",
     },
     admin: {
       system: {
@@ -772,6 +791,23 @@ const local: App.I18n.Schema = {
           },
         },
       },
+      dashboard: {
+        title: "看板",
+        visitCount: "访问量",
+        downloadCount: "下载量",
+        memberCount: "会员数",
+        bookCount: "书籍数",
+        totalBooks: "总书籍数",
+        weeklyNewBooks: "本周新增",
+        monthlyActiveUsers: "月活跃用户",
+        recentReadings: "最近阅读",
+        cardData: {
+          visits: "总访问量",
+          downloads: "总下载量",
+          members: "会员总数",
+          books: "书籍总数",
+        },
+      },
     },
   },
   form: {
@@ -830,6 +866,6 @@ const local: App.I18n.Schema = {
       unFixed: "取消固定",
     },
   },
-};
+}
 
-export default local;
+export default local

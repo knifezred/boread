@@ -11,7 +11,7 @@ type SysMenuButton struct {
 	ID         uint64         `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	MenuID     uint64         `gorm:"column:menu_id;not null" json:"menuId"`
 	ButtonCode string         `gorm:"column:button_code;size:64;not null" json:"buttonCode"`
-	ButtonDesc *string        `gorm:"column:button_desc;size:255" json:"buttonDesc,omitempty"`
+	ButtonDesc *string        `gorm:"column:button_desc;size:255" json:"buttonDesc"`
 	CreateTime time.Time      `gorm:"column:create_time;autoCreateTime:milli" json:"createTime"`
 	UpdateTime time.Time      `gorm:"column:update_time;autoUpdateTime:milli" json:"updateTime"`
 	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at;index" json:"-"`

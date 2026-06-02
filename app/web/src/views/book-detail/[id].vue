@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { NButton, NCard, NTag, NSpace, NSpin, NPagination } from "naive-ui";
-import BookCard from "@/components/book-card.vue";
+import { ref, computed, onMounted } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { NButton, NCard, NTag, NSpace, NSpin, NPagination } from "naive-ui"
+import BookCard from "@/components/book-card.vue"
 import {
   fetchGetBook,
   fetchGetChapterList,
   fetchReParseChapters,
-} from "@/service/api";
-import { $t } from "@/locales";
-import { formatWordCount, formatTime } from "@/utils/book";
+  fetchAddToBookshelf,
+} from "@/service/api"
+import { $t } from "@/locales"
+import { formatWordCount, formatTime } from "@/utils/book"
 
 defineOptions({ name: "BookDetail" });
 
@@ -133,6 +134,20 @@ async function handleReParse() {
   });
 }
 
+/** 添加到书架 */
+async function handleAddToShelf() {
+  try {
+    const { data } = await fetchAddToBookshelf({ bookId: bookInfo.value.id });
+    if (data) {
+      window.$message?.success($t("page.book.detail.addShelfSuccess"));
+    }
+  } catch (err: any) {
+    window.$message?.error(
+      err.message || $t("page.book.detail.addShelfFailed"),
+    );
+  }
+}
+
 onMounted(async () => {
   loading.value = true;
   try {
@@ -249,7 +264,7 @@ onMounted(async () => {
                     >
                       {{ $t("page.book.detail.readNow") }}
                     </NButton>
-                    <NButton size="large" ghost type="primary">
+                    <NButton size="large" ghost type="primary" @click="handleAddToShelf">
                       {{ $t("page.book.detail.addToShelf") }}
                     </NButton>
                   </NSpace>

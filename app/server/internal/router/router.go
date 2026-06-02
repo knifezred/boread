@@ -48,6 +48,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookChapterRepo := repository.NewBookChapterRepository(db)
 	bookChapterRuleRepo := repository.NewBookChapterRuleRepository(db)
 	bookFilterRuleRepo := repository.NewBookContentFilterRuleRepository(db)
+	readerBookshelfRepo := repository.NewReaderBookshelfRepository(db)
+	readerReadProgressRepo := repository.NewReaderReadProgressRepository(db)
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, db)
@@ -61,6 +63,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
 	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo, bookChapterRepo)
 	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
+	readerSvc := service.NewReaderService(db, readerBookshelfRepo, readerReadProgressRepo, bookRepo, bookChapterRepo)
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
@@ -74,6 +77,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
 	bookHandler := v1.NewBookHandler(bookSvc)
 	bookFileHandler := v1.NewBookFileHandler(bookFileSvc)
+	readerHandler := v1.NewReaderHandler(readerSvc)
 
 	api := r.Group("/api")
 	{
@@ -198,6 +202,17 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.POST("/book/filter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateFilterRule)
 			manage.PUT("/book/filter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateFilterRule)
 			manage.DELETE("/book/filter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteFilterRule)
+
+			// --- Reader Bookshelf ---
+			manage.POST("/bookshelf", readerHandler.AddToBookshelf)
+			manage.DELETE("/bookshelf/:bookId", readerHandler.RemoveFromBookshelf)
+			manage.PUT("/bookshelf/:bookId", readerHandler.UpdateBookshelf)
+			manage.POST("/bookshelf/page", readerHandler.GetBookshelfPage)
+			manage.GET("/bookshelf/groups", readerHandler.ListGroups)
+
+			// --- Reader Progress ---
+			manage.PUT("/reader/progress/:bookId", readerHandler.ReportProgress)
+			manage.GET("/reader/progress/:bookId", readerHandler.GetProgress)
 		}
 	}
 

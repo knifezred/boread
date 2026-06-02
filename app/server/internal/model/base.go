@@ -13,9 +13,9 @@ import (
 // 字段名与 SQL 列对齐 (sys_user / sys_role 等), 而非 GORM 默认命名
 type BaseModel struct {
 	ID         uint64         `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	CreateBy   *uint64        `gorm:"column:create_by" json:"createBy,omitempty"`
+	CreateBy   *uint64        `gorm:"column:create_by" json:"createBy"`
 	CreateTime time.Time      `gorm:"column:create_time;autoCreateTime:milli" json:"createTime"`
-	UpdateBy   *uint64        `gorm:"column:update_by" json:"updateBy,omitempty"`
+	UpdateBy   *uint64        `gorm:"column:update_by" json:"updateBy"`
 	UpdateTime time.Time      `gorm:"column:update_time;autoUpdateTime:milli" json:"updateTime"`
 	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at;index" json:"-"`
 }

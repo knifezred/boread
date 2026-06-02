@@ -38,6 +38,7 @@ declare module "@elegant-router/types" {
     "admin_system_user-detail": "/admin/system/user-detail/:id";
     "book-detail": "/book-detail/:id";
     "book-reader": "/book-reader";
+    "bookshelf": "/bookshelf";
     "home": "/home";
     "iframe-page": "/iframe-page/:url";
     "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?";
@@ -78,6 +79,7 @@ declare module "@elegant-router/types" {
     | "admin"
     | "book-detail"
     | "book-reader"
+    | "bookshelf"
     | "home"
     | "iframe-page"
     | "login"
@@ -117,6 +119,7 @@ declare module "@elegant-router/types" {
     | "admin_system_user"
     | "book-detail"
     | "book-reader"
+    | "bookshelf"
     | "home"
   >;
 

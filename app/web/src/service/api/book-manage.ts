@@ -1,4 +1,4 @@
-import { request } from "../request"
+import { request } from "../request";
 
 // =====================================================================
 // 后端: boread (Go + Gin)
@@ -375,5 +375,69 @@ export function fetchDeleteFilterRule(id: string | number) {
   return request<null>({
     url: `/manage/book/filter-rule/${id}`,
     method: "delete",
+  });
+}
+
+// -------- Reader Bookshelf --------
+
+/** 书架分页列表 */
+export function fetchGetBookshelfPage(params?: Api.BookManage.BookshelfSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookshelfItem>>({
+    url: "/manage/bookshelf/page",
+    method: "post",
+    data: params,
+  });
+}
+
+/** 添加到书架 */
+export function fetchAddToBookshelf(data: Api.BookManage.BookshelfRequest) {
+  return request<Api.BookManage.BookshelfItem>({
+    url: "/manage/bookshelf",
+    method: "post",
+    data,
+  });
+}
+
+/** 从书架移除 */
+export function fetchRemoveFromBookshelf(bookId: string | number) {
+  return request<null>({
+    url: `/manage/bookshelf/${bookId}`,
+    method: "delete",
+  });
+}
+
+/** 更新书架 */
+export function fetchUpdateBookshelf(bookId: string | number, data: Api.BookManage.BookshelfUpdateRequest) {
+  return request<Api.BookManage.BookshelfItem>({
+    url: `/manage/bookshelf/${bookId}`,
+    method: "put",
+    data,
+  });
+}
+
+/** 获取书架分组列表 */
+export function fetchListBookshelfGroups() {
+  return request<Api.BookManage.BookshelfGroupItem[]>({
+    url: "/manage/bookshelf/groups",
+    method: "get",
+  });
+}
+
+// -------- Reader Read Progress --------
+
+/** 上报阅读进度 */
+export function fetchReportReadProgress(bookId: string | number, data: Api.BookManage.ReadProgressRequest) {
+  return request<Api.BookManage.ReadProgressResponse>({
+    url: `/manage/reader/progress/${bookId}`,
+    method: "put",
+    data,
+  });
+}
+
+/** 获取阅读进度 */
+export function fetchGetReadProgress(bookId: string | number) {
+  return request<Api.BookManage.ReadProgressResponse>({
+    url: `/manage/reader/progress/${bookId}`,
+    method: "get",
   });
 }

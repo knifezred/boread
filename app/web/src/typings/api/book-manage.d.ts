@@ -331,5 +331,80 @@ declare namespace Api {
       sortBy: string;
       sortOrder: string;
     }
+
+    // ==================== Reader Bookshelf ====================
+
+    /** 书架条目 */
+    type BookshelfItem = {
+      id: number;
+      readerId: number;
+      bookId: number;
+      groupName: string;
+      isTop: boolean;
+      lastReadTime: string | null;
+      addTime: string;
+      createTime: string;
+      bookTitle: string;
+      bookAuthor: string;
+      bookCover: string | null;
+      totalChapters: number;
+      totalWords: number;
+      chapterId: number | null;
+      chapterNo: number | null;
+      position: number | null;
+      readPercent: number;
+      readDuration: number;
+    };
+
+    /** 书架搜索参数 */
+    type BookshelfSearchParams = CommonType.RecordNullable<
+      {
+        groupName: string;
+        keyword: string;
+      } & CommonSearchParams
+    >;
+
+    /** 添加到书架请求 */
+    type BookshelfRequest = {
+      bookId: number;
+      groupName?: string;
+    };
+
+    /** 更新书架请求 */
+    type BookshelfUpdateRequest = {
+      groupName?: string;
+      isTop?: boolean;
+    };
+
+    /** 书架分组项 */
+    type BookshelfGroupItem = {
+      groupName: string;
+      bookCount: number;
+    };
+
+    // ==================== Reader Read Progress ====================
+
+    /** 上报阅读进度请求 */
+    type ReadProgressRequest = {
+      fileId?: number | null;
+      chapterId: number;
+      chapterNo: number;
+      position: number;
+      percent: number;
+      readDuration: number;
+    };
+
+    /** 阅读进度响应 */
+    type ReadProgressResponse = Common.CommonRecord<{
+      readerId: number;
+      bookId: number;
+      fileId: number | null;
+      chapterId: number;
+      chapterNo: number;
+      position: number;
+      percent: number;
+      readDuration: number;
+      lastReadTime: string;
+    }>;
   }
 }

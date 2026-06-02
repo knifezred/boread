@@ -235,6 +235,7 @@ const local: App.I18n.Schema = {
     404: 'Page Not Found',
     500: 'Server Error',
     'iframe-page': 'Iframe',
+    bookshelf: 'My Bookshelf',
     admin_dashboard: 'Dashboard',
     admin: 'System',
     admin_system: 'System',
@@ -362,6 +363,7 @@ const local: App.I18n.Schema = {
       },
       detail: {
         breadcrumbHome: 'Home',
+        introTitle: 'Introduction',
         bookInfo: 'Book Info',
         catalog: 'Catalog',
         author: 'Author',
@@ -372,6 +374,8 @@ const local: App.I18n.Schema = {
         rating: 'Rating',
         readNow: 'Read Now',
         addToShelf: 'Add to Shelf',
+        addShelfSuccess: 'Added to shelf',
+        addShelfFailed: 'Failed to add to shelf',
         totalChapters: 'Total {total} chapters',
         ascSort: 'Ascending',
         descSort: 'Descending',
@@ -413,6 +417,22 @@ const local: App.I18n.Schema = {
       catalog: {
         title: 'Catalog'
       }
+    },
+    bookshelf: {
+      title: "My Bookshelf",
+      all: "All",
+      empty: "Your bookshelf is empty, go add some books",
+      top: "Pinned",
+      setTop: "Pin to Top",
+      cancelTop: "Unpin",
+      changeGroup: "Change Group",
+      remove: "Remove",
+      searchPlaceholder: "Search book title",
+      groupName: "Group Name",
+      groupPlaceholder: "Enter group name",
+      addToBookshelf: "Add to Bookshelf",
+      notRead: "Not Read",
+      finished: "Finished"
     },
     admin: {
       system: {
@@ -769,6 +789,23 @@ const local: App.I18n.Schema = {
             description: ""
           }
         }
+      },
+      dashboard: {
+        title: "Dashboard",
+        visitCount: "Visits",
+        downloadCount: "Downloads",
+        memberCount: "Members",
+        bookCount: "Books",
+        totalBooks: "Total Books",
+        weeklyNewBooks: "New This Week",
+        monthlyActiveUsers: "Monthly Active Users",
+        recentReadings: "Recent Readings",
+        cardData: {
+          visits: "Total Visits",
+          downloads: "Total Downloads",
+          members: "Total Members",
+          books: "Total Books"
+        }
       }
     },
   },
@@ -828,6 +865,6 @@ const local: App.I18n.Schema = {
       unFixed: 'Unfixed'
     }
   }
-};
+}
 
-export default local;
+export default local

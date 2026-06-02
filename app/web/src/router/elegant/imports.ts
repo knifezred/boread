@@ -35,5 +35,6 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   admin_system_user: () => import("@/views/admin/system/user/index.vue"),
   "book-detail": () => import("@/views/book-detail/[id].vue"),
   "book-reader": () => import("@/views/book-reader/index.vue"),
+  bookshelf: () => import("@/views/bookshelf/index.vue"),
   home: () => import("@/views/home/index.vue"),
 };

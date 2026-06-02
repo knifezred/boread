@@ -41,10 +41,10 @@ type BookSearch struct {
 type BookResponse struct {
 	model.Book
 	TagIDs             []uint64   `json:"tagIds"`
-	Tags               []TagBrief `json:"tags,omitempty"`
-	CategoryName       string     `json:"categoryName,omitempty"`
-	LatestChapterTitle string     `json:"latestChapterTitle,omitempty"`
-	LatestChapterNo    uint32     `json:"latestChapterNo,omitempty"`
+	Tags               []TagBrief `json:"tags"`
+	CategoryName       string     `json:"categoryName"`
+	LatestChapterTitle string     `json:"latestChapterTitle"`
+	LatestChapterNo    uint32     `json:"latestChapterNo"`
 }
 
 // TagBrief 标签简要信息
