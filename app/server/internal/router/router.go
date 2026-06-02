@@ -59,7 +59,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	logSvc := service.NewLogService(logRepo)
 	bookCategorySvc := service.NewBookCategoryService(bookCategoryRepo)
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
-	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo)
+	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo, bookChapterRepo)
 	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
 
 	// === Handler 层 ===

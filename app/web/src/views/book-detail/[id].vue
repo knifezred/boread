@@ -71,8 +71,6 @@ function toggleShowAll() {
   showAll.value = !showAll.value;
 }
 
-const latestChapter = ref("");
-
 function toggleSort() {
   sortAsc.value = !sortAsc.value;
 }
@@ -142,25 +140,6 @@ onMounted(async () => {
     if (bookData) {
       bookInfo.value = bookData;
       await loadChapters(1);
-
-      if (bookData.totalChapters > 0) {
-        try {
-          const lastPage = Math.ceil(
-            bookData.totalChapters / chapterSize.value,
-          );
-          const { data: lastPageData } = await fetchGetChapterList({
-            bookId: Number(bookId),
-            current: lastPage,
-            size: chapterSize.value,
-          });
-          if (lastPageData?.records?.length) {
-            latestChapter.value =
-              lastPageData.records[lastPageData.records.length - 1].title;
-          }
-        } catch {
-          // 查询最新章节失败不影响主流程
-        }
-      }
     }
   } catch (err) {
     console.error("加载书籍详情失败:", err);
@@ -217,7 +196,7 @@ onMounted(async () => {
                 <div class="text-sm mb-3">
                   <span>{{ $t("page.book.detail.latestChapter") }}: </span>
                   <span class="text-primary no-underline">{{
-                    latestChapter || $t("page.book.reader.loading")
+                    bookInfo.latestChapterTitle || $t("page.book.reader.loading")
                   }}</span>
                 </div>
                 <div

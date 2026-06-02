@@ -24,6 +24,7 @@ type BookService struct {
 	tagRelRepo   *repository.BookTagRelRepository
 	categoryRepo *repository.BookCategoryRepository
 	tagRepo      *repository.BookTagRepository
+	chapterRepo  *repository.BookChapterRepository
 }
 
 func NewBookService(
@@ -32,6 +33,7 @@ func NewBookService(
 	tagRelRepo *repository.BookTagRelRepository,
 	categoryRepo *repository.BookCategoryRepository,
 	tagRepo *repository.BookTagRepository,
+	chapterRepo *repository.BookChapterRepository,
 ) *BookService {
 	return &BookService{
 		db:           db,
@@ -39,6 +41,7 @@ func NewBookService(
 		tagRelRepo:   tagRelRepo,
 		categoryRepo: categoryRepo,
 		tagRepo:      tagRepo,
+		chapterRepo:  chapterRepo,
 	}
 }
 
@@ -252,6 +255,11 @@ func (s *BookService) GetByID(ctx context.Context, id uint64) (*dto.BookResponse
 			resp.CategoryName = cat.CategoryName
 		}
 	}
+	// 填充最新章节信息
+	if ch, err := s.chapterRepo.GetLatestByBookID(ctx, id); err == nil && ch != nil {
+		resp.LatestChapterTitle = ch.Title
+		resp.LatestChapterNo = ch.ChapterNo
+	}
 	return resp, nil
 }
 
@@ -291,6 +299,13 @@ func (s *BookService) Page(ctx context.Context, req *dto.BookSearch) (*dto.PageR
 	if err != nil {
 		return nil, err
 	}
+	// 批量查最新章节
+	chapterMap := make(map[uint64]*model.BookChapter, len(rows))
+	for _, r := range rows {
+		if ch, err := s.chapterRepo.GetLatestByBookID(ctx, r.ID); err == nil && ch != nil {
+			chapterMap[r.ID] = ch
+		}
+	}
 	records := make([]dto.BookResponse, len(rows))
 	for i, r := range rows {
 		resp := dto.BookResponse{Book: r}
@@ -299,6 +314,10 @@ func (s *BookService) Page(ctx context.Context, req *dto.BookSearch) (*dto.PageR
 		}
 		if r.CategoryID != nil {
 			resp.CategoryName = catMap[*r.CategoryID]
+		}
+		if ch, ok := chapterMap[r.ID]; ok {
+			resp.LatestChapterTitle = ch.Title
+			resp.LatestChapterNo = ch.ChapterNo
 		}
 		records[i] = resp
 	}

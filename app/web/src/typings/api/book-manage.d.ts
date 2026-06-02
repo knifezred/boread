@@ -81,6 +81,8 @@ declare namespace Api {
       deptId: number | null;
       tagIds?: number[];
       tags?: { id: number; tagName: string }[];
+      latestChapterTitle?: string;
+      latestChapterNo?: number;
     }>;
 
     /** book search params */

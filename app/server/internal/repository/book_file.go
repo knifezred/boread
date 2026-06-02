@@ -153,6 +153,22 @@ func (r *BookChapterRepository) DeleteByFileID(ctx context.Context, fileID uint6
 	return r.db.WithContext(ctx).Where("file_id = ?", fileID).Delete(&model.BookChapter{}).Error
 }
 
+func (r *BookChapterRepository) GetLatestByBookID(ctx context.Context, bookID uint64) (*model.BookChapter, error) {
+	var m model.BookChapter
+	err := r.db.WithContext(ctx).Model(&model.BookChapter{}).
+		Where("book_id = ?", bookID).
+		Order("chapter_no DESC").
+		Limit(1).
+		Find(&m).Error
+	if err != nil {
+		return nil, err
+	}
+	if m.ID == 0 {
+		return nil, nil
+	}
+	return &m, nil
+}
+
 func (r *BookChapterRepository) DeleteByBookID(ctx context.Context, bookID uint64) error {
 	return r.db.WithContext(ctx).Where("book_id = ?", bookID).Delete(&model.BookChapter{}).Error
 }
