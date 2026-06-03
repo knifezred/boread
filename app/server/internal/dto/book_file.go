@@ -116,13 +116,12 @@ type ReParseResponse struct {
 // ChapterRuleRequest 规则请求
 type ChapterRuleRequest struct {
 	RuleName      string  `json:"ruleName" binding:"required,max=64"`
-	ScopeType     string  `json:"scopeType" binding:"required,oneof=1 2"`
-	BookID        *uint64 `json:"bookId"`
-	Pattern       string  `json:"pattern" binding:"required,max=512"`
-	TitleGroup    int     `json:"titleGroup"`
+	RuleType      string  `json:"ruleType" binding:"required,oneof=1 2"`
+	TitlePattern  string  `json:"titlePattern" binding:"required,max=512"`
+	GroupPattern  *string `json:"groupPattern"`
 	MinChapterLen uint32  `json:"minChapterLen"`
 	MaxChapterLen uint32  `json:"maxChapterLen"`
-	Priority      int     `json:"priority"`
+	SortOrder     int     `json:"sortOrder"`
 	Description   *string `json:"description"`
 	Status        string  `json:"status"`
 }
@@ -130,10 +129,10 @@ type ChapterRuleRequest struct {
 // ChapterRuleSearch 规则搜索
 type ChapterRuleSearch struct {
 	PageRequest
-	RuleName  string  `json:"ruleName"`
-	ScopeType string  `json:"scopeType"`
-	BookID    *uint64 `json:"bookId"`
-	Status    string  `json:"status"`
+	RuleName string  `json:"ruleName"`
+	RuleType string  `json:"ruleType"`
+	UserID   *uint64 `json:"userId"`
+	Status   string  `json:"status"`
 }
 
 // ChapterRuleResponse 规则响应
@@ -141,7 +140,23 @@ type ChapterRuleResponse struct {
 	model.BookChapterRule
 }
 
-// ==================== 内容净化规则 ====================
+// ==================== 章节规则绑定 ====================
+
+// ChapterRuleBindRequest 绑定规则到书籍请求
+type ChapterRuleBindRequest struct {
+	BookID uint64 `json:"bookId" binding:"required"`
+	RuleID uint64 `json:"ruleId" binding:"required"`
+}
+
+// ChapterRuleBindResponse 绑定规则响应
+type ChapterRuleBindResponse struct {
+	ID         uint64 `json:"id"`
+	BookID     uint64 `json:"bookId"`
+	ReaderID   uint64 `json:"readerId"`
+	RuleID     uint64 `json:"ruleId"`
+	RuleName   string `json:"ruleName"`
+	CreateTime string `json:"createTime"`
+}
 
 // FilterRuleRequest 过滤规则请求
 type FilterRuleRequest struct {

@@ -220,6 +220,8 @@ declare namespace Api {
     type BookChapter = Common.CommonRecord<{
       bookId: number;
       fileId: number;
+      volumeNo: number | null;
+      volumeTitle: string | null;
       chapterNo: number;
       title: string;
       byteOffset: number;
@@ -253,13 +255,13 @@ declare namespace Api {
     /** book chapter rule */
     type BookChapterRule = Common.CommonRecord<{
       ruleName: string;
-      scopeType: string;
-      bookId: number | null;
-      pattern: string;
-      titleGroup: number;
+      ruleType: string;
+      userId: number | null;
+      titlePattern: string;
+      groupPattern: string | null;
       minChapterLen: number;
       maxChapterLen: number;
-      priority: number;
+      sortOrder: number;
       description: string | null;
       status: string;
     }>;
@@ -267,21 +269,38 @@ declare namespace Api {
     /** chapter rule request */
     type ChapterRuleRequest = {
       ruleName: string;
-      scopeType: string;
-      bookId?: number | null;
-      pattern: string;
-      titleGroup?: number;
+      ruleType: string;
+      titlePattern: string;
+      groupPattern?: string | null;
       minChapterLen?: number;
       maxChapterLen?: number;
-      priority?: number;
+      sortOrder?: number;
       description?: string | null;
       status?: string;
     };
 
     /** chapter rule search params */
     type ChapterRuleSearchParams = CommonType.RecordNullable<
-      { ruleName: string; scopeType: string; bookId: number | null; status: string } & CommonSearchParams
+      { ruleName: string; ruleType: string; userId: number | null; status: string } & CommonSearchParams
     >;
+
+    // ==================== Book Chapter Rule Binding ====================
+
+    /** chapter rule bind request */
+    type ChapterRuleBindRequest = {
+      bookId: number;
+      ruleId: number;
+    };
+
+    /** chapter rule bind response */
+    type ChapterRuleBindResponse = {
+      id: number;
+      bookId: number;
+      readerId: number;
+      ruleId: number;
+      ruleName: string;
+      createTime: string;
+    };
 
     // ==================== Book Content Filter Rule ====================
 

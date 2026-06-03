@@ -30,12 +30,13 @@ var (
 
 // AuthService 认证服务
 type AuthService struct {
-	userRepo *repository.SysUserRepository
-	db       *gorm.DB
+	userRepo        *repository.SysUserRepository
+	chapterRuleRepo *repository.BookChapterRuleRepository
+	db              *gorm.DB
 }
 
-func NewAuthService(userRepo *repository.SysUserRepository, db *gorm.DB) *AuthService {
-	return &AuthService{userRepo: userRepo, db: db}
+func NewAuthService(userRepo *repository.SysUserRepository, chapterRuleRepo *repository.BookChapterRuleRepository, db *gorm.DB) *AuthService {
+	return &AuthService{userRepo: userRepo, chapterRuleRepo: chapterRuleRepo, db: db}
 }
 
 // Login 登录: 校验密码 + 风控 + 记录日志 + 签发 token
@@ -85,6 +86,9 @@ func (s *AuthService) Login(ctx context.Context, req *dto.LoginRequest, ip, ua s
 	}
 
 	s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultSuccess, "ok")
+
+	// 登录成功后初始化用户章节识别规则（如果尚未初始化）
+	s.initUserChapterRules(ctx, user.ID)
 
 	return &dto.LoginResponse{
 		Token:            token,
@@ -229,6 +233,41 @@ func buildLevel(parentID uint64, childrenMap map[uint64][]model.SysMenu) []dto.M
 		out = append(out, r)
 	}
 	return out
+}
+
+// initUserChapterRules 初始化用户章节识别规则
+// 检查用户是否已有自定义规则，如果没有则复制系统默认规则
+func (s *AuthService) initUserChapterRules(ctx context.Context, userID uint64) {
+	// 检查用户是否已有规则
+	existing, err := s.chapterRuleRepo.ListByUserID(ctx, userID)
+	if err != nil || len(existing) > 0 {
+		return // 已有规则或查询出错，不做操作
+	}
+
+	// 获取系统默认规则
+	systemRules, err := s.chapterRuleRepo.ListSystemDefaults(ctx)
+	if err != nil || len(systemRules) == 0 {
+		return
+	}
+
+	// 逐条复制为用户自定义规则
+	for _, sr := range systemRules {
+		cr := &model.BookChapterRule{
+			RuleName:      sr.RuleName,
+			RuleType:      model.RuleTypeCustom,
+			UserID:        &userID,
+			TitlePattern:  sr.TitlePattern,
+			GroupPattern:  sr.GroupPattern,
+			MinChapterLen: sr.MinChapterLen,
+			MaxChapterLen: sr.MaxChapterLen,
+			SortOrder:     sr.SortOrder,
+			Description:   sr.Description,
+			Status:        sr.Status,
+		}
+		cr.CreateBy = &userID
+		cr.UpdateBy = &userID
+		_ = s.chapterRuleRepo.Create(ctx, cr)
+	}
 }
 
 // writeLoginLog 写登录日志, 失败不影响主流程

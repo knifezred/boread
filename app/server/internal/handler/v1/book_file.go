@@ -178,7 +178,7 @@ func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
 		response.Error(c, 1001, err.Error())
 		return
 	}
-	resp, err := h.svc.ReParseChapters(c.Request.Context(), &req)
+	resp, err := h.svc.ReParseChapters(c.Request.Context(), &req, utils.GetUserID(c))
 	if err != nil {
 		response.Error(c, mapFileErr(err), err.Error())
 		return
@@ -399,6 +399,74 @@ func (h *BookFileHandler) PageChapterRule(c *gin.Context) {
 	resp, err := h.svc.PageChapterRule(c.Request.Context(), &req)
 	if err != nil {
 		response.Error(c, 5001, err.Error())
+		return
+	}
+	response.Success(c, resp)
+}
+
+// ==================== 章节规则绑定 ====================
+
+// BindChapterRule 为书籍绑定章节识别规则
+// @Summary   为书籍绑定章节识别规则
+// @Tags      book-chapter-rule
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    body  body  dto.ChapterRuleBindRequest  true  "绑定参数"
+// @Success  200  {object}  response.Response{data=dto.ChapterRuleBindResponse}
+// @Router   /api/manage/book/chapter-rule/bind [post]
+func (h *BookFileHandler) BindChapterRule(c *gin.Context) {
+	var req dto.ChapterRuleBindRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, 1001, err.Error())
+		return
+	}
+	resp, err := h.svc.BindChapterRule(c.Request.Context(), &req, utils.GetUserID(c))
+	if err != nil {
+		response.Error(c, mapFileErr(err), err.Error())
+		return
+	}
+	response.Success(c, resp)
+}
+
+// UnbindChapterRule 解绑书籍的章节识别规则
+// @Summary   解绑书籍的章节识别规则
+// @Tags      book-chapter-rule
+// @Security  BearerAuth
+// @Produce   json
+// @Param    bookId  path  int  true  "书籍ID"
+// @Success  200  {object}  response.Response
+// @Router   /api/manage/book/chapter-rule/bind/{bookId} [delete]
+func (h *BookFileHandler) UnbindChapterRule(c *gin.Context) {
+	bookID, err := utils.ParseUint64Param(c, "bookId")
+	if err != nil {
+		response.Error(c, 1001, "invalid bookId")
+		return
+	}
+	if err := h.svc.UnbindChapterRule(c.Request.Context(), bookID, utils.GetUserID(c)); err != nil {
+		response.Error(c, mapFileErr(err), err.Error())
+		return
+	}
+	response.Success(c, nil)
+}
+
+// GetBoundChapterRule 获取书籍绑定的章节识别规则
+// @Summary   获取书籍绑定的章节识别规则
+// @Tags      book-chapter-rule
+// @Security  BearerAuth
+// @Produce   json
+// @Param    bookId  path  int  true  "书籍ID"
+// @Success  200  {object}  response.Response{data=dto.ChapterRuleBindResponse}
+// @Router   /api/manage/book/chapter-rule/bind/{bookId} [get]
+func (h *BookFileHandler) GetBoundChapterRule(c *gin.Context) {
+	bookID, err := utils.ParseUint64Param(c, "bookId")
+	if err != nil {
+		response.Error(c, 1001, "invalid bookId")
+		return
+	}
+	resp, err := h.svc.GetBoundChapterRule(c.Request.Context(), bookID, utils.GetUserID(c))
+	if err != nil {
+		response.Error(c, mapFileErr(err), err.Error())
 		return
 	}
 	response.Success(c, resp)

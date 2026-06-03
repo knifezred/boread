@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -16,14 +17,17 @@ import (
 // ChapterParser — 章节识别引擎
 //
 // 功能:
-//  1. 支持正则规则匹配章节标题 (来自 book_chapter_rule)
-//  2. 支持常见章节格式内置识别: "第X章", "Chapter X", 数字编号
-//  3. 按章节切分并返回偏移索引
+//  1. 支持按 sort_order 升序依次尝试多条规则组合
+//  2. 支持分卷标题识别（group_pattern）
+//  3. 支持章节最小/最大字符数过滤
+//  4. 支持常见章节格式内置识别: "第X章", "Chapter X", 数字编号
+//  5. 按章节切分并返回偏移索引
 // =====================================================================
 
 // ChapterMatch 单个章节匹配结果
 type ChapterMatch struct {
 	Title          string
+	VolumeTitle    string // 匹配到的卷标题，为空表示不是卷标题行
 	ByteOffset     uint64 // 标题行起始字节偏移
 	TitleEndOffset uint64 // 标题行结束（下一行起始）字节偏移
 	LineNumber     int
@@ -36,27 +40,50 @@ type ParseResult struct {
 
 // ChapterSegment 章节段
 type ChapterSegment struct {
-	Title      string
-	ByteOffset uint64
-	ByteLength uint32
-	WordCount  uint32
+	Title       string
+	VolumeNo    *uint32
+	VolumeTitle *string
+	ByteOffset  uint64
+	ByteLength  uint32
+	WordCount   uint32
+}
+
+// compiledRule 预编译的规则
+type compiledRule struct {
+	rule       model.BookChapterRule
+	titleRegex *regexp.Regexp
+	groupRegex *regexp.Regexp
 }
 
 // ChapterParser 章节解析器
 type ChapterParser struct {
-	rules []model.BookChapterRule
+	rules []compiledRule
 }
 
-// NewChapterParser 创建解析器，传入有效规则（按优先级排序）
+// NewChapterParser 创建解析器，传入有效规则（已按 sort_order 升序排序）
 func NewChapterParser(rules []model.BookChapterRule) *ChapterParser {
-	return &ChapterParser{rules: rules}
+	compiled := make([]compiledRule, 0, len(rules))
+	for _, r := range rules {
+		titleRe, err := regexp.Compile(r.TitlePattern)
+		if err != nil {
+			continue
+		}
+		cr := compiledRule{rule: r, titleRegex: titleRe}
+		if r.GroupPattern != nil && *r.GroupPattern != "" {
+			if groupRe, err := regexp.Compile(*r.GroupPattern); err == nil {
+				cr.groupRegex = groupRe
+			}
+		}
+		compiled = append(compiled, cr)
+	}
+	return &ChapterParser{rules: compiled}
 }
 
 // Parse 解析原始文本，返回章节分段结果
 func (p *ChapterParser) Parse(content []byte) *ParseResult {
-	// 1. 按行扫描，找到所有章节标题位置
-	matches := p.scanTitles(content)
-	if len(matches) == 0 {
+	// 1. 按行扫描，找到所有章节标题位置（含卷标题）
+	rawMatches := p.scanTitles(content)
+	if len(rawMatches) == 0 {
 		// 无匹配：整本书作为一个章节
 		wordCount := countWords(content)
 		return &ParseResult{
@@ -70,13 +97,26 @@ func (p *ChapterParser) Parse(content []byte) *ParseResult {
 	}
 
 	// 2. 按标题位置切分章节
-	// 每个章节的内容从标题行的下一行开始，到下一章节标题行结束
+	segments := p.buildSegments(content, rawMatches)
+
+	// 3. 应用 min_chapter_len / max_chapter_len 过滤
+	segments = p.filterByLength(segments)
+
+	return &ParseResult{Chapters: segments}
+}
+
+// buildSegments 按匹配结果构建章节段，同时处理卷信息
+func (p *ChapterParser) buildSegments(content []byte, matches []ChapterMatch) []ChapterSegment {
+	contentLen := uint64(len(content))
 	segments := make([]ChapterSegment, 0, len(matches))
+	var currentVolumeNo *uint32
+	var currentVolumeTitle *string
+
 	for i, m := range matches {
 		// 内容起始位置：标题行结束（下一行起始）
 		contentStart := m.TitleEndOffset
-		if contentStart > uint64(len(content)) {
-			contentStart = uint64(len(content))
+		if contentStart > contentLen {
+			contentStart = contentLen
 		}
 
 		// 内容结束位置：下一章节标题行起始
@@ -84,32 +124,108 @@ func (p *ChapterParser) Parse(content []byte) *ParseResult {
 		if i+1 < len(matches) {
 			endOffset = matches[i+1].ByteOffset
 		} else {
-			endOffset = uint64(len(content))
+			endOffset = contentLen
 		}
 
+		// 判断是否是卷标题行
+		if m.VolumeTitle != "" {
+			// 卷标题所在行不做为章节，但更新当前的卷信息
+			volNo := uint32(1)
+			if currentVolumeNo != nil {
+				volNo = *currentVolumeNo + 1
+			}
+			currentVolumeNo = &volNo
+			vt := m.VolumeTitle
+			currentVolumeTitle = &vt
+			continue
+		}
+
+		var segBytes []byte
 		if contentStart < endOffset {
-			seg := content[contentStart:endOffset]
-			segments = append(segments, ChapterSegment{
-				Title:      m.Title,
-				ByteOffset: contentStart,
-				ByteLength: uint32(len(seg)),
-				WordCount:  countWords(seg),
-			})
+			segBytes = content[contentStart:endOffset]
 		} else {
-			segments = append(segments, ChapterSegment{
-				Title:      m.Title,
-				ByteOffset: contentStart,
-				ByteLength: 0,
-				WordCount:  0,
-			})
+			segBytes = nil
+		}
+
+		seg := ChapterSegment{
+			Title:       m.Title,
+			VolumeNo:    copyUint32Ptr(currentVolumeNo),
+			VolumeTitle: copyStringPtr(currentVolumeTitle),
+			ByteOffset:  contentStart,
+			ByteLength:  uint32(len(segBytes)),
+			WordCount:   countWords(segBytes),
+		}
+		segments = append(segments, seg)
+	}
+
+	return segments
+}
+
+// filterByLength 根据每个规则的 min_chapter_len / max_chapter_len 过滤章节
+// 太短的章节（目录/导航行）合并到上一章，太长的章节保持原样
+func (p *ChapterParser) filterByLength(segments []ChapterSegment) []ChapterSegment {
+	if len(segments) <= 1 {
+		return segments
+	}
+
+	// 按规则匹配章节：遍历规则，对符合条件的章节标记过滤
+	// 简化策略：对所有章节统一应用规则链中的最严格限制
+	result := make([]ChapterSegment, 0, len(segments))
+
+	for i, seg := range segments {
+		// 获取匹配该章节的对应规则的 min/max
+		// 使用分组匹配：找到该章节所属的匹配规则
+		minLen, maxLen := p.getEffectiveLimits(seg)
+
+		// 检查是否过短（跳过太短的章节，并入上一章）
+		// 但跳过长度过滤的条件：seg.ByteLength < minLen 且不是第一章
+		if seg.ByteLength < minLen && i > 0 && minLen > 0 {
+			// 合并到上一章
+			prev := &result[len(result)-1]
+			prev.ByteLength += seg.ByteLength
+			prev.WordCount += seg.WordCount
+			// 保留标题（追加显示）
+			prev.Title = prev.Title + " / " + seg.Title
+			continue
+		}
+
+		// 检查是否过长（不截断，仅标记）
+		// 如果超过 max_len，保留但记录
+		if seg.ByteLength > maxLen && maxLen > 0 {
+			// 超过上限，保持原样（强制按当前标题分割，但记录异常）
+		}
+
+		result = append(result, seg)
+	}
+
+	return result
+}
+
+// getEffectiveLimits 获取作用于该章节的有效 min/max 限制
+// 遍历所有规则，取匹配该章节标题的规则的限制值；如果无匹配，使用默认值
+func (p *ChapterParser) getEffectiveLimits(seg ChapterSegment) (uint32, uint32) {
+	minLen := uint32(100)    // 默认值
+	maxLen := uint32(100000) // 默认值
+
+	for _, cr := range p.rules {
+		if cr.titleRegex.MatchString(seg.Title) {
+			// 使用第一个匹配的规则的参数
+			if cr.rule.MinChapterLen > 0 {
+				minLen = cr.rule.MinChapterLen
+			}
+			if cr.rule.MaxChapterLen > 0 {
+				maxLen = cr.rule.MaxChapterLen
+			}
+			break
 		}
 	}
-	return &ParseResult{Chapters: segments}
+
+	return minLen, maxLen
 }
 
 // scanTitles 扫描文本中所有章节标题
 func (p *ChapterParser) scanTitles(content []byte) []ChapterMatch {
-	// 先尝试规则匹配
+	// 先尝试规则匹配（多规则组合）
 	if len(p.rules) > 0 {
 		if matches := p.matchByRules(content); len(matches) > 0 {
 			return matches
@@ -119,20 +235,54 @@ func (p *ChapterParser) scanTitles(content []byte) []ChapterMatch {
 	return p.matchBuiltin(content)
 }
 
-// matchByRules 使用配置的规则匹配章节标题
-// 按优先级逐个规则尝试，第一个能匹配到内容的规则生效
+// matchByRules 使用配置的规则按 sort_order 依次匹配章节标题
+// 遍历所有规则，将所有规则的匹配结果合并，按字节偏移排序
 func (p *ChapterParser) matchByRules(content []byte) []ChapterMatch {
-	for _, rule := range p.rules {
-		re, err := regexp.Compile(rule.Pattern)
-		if err != nil {
-			continue
+	type rawMatch struct {
+		offset uint64
+		match  ChapterMatch
+	}
+
+	var rawMatches []rawMatch
+
+	for _, cr := range p.rules {
+		// 尝试匹配卷标题（group_pattern）
+		if cr.groupRegex != nil {
+			groupMatches := p.scanWithRegex(content, cr.groupRegex, 0)
+			for _, m := range groupMatches {
+				m.VolumeTitle = m.Title // 标记为卷标题
+				rawMatches = append(rawMatches, rawMatch{offset: m.ByteOffset, match: m})
+			}
 		}
-		matches := p.scanWithRegex(content, re, rule.TitleGroup)
-		if len(matches) > 0 {
-			return matches
+
+		// 尝试匹配章节标题（title_pattern）
+		titleMatches := p.scanWithRegex(content, cr.titleRegex, 0)
+		for _, m := range titleMatches {
+			rawMatches = append(rawMatches, rawMatch{offset: m.ByteOffset, match: m})
 		}
 	}
-	return nil
+
+	if len(rawMatches) == 0 {
+		return nil
+	}
+
+	// 按偏移量去重排序（同一位置多条规则匹配，取第一条规则的匹配）
+	sort.Slice(rawMatches, func(i, j int) bool {
+		return rawMatches[i].offset < rawMatches[j].offset
+	})
+
+	// 去重
+	result := make([]ChapterMatch, 0, len(rawMatches))
+	seen := make(map[uint64]bool)
+	for _, rm := range rawMatches {
+		if seen[rm.offset] {
+			continue
+		}
+		seen[rm.offset] = true
+		result = append(result, rm.match)
+	}
+
+	return result
 }
 
 // scanWithRegex 使用单个正则扫描整个文件
@@ -213,6 +363,23 @@ func (p *ChapterParser) matchBuiltin(content []byte) []ChapterMatch {
 		offset += uint64(lineBytes) + 1
 	}
 	return matches
+}
+
+// 辅助函数
+func copyUint32Ptr(v *uint32) *uint32 {
+	if v == nil {
+		return nil
+	}
+	cpy := *v
+	return &cpy
+}
+
+func copyStringPtr(v *string) *string {
+	if v == nil {
+		return nil
+	}
+	cpy := *v
+	return &cpy
 }
 
 // =====================================================================

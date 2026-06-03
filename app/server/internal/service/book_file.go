@@ -42,15 +42,16 @@ const (
 
 // BookFileService 小说文件管理服务
 type BookFileService struct {
-	db              *gorm.DB
-	bookRepo        *repository.BookRepository
-	bookFileRepo    *repository.BookFileRepository
-	uploadRepo      *repository.BookUploadRepository
-	chapterRepo     *repository.BookChapterRepository
-	chapterRuleRepo *repository.BookChapterRuleRepository
-	filterRuleRepo  *repository.BookContentFilterRuleRepository
-	categoryRepo    *repository.BookCategoryRepository
-	tagRepo         *repository.BookTagRepository
+	db                 *gorm.DB
+	bookRepo           *repository.BookRepository
+	bookFileRepo       *repository.BookFileRepository
+	uploadRepo         *repository.BookUploadRepository
+	chapterRepo        *repository.BookChapterRepository
+	chapterRuleRepo    *repository.BookChapterRuleRepository
+	chapterRuleRelRepo *repository.BookChapterRuleRelRepository
+	filterRuleRepo     *repository.BookContentFilterRuleRepository
+	categoryRepo       *repository.BookCategoryRepository
+	tagRepo            *repository.BookTagRepository
 }
 
 func NewBookFileService(
@@ -60,20 +61,22 @@ func NewBookFileService(
 	uploadRepo *repository.BookUploadRepository,
 	chapterRepo *repository.BookChapterRepository,
 	chapterRuleRepo *repository.BookChapterRuleRepository,
+	chapterRuleRelRepo *repository.BookChapterRuleRelRepository,
 	filterRuleRepo *repository.BookContentFilterRuleRepository,
 	categoryRepo *repository.BookCategoryRepository,
 	tagRepo *repository.BookTagRepository,
 ) *BookFileService {
 	return &BookFileService{
-		db:              db,
-		bookRepo:        bookRepo,
-		bookFileRepo:    bookFileRepo,
-		uploadRepo:      uploadRepo,
-		chapterRepo:     chapterRepo,
-		chapterRuleRepo: chapterRuleRepo,
-		filterRuleRepo:  filterRuleRepo,
-		categoryRepo:    categoryRepo,
-		tagRepo:         tagRepo,
+		db:                 db,
+		bookRepo:           bookRepo,
+		bookFileRepo:       bookFileRepo,
+		uploadRepo:         uploadRepo,
+		chapterRepo:        chapterRepo,
+		chapterRuleRepo:    chapterRuleRepo,
+		chapterRuleRelRepo: chapterRuleRelRepo,
+		filterRuleRepo:     filterRuleRepo,
+		categoryRepo:       categoryRepo,
+		tagRepo:            tagRepo,
 	}
 }
 
@@ -168,7 +171,7 @@ func (s *BookFileService) ConfirmImport(ctx context.Context, req *dto.ConfirmImp
 		return nil, fmt.Errorf("读取文件失败: %w", err)
 	}
 
-	// 获取章节识别规则（全局 + 书籍级）
+	// 获取章节识别规则（全局默认规则，扫描任务不使用用户ID）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
 
 	// 先应用入库过滤规则，再在过滤后的数据上解析章节
@@ -242,14 +245,16 @@ func (s *BookFileService) ConfirmImport(ctx context.Context, req *dto.ConfirmImp
 		chapters := make([]model.BookChapter, len(parseResult.Chapters))
 		for i, seg := range parseResult.Chapters {
 			chapters[i] = model.BookChapter{
-				BookID:     bookID,
-				FileID:     bf.ID,
-				ChapterNo:  uint32(i + 1),
-				Title:      seg.Title,
-				ByteOffset: seg.ByteOffset,
-				ByteLength: seg.ByteLength,
-				WordCount:  seg.WordCount,
-				Status:     model.ChapterPublished,
+				BookID:      bookID,
+				FileID:      bf.ID,
+				VolumeNo:    seg.VolumeNo,
+				VolumeTitle: seg.VolumeTitle,
+				ChapterNo:   uint32(i + 1),
+				Title:       seg.Title,
+				ByteOffset:  seg.ByteOffset,
+				ByteLength:  seg.ByteLength,
+				WordCount:   seg.WordCount,
+				Status:      model.ChapterPublished,
 			}
 		}
 		if err := tx.Create(&chapters).Error; err != nil {
@@ -385,6 +390,7 @@ func (s *BookFileService) scanLocalFile(ctx context.Context, fpath string, userI
 	filter := NewContentFilter(filterRules)
 	filteredData := applyFilterToContent(data, filter)
 
+	// 获取章节识别规则（系统默认规则）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
 	parser := NewChapterParser(rules)
 	parseResult := parser.Parse(filteredData)
@@ -444,14 +450,16 @@ func (s *BookFileService) scanLocalFile(ctx context.Context, fpath string, userI
 		chapters := make([]model.BookChapter, len(parseResult.Chapters))
 		for i, seg := range parseResult.Chapters {
 			chapters[i] = model.BookChapter{
-				BookID:     book.ID,
-				FileID:     bf.ID,
-				ChapterNo:  uint32(i + 1),
-				Title:      seg.Title,
-				ByteOffset: seg.ByteOffset,
-				ByteLength: seg.ByteLength,
-				WordCount:  seg.WordCount,
-				Status:     model.ChapterPublished,
+				BookID:      book.ID,
+				FileID:      bf.ID,
+				VolumeNo:    seg.VolumeNo,
+				VolumeTitle: seg.VolumeTitle,
+				ChapterNo:   uint32(i + 1),
+				Title:       seg.Title,
+				ByteOffset:  seg.ByteOffset,
+				ByteLength:  seg.ByteLength,
+				WordCount:   seg.WordCount,
+				Status:      model.ChapterPublished,
 			}
 		}
 		if err := tx.Create(&chapters).Error; err != nil {
@@ -525,8 +533,8 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 		return result
 	}
 
-	// 获取章节识别规则
-	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0) // bookID=0 取全局规则
+	// 获取章节识别规则（系统默认规则）
+	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0) // bookID=0 取系统默认规则
 
 	// 先应用入库过滤规则，再在过滤后的数据上解析章节
 	// 确保字节偏移与存储到文件的内容一致
@@ -592,14 +600,16 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 		chapters := make([]model.BookChapter, len(parseResult.Chapters))
 		for i, seg := range parseResult.Chapters {
 			chapters[i] = model.BookChapter{
-				BookID:     bookID,
-				FileID:     bf.ID,
-				ChapterNo:  uint32(i + 1),
-				Title:      seg.Title,
-				ByteOffset: seg.ByteOffset,
-				ByteLength: seg.ByteLength,
-				WordCount:  seg.WordCount,
-				Status:     model.ChapterPublished,
+				BookID:      bookID,
+				FileID:      bf.ID,
+				VolumeNo:    seg.VolumeNo,
+				VolumeTitle: seg.VolumeTitle,
+				ChapterNo:   uint32(i + 1),
+				Title:       seg.Title,
+				ByteOffset:  seg.ByteOffset,
+				ByteLength:  seg.ByteLength,
+				WordCount:   seg.WordCount,
+				Status:      model.ChapterPublished,
 			}
 		}
 		if err := tx.Create(&chapters).Error; err != nil {
@@ -638,7 +648,8 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 
 // ReParseChapters 重新识别章节
 // 读取已入库的内容文件，重新解析章节索引并替换
-func (s *BookFileService) ReParseChapters(ctx context.Context, req *dto.ReParseRequest) (*dto.ReParseResponse, error) {
+// 支持按书籍绑定规则或用户默认规则解析
+func (s *BookFileService) ReParseChapters(ctx context.Context, req *dto.ReParseRequest, userID uint64) (*dto.ReParseResponse, error) {
 	book, err := s.bookRepo.GetByID(ctx, req.BookID)
 	if err != nil {
 		return nil, fmt.Errorf("书籍不存在: %w", err)
@@ -658,8 +669,19 @@ func (s *BookFileService) ReParseChapters(ctx context.Context, req *dto.ReParseR
 		return nil, fmt.Errorf("读取内容文件失败: %w", err)
 	}
 
-	// 获取章节识别规则
-	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
+	// 获取章节识别规则：优先检查书籍是否绑定了固定规则
+	var rules []model.BookChapterRule
+	rel, relErr := s.chapterRuleRelRepo.GetByBookAndReader(ctx, req.BookID, userID)
+	if relErr == nil && rel != nil {
+		// 有绑定规则：仅使用该规则
+		rule, ruleErr := s.chapterRuleRepo.GetByID(ctx, rel.RuleID)
+		if ruleErr == nil {
+			rules = []model.BookChapterRule{*rule}
+		}
+	} else {
+		// 无绑定规则：使用用户有效规则（用户自定义 + 系统默认）
+		rules, _ = s.chapterRuleRepo.ListEffective(ctx, userID)
+	}
 
 	// 在已过滤的内容上重新解析
 	parser := NewChapterParser(rules)
@@ -679,14 +701,16 @@ func (s *BookFileService) ReParseChapters(ctx context.Context, req *dto.ReParseR
 		chapters := make([]model.BookChapter, newCount)
 		for i, seg := range parseResult.Chapters {
 			chapters[i] = model.BookChapter{
-				BookID:     book.ID,
-				FileID:     *book.PrimaryFileID,
-				ChapterNo:  uint32(i + 1),
-				Title:      seg.Title,
-				ByteOffset: seg.ByteOffset,
-				ByteLength: seg.ByteLength,
-				WordCount:  seg.WordCount,
-				Status:     model.ChapterPublished,
+				BookID:      book.ID,
+				FileID:      *book.PrimaryFileID,
+				VolumeNo:    seg.VolumeNo,
+				VolumeTitle: seg.VolumeTitle,
+				ChapterNo:   uint32(i + 1),
+				Title:       seg.Title,
+				ByteOffset:  seg.ByteOffset,
+				ByteLength:  seg.ByteLength,
+				WordCount:   seg.WordCount,
+				Status:      model.ChapterPublished,
 			}
 		}
 		if err := tx.Create(&chapters).Error; err != nil {
@@ -760,13 +784,13 @@ func (s *BookFileService) GetChapterContent(ctx context.Context, bookID uint64, 
 func (s *BookFileService) CreateChapterRule(ctx context.Context, req *dto.ChapterRuleRequest, userID uint64) (*model.BookChapterRule, error) {
 	m := &model.BookChapterRule{
 		RuleName:      req.RuleName,
-		ScopeType:     model.RuleScopeType(req.ScopeType),
-		BookID:        req.BookID,
-		Pattern:       req.Pattern,
-		TitleGroup:    req.TitleGroup,
+		RuleType:      model.RuleTypeCustom,
+		UserID:        &userID,
+		TitlePattern:  req.TitlePattern,
+		GroupPattern:  req.GroupPattern,
 		MinChapterLen: req.MinChapterLen,
 		MaxChapterLen: req.MaxChapterLen,
-		Priority:      req.Priority,
+		SortOrder:     req.SortOrder,
 		Description:   req.Description,
 		Status:        model.EnableStatus(req.Status),
 	}
@@ -793,13 +817,11 @@ func (s *BookFileService) UpdateChapterRule(ctx context.Context, id uint64, req 
 		return nil, ErrRuleNotFound
 	}
 	m.RuleName = req.RuleName
-	m.ScopeType = model.RuleScopeType(req.ScopeType)
-	m.BookID = req.BookID
-	m.Pattern = req.Pattern
-	m.TitleGroup = req.TitleGroup
+	m.TitlePattern = req.TitlePattern
+	m.GroupPattern = req.GroupPattern
 	m.MinChapterLen = req.MinChapterLen
 	m.MaxChapterLen = req.MaxChapterLen
-	m.Priority = req.Priority
+	m.SortOrder = req.SortOrder
 	m.Description = req.Description
 	if req.Status != "" {
 		m.Status = model.EnableStatus(req.Status)
@@ -833,6 +855,75 @@ func (s *BookFileService) PageChapterRule(ctx context.Context, req *dto.ChapterR
 		records[i] = dto.ChapterRuleResponse{BookChapterRule: r}
 	}
 	return dto.NewPageResponse(records, total, &req.PageRequest), nil
+}
+
+// ==================== 章节规则绑定 ====================
+
+// BindChapterRule 为书籍绑定固定章节识别规则
+func (s *BookFileService) BindChapterRule(ctx context.Context, req *dto.ChapterRuleBindRequest, userID uint64) (*dto.ChapterRuleBindResponse, error) {
+	// 验证规则存在
+	_, err := s.chapterRuleRepo.GetByID(ctx, req.RuleID)
+	if err != nil {
+		return nil, ErrRuleNotFound
+	}
+
+	// 删除旧的绑定（如果有）
+	_ = s.chapterRuleRelRepo.DeleteByBookAndReader(ctx, req.BookID, userID)
+
+	rel := &model.BookChapterRuleRel{
+		BookID:   req.BookID,
+		ReaderID: userID,
+		RuleID:   req.RuleID,
+	}
+	rel.CreateBy = &userID
+	rel.UpdateBy = &userID
+	if err := s.chapterRuleRelRepo.Create(ctx, rel); err != nil {
+		return nil, err
+	}
+
+	// 获取规则名称
+	rule, _ := s.chapterRuleRepo.GetByID(ctx, req.RuleID)
+	ruleName := ""
+	if rule != nil {
+		ruleName = rule.RuleName
+	}
+
+	return &dto.ChapterRuleBindResponse{
+		ID:         rel.ID,
+		BookID:     rel.BookID,
+		ReaderID:   rel.ReaderID,
+		RuleID:     rel.RuleID,
+		RuleName:   ruleName,
+		CreateTime: rel.CreateTime.Format("2006-01-02 15:04:05"),
+	}, nil
+}
+
+// UnbindChapterRule 解绑书籍的章节识别规则
+func (s *BookFileService) UnbindChapterRule(ctx context.Context, bookID, userID uint64) error {
+	return s.chapterRuleRelRepo.DeleteByBookAndReader(ctx, bookID, userID)
+}
+
+// GetBoundChapterRule 获取书籍绑定的章节识别规则
+func (s *BookFileService) GetBoundChapterRule(ctx context.Context, bookID, userID uint64) (*dto.ChapterRuleBindResponse, error) {
+	rel, err := s.chapterRuleRelRepo.GetByBookAndReader(ctx, bookID, userID)
+	if err != nil {
+		return nil, nil // 未绑定返回 nil
+	}
+
+	rule, _ := s.chapterRuleRepo.GetByID(ctx, rel.RuleID)
+	ruleName := ""
+	if rule != nil {
+		ruleName = rule.RuleName
+	}
+
+	return &dto.ChapterRuleBindResponse{
+		ID:         rel.ID,
+		BookID:     rel.BookID,
+		ReaderID:   rel.ReaderID,
+		RuleID:     rel.RuleID,
+		RuleName:   ruleName,
+		CreateTime: rel.CreateTime.Format("2006-01-02 15:04:05"),
+	}, nil
 }
 
 // ==================== 内容净化规则 CRUD ====================

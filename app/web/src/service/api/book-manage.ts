@@ -280,11 +280,11 @@ export function fetchGetPublicChapterList(bookId: string | number) {
 }
 
 /** 重新识别章节 */
-export function fetchReParseChapters(bookId: number) {
+export function fetchReParseChapters(bookId: number, ruleId?: number) {
   return request<Api.BookManage.ReParseResponse>({
     url: "/manage/book/re-parse",
     method: "post",
-    data: { bookId },
+    data: ruleId ? { bookId, ruleId } : { bookId },
   });
 }
 
@@ -330,6 +330,33 @@ export function fetchDeleteChapterRule(id: string | number) {
   return request<null>({
     url: `/manage/book/chapter-rule/${id}`,
     method: "delete",
+  });
+}
+
+// -------- Book Chapter Rule Bind --------
+
+/** 为书籍绑定章节识别规则 */
+export function fetchBindChapterRule(data: Api.BookManage.ChapterRuleBindRequest) {
+  return request<Api.BookManage.ChapterRuleBindResponse>({
+    url: "/manage/book/chapter-rule/bind",
+    method: "post",
+    data,
+  });
+}
+
+/** 解绑书籍的章节识别规则 */
+export function fetchUnbindChapterRule(bookId: number) {
+  return request<null>({
+    url: `/manage/book/chapter-rule/bind/${bookId}`,
+    method: "delete",
+  });
+}
+
+/** 获取书籍绑定的章节识别规则 */
+export function fetchGetBoundChapterRule(bookId: number) {
+  return request<Api.BookManage.ChapterRuleBindResponse | null>({
+    url: `/manage/book/chapter-rule/bind/${bookId}`,
+    method: "get",
   });
 }
 

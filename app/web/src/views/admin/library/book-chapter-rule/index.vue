@@ -4,8 +4,8 @@ import type { Ref } from "vue"
 import { NButton, NPopconfirm, NTag } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
 import {
-  fetchGetChapterRuleList,
-  fetchDeleteChapterRule,
+    fetchGetChapterRuleList,
+    fetchDeleteChapterRule,
 } from "@/service/api"
 import { useAppStore } from "@/store/modules/app"
 import { defaultTransform, useNaivePaginatedTable, useTableOperate } from "@/hooks/common/table"
@@ -18,7 +18,7 @@ const appStore = useAppStore();
 const { bool: visible, setTrue: openModal } = useBoolean();
 
 const searchParams = ref<Api.BookManage.ChapterRuleSearchParams>({
-  current: 1, size: 10, ruleName: null, scopeType: null, bookId: null, status: null,
+  current: 1, size: 10, ruleName: null, ruleType: null, userId: null, status: null,
 });
 
 const { columns, columnChecks, data, loading, pagination, getData, getDataByPage } = useNaivePaginatedTable({
@@ -30,14 +30,14 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
     { key: "index", title: $t("common.index"), align: "center", width: 64, render: (_, index) => index + 1 },
     { key: "ruleName", title: $t("page.admin.library.bookChapterRule.ruleName"), align: "center", minWidth: 140 },
     {
-      key: "scopeType", title: $t("page.admin.library.bookChapterRule.scopeType"), align: "center", width: 100,
-      render: (row: { scopeType: string }) => {
-        const map: Record<string, string> = { "1": $t("page.admin.library.bookChapterRule.scopeGlobal"), "2": $t("page.admin.library.bookChapterRule.scopeBook") };
-        return <NTag type={row.scopeType === "1" ? "info" : "primary"}>{map[row.scopeType] || row.scopeType}</NTag>;
+      key: "ruleType", title: $t("page.admin.library.bookChapterRule.ruleType"), align: "center", width: 100,
+      render: (row: { ruleType: string }) => {
+        const map: Record<string, string> = { "1": $t("page.admin.library.bookChapterRule.ruleTypeSystem"), "2": $t("page.admin.library.bookChapterRule.ruleTypeCustom") };
+        return <NTag type={row.ruleType === "1" ? "info" : "primary"}>{map[row.ruleType] || row.ruleType}</NTag>;
       },
     },
-    { key: "pattern", title: $t("page.admin.library.bookChapterRule.pattern"), align: "left", ellipsis: { tooltip: true }, minWidth: 200 },
-    { key: "priority", title: $t("page.admin.library.bookChapterRule.priority"), align: "center", width: 80 },
+    { key: "titlePattern", title: $t("page.admin.library.bookChapterRule.titlePattern"), align: "left", ellipsis: { tooltip: true }, minWidth: 200 },
+    { key: "sortOrder", title: $t("page.admin.library.bookChapterRule.sortOrder"), align: "center", width: 80 },
     {
       key: "status", title: $t("page.admin.library.bookChapterRule.status"), align: "center", width: 80,
       render: (row: { status: string }) => <NTag type={row.status === "1" ? "success" : "warning"}>{row.status === "1" ? $t("common.enable") : $t("common.disable")}</NTag>,

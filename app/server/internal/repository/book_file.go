@@ -255,11 +255,11 @@ func (r *BookChapterRuleRepository) Page(ctx context.Context, req *dto.ChapterRu
 	if req.RuleName != "" {
 		tx = tx.Where("rule_name LIKE ?", "%"+req.RuleName+"%")
 	}
-	if req.ScopeType != "" {
-		tx = tx.Where("scope_type = ?", req.ScopeType)
+	if req.RuleType != "" {
+		tx = tx.Where("rule_type = ?", req.RuleType)
 	}
-	if req.BookID != nil {
-		tx = tx.Where("book_id = ?", *req.BookID)
+	if req.UserID != nil {
+		tx = tx.Where("user_id = ?", *req.UserID)
 	}
 	if req.Status != "" {
 		tx = tx.Where("status = ?", req.Status)
@@ -268,19 +268,77 @@ func (r *BookChapterRuleRepository) Page(ctx context.Context, req *dto.ChapterRu
 	if err := tx.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	if err := tx.Order("priority DESC").Offset(req.Offset()).Limit(req.Size).Find(&rows).Error; err != nil {
+	if err := tx.Order("sort_order ASC").Offset(req.Offset()).Limit(req.Size).Find(&rows).Error; err != nil {
 		return nil, 0, err
 	}
 	return rows, total, nil
 }
 
-func (r *BookChapterRuleRepository) ListEffective(ctx context.Context, bookID uint64) ([]model.BookChapterRule, error) {
+func (r *BookChapterRuleRepository) ListEffective(ctx context.Context, userID uint64) ([]model.BookChapterRule, error) {
 	var rows []model.BookChapterRule
+	// 查询启用的规则：用户自定义规则优先，不足时补充系统默认规则
+	// 规则匹配: 用户自定义(user_id=userID) + 系统默认(user_id IS NULL)
 	err := r.db.WithContext(ctx).Model(&model.BookChapterRule{}).
 		Where("status = ?", model.StatusEnabled).
-		Where("(scope_type = ? AND book_id = ?) OR (scope_type = ? AND book_id IS NULL)",
-			model.RuleScopeBook, bookID, model.RuleScopeGlobal).
-		Order("priority ASC").
+		Where("(user_id = ?) OR (rule_type = ? AND user_id IS NULL)", userID, model.RuleTypeSystem).
+		Order("sort_order ASC").
+		Find(&rows).Error
+	return rows, err
+}
+
+func (r *BookChapterRuleRepository) ListByUserID(ctx context.Context, userID uint64) ([]model.BookChapterRule, error) {
+	var rows []model.BookChapterRule
+	err := r.db.WithContext(ctx).Model(&model.BookChapterRule{}).
+		Where("user_id = ?", userID).
+		Order("sort_order ASC").
+		Find(&rows).Error
+	return rows, err
+}
+
+func (r *BookChapterRuleRepository) ListSystemDefaults(ctx context.Context) ([]model.BookChapterRule, error) {
+	var rows []model.BookChapterRule
+	err := r.db.WithContext(ctx).Model(&model.BookChapterRule{}).
+		Where("rule_type = ? AND user_id IS NULL", model.RuleTypeSystem).
+		Order("sort_order ASC").
+		Find(&rows).Error
+	return rows, err
+}
+
+// ==================== BookChapterRuleRelRepository ====================
+
+type BookChapterRuleRelRepository struct {
+	db *gorm.DB
+}
+
+func NewBookChapterRuleRelRepository(db *gorm.DB) *BookChapterRuleRelRepository {
+	return &BookChapterRuleRelRepository{db: db}
+}
+
+func (r *BookChapterRuleRelRepository) Create(ctx context.Context, m *model.BookChapterRuleRel) error {
+	return r.db.WithContext(ctx).Create(m).Error
+}
+
+func (r *BookChapterRuleRelRepository) GetByBookAndReader(ctx context.Context, bookID, readerID uint64) (*model.BookChapterRuleRel, error) {
+	var m model.BookChapterRuleRel
+	err := r.db.WithContext(ctx).
+		Where("book_id = ? AND reader_id = ?", bookID, readerID).
+		First(&m).Error
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
+}
+
+func (r *BookChapterRuleRelRepository) DeleteByBookAndReader(ctx context.Context, bookID, readerID uint64) error {
+	return r.db.WithContext(ctx).
+		Where("book_id = ? AND reader_id = ?", bookID, readerID).
+		Delete(&model.BookChapterRuleRel{}).Error
+}
+
+func (r *BookChapterRuleRelRepository) ListByReader(ctx context.Context, readerID uint64) ([]model.BookChapterRuleRel, error) {
+	var rows []model.BookChapterRuleRel
+	err := r.db.WithContext(ctx).
+		Where("reader_id = ?", readerID).
 		Find(&rows).Error
 	return rows, err
 }

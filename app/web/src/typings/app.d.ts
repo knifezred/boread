@@ -991,14 +991,14 @@ declare namespace App {
             bookChapterRule: {
               title: string
               ruleName: string
-              scopeType: string
-              scopeGlobal: string
-              scopeBook: string
-              pattern: string
-              titleGroup: string
+              ruleType: string
+              ruleTypeSystem: string
+              ruleTypeCustom: string
+              titlePattern: string
+              groupPattern: string
               minChapterLen: string
               maxChapterLen: string
-              priority: string
+              sortOrder: string
               description: string
               status: string
               addRule: string
@@ -1006,8 +1006,28 @@ declare namespace App {
               rulePreview: string
               form: {
                 ruleName: string
-                pattern: string
+                titlePattern: string
+                groupPattern: string
                 description: string
+                reParse: {
+                  title: string
+                  selectRule: string
+                  autoRule: string
+                  hint: string
+                  confirm: string
+                }
+                regexTest: {
+                  title: string
+                  sampleText: string
+                  runTest: string
+                  titleMatches: string
+                  groupMatches: string
+                  noMatch: string
+                  matchCount: string
+                  regexError: string
+                  capturedGroup: string
+                  matchedText: string
+                }
               }
             }
             bookFilterRule: {

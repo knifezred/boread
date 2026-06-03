@@ -47,12 +47,13 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookUploadRepo := repository.NewBookUploadRepository(db)
 	bookChapterRepo := repository.NewBookChapterRepository(db)
 	bookChapterRuleRepo := repository.NewBookChapterRuleRepository(db)
+	bookChapterRuleRelRepo := repository.NewBookChapterRuleRelRepository(db)
 	bookFilterRuleRepo := repository.NewBookContentFilterRuleRepository(db)
 	readerBookshelfRepo := repository.NewReaderBookshelfRepository(db)
 	readerReadProgressRepo := repository.NewReaderReadProgressRepository(db)
 
 	// === Service 层 ===
-	authSvc := service.NewAuthService(userRepo, db)
+	authSvc := service.NewAuthService(userRepo, bookChapterRuleRepo, db)
 	deptSvc := service.NewDeptService(deptRepo)
 	roleSvc := service.NewRoleService(roleRepo)
 	userSvc := service.NewUserService(userRepo)
@@ -62,7 +63,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookCategorySvc := service.NewBookCategoryService(bookCategoryRepo)
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
 	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo, bookChapterRepo)
-	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
+	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookChapterRuleRelRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
 	readerSvc := service.NewReaderService(db, readerBookshelfRepo, readerReadProgressRepo, bookRepo, bookChapterRepo)
 
 	// === Handler 层 ===
@@ -195,6 +196,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.POST("/book/chapter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateChapterRule)
 			manage.PUT("/book/chapter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateChapterRule)
 			manage.DELETE("/book/chapter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteChapterRule)
+
+			// --- Book Chapter Rule Rel ---
+			manage.POST("/book/chapter-rule/bind", bookFileHandler.BindChapterRule)
+			manage.DELETE("/book/chapter-rule/bind/:bookId", bookFileHandler.UnbindChapterRule)
+			manage.GET("/book/chapter-rule/bind/:bookId", bookFileHandler.GetBoundChapterRule)
 
 			// --- Book Filter Rule ---
 			manage.GET("/book/filter-rule/:id", bookFileHandler.GetFilterRuleByID)

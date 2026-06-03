@@ -416,12 +416,12 @@ func upsertDefaultChapterRule(ctx context.Context, db *gorm.DB) error {
 	desc := "匹配中文数字章节格式: 第X章/节/回/卷/篇"
 	rule := model.BookChapterRule{
 		RuleName:      ruleName,
-		ScopeType:     model.RuleScopeGlobal,
-		Pattern:       `^(第[一二三四五六七八九十百千万0-9０-９]+[章章节回卷篇部集])`,
-		TitleGroup:    1,
+		RuleType:      model.RuleTypeSystem,
+		TitlePattern:  `^(第[一二三四五六七八九十百千万0-9０-９]+[章章节回卷篇部集])`,
+		GroupPattern:  nil,
 		MinChapterLen: 100,
 		MaxChapterLen: 100000,
-		Priority:      0,
+		SortOrder:     0,
 		Description:   &desc,
 		Status:        model.StatusEnabled,
 	}

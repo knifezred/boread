@@ -143,7 +143,7 @@ CREATE TABLE `book_chapter_rule_rel` (
   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `book_id`         BIGINT UNSIGNED NOT NULL                       COMMENT '书籍ID，关联书籍主表',
   `reader_id`       BIGINT UNSIGNED NOT NULL                       COMMENT '读者ID，关联sys_user表',
-  `rule_id`         BIGINT UNSIGNED NOT NULL                       COMMENT '规则ID，关联chapter_rule表',
+  `rule_id`         BIGINT UNSIGNED NOT NULL                       COMMENT '规则ID，关联book_chapter_rule表',
   `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
@@ -152,7 +152,7 @@ CREATE TABLE `book_chapter_rule_rel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_book_rule` (`book_id`, `reader_id`)                 COMMENT '同一本书同一读者不能重复关联规则',
   KEY `idx_book_reader_id` (`book_id`, `reader_id`)              COMMENT '按书籍和读者查询关联',
-  CONSTRAINT `fk_book_rule_rel_rule` FOREIGN KEY (`rule_id`) REFERENCES `chapter_rule` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_book_rule_rel_rule` FOREIGN KEY (`rule_id`) REFERENCES `book_chapter_rule` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='书籍规则关联表';
 
 
