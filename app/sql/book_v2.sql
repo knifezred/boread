@@ -57,11 +57,13 @@ CREATE TABLE `book_chapter` (
   `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
   `book_id`       BIGINT UNSIGNED NOT NULL                          COMMENT '归属作品 id (book.id)',
   `file_id`       BIGINT UNSIGNED NOT NULL                          COMMENT '来源文件 id (book_file.id)',
+  `volume_no`     INT UNSIGNED    NULL     DEFAULT NULL             COMMENT '卷序号 (1 开始)',
+  `volume_title`  VARCHAR(255)    NULL     DEFAULT NULL             COMMENT '卷标题',
   `chapter_no`    INT UNSIGNED    NOT NULL                          COMMENT '章节序号 (1 开始)',
   `title`         VARCHAR(255)    NOT NULL                          COMMENT '章节标题',
   `byte_offset`   BIGINT UNSIGNED NOT NULL                          COMMENT '在 book_file.content_path 文件中的起始字节偏移',
   `byte_length`   INT UNSIGNED    NOT NULL                          COMMENT '章节字节长度 (UTF-8 编码后)',
-  `word_count`    INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '字符数 (展示用)',
+  `word_count`    INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '字符数 (展示用,需过滤空格等无效字符)',
   `is_vip`        TINYINT(1)      NOT NULL DEFAULT 0                COMMENT '是否 VIP 章节',
   `status`        CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-发布, 2-草稿, 3-下架',
   `create_by`     BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
@@ -106,31 +108,77 @@ CREATE TABLE `book_upload` (
 -- ---------------------------------------------------------------------
 -- Table: book_chapter_rule (章节识别规则)
 -- 用于解析 txt 时切分章节, 支持多条规则按优先级匹配
--- scope_type 区分全局默认还是单书覆盖
+-- 存储系统默认规则和用户自定义规则
 -- ---------------------------------------------------------------------
 DROP TABLE IF EXISTS `book_chapter_rule`;
 CREATE TABLE `book_chapter_rule` (
-  `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
-  `rule_name`       VARCHAR(64)     NOT NULL                          COMMENT '规则名称',
-  `scope_type`      CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '作用域: 1-全局默认, 2-单书覆盖',
-  `book_id`         BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '关联书 id (scope_type=2 时必填)',
-  `pattern`         VARCHAR(512)    NOT NULL                          COMMENT '章节标题正则 (Go RE2 语法)',
-  `title_group`     INT             NOT NULL DEFAULT 0                COMMENT '正则中作为标题的捕获组序号, 0=整行',
-  `min_chapter_len` INT UNSIGNED    NOT NULL DEFAULT 100              COMMENT '章节最小字符数 (过滤误匹配如目录页)',
-  `max_chapter_len` INT UNSIGNED    NOT NULL DEFAULT 100000           COMMENT '章节最大字符数 (过大可能是未切分)',
-  `priority`        INT             NOT NULL DEFAULT 0                COMMENT '优先级 (越大越先匹配)',
-  `description`     VARCHAR(255)    NULL     DEFAULT NULL             COMMENT '说明 / 示例',
-  `status`          CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-启用, 2-禁用',
+  `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `rule_name`       VARCHAR(64)     NOT NULL                       COMMENT '规则名称，如：标准章节、数字序号等',
+  `rule_type`       CHAR(1)         NOT NULL DEFAULT '1'           COMMENT '规则类型: 1-系统默认, 2-用户自定义',
+  `user_id`         BIGINT UNSIGNED NULL                           COMMENT '用户ID，rule_type=2时必填，标识该规则属于哪个用户',
+  `title_pattern`   VARCHAR(512)    NOT NULL                       COMMENT '章节标题正则表达式，使用Go RE2语法，如：第(\\d+)章\\s+(.+)',
+  `group_pattern`   VARCHAR(512)    NULL                           COMMENT '分卷标题正则表达式，使用Go RE2语法，如：第(\\d+)卷\\s+(.+)，空表示不分卷',
+  `min_chapter_len` INT UNSIGNED    NOT NULL DEFAULT 100           COMMENT '章节最小字符数，低于此阈值则过滤（用于排除目录页、导航行等误匹配）',
+  `max_chapter_len` INT UNSIGNED    NOT NULL DEFAULT 100000        COMMENT '章节最大字符数，超过此阈值则过滤（防止未正确切分的大块内容）',
+  `sort_order`      INT             NOT NULL DEFAULT 0             COMMENT '全局排序字段，数字越小优先级越高，系统匹配时按此顺序依次尝试规则',
+  `description`     VARCHAR(255)    NULL                           COMMENT '规则说明/示例，如：匹配"第1章 标题"格式的章节',
+  `status`          CHAR(1)         NOT NULL DEFAULT '1'           COMMENT '状态: 1-启用, 2-禁用',
   `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
   `create_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
   `update_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `deleted_at`      DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
   PRIMARY KEY (`id`),
-  KEY `idx_scope` (`scope_type`, `book_id`),
-  KEY `idx_priority` (`priority`),
-  KEY `idx_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节识别规则表';
+  KEY `idx_type_user` (`rule_type`, `user_id`)                     COMMENT '按规则类型和用户查询',
+  KEY `idx_sort_status` (`sort_order`, `status`)                   COMMENT '按排序和状态查询活跃规则',
+  KEY `idx_deleted_at` (`deleted_at`)                              COMMENT '软删除查询索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节规则定义表';
+
+
+-- =====================================================
+-- Table: book_chapter_rule_rel (书籍章节规则关联表)
+-- 定义书籍与章节规则的绑定关系，支持多规则组合匹配和单规则直接使用
+-- =====================================================
+CREATE TABLE `book_chapter_rule_rel` (
+  `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `book_id`         BIGINT UNSIGNED NOT NULL                       COMMENT '书籍ID，关联书籍主表',
+  `reader_id`       BIGINT UNSIGNED NOT NULL                       COMMENT '读者ID，关联sys_user表',
+  `rule_id`         BIGINT UNSIGNED NOT NULL                       COMMENT '规则ID，关联chapter_rule表',
+  `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+  `create_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+  `update_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `deleted_at`      DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_book_rule` (`book_id`, `reader_id`)                 COMMENT '同一本书同一读者不能重复关联规则',
+  KEY `idx_book_reader_id` (`book_id`, `reader_id`)              COMMENT '按书籍和读者查询关联',
+  CONSTRAINT `fk_book_rule_rel_rule` FOREIGN KEY (`rule_id`) REFERENCES `chapter_rule` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='书籍规则关联表';
+
+
+-- DROP TABLE IF EXISTS `book_chapter_rule`;
+-- CREATE TABLE `book_chapter_rule` (
+--   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
+--   `rule_name`       VARCHAR(64)     NOT NULL                          COMMENT '规则名称',
+--   `scope_type`      CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '作用域: 1-全局默认, 2-单书覆盖',
+--   `book_id`         BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '关联书 id (scope_type=2 时必填)',
+--   `pattern`         VARCHAR(512)    NOT NULL                          COMMENT '章节标题正则 (Go RE2 语法)',
+--   `title_group`     INT             NOT NULL DEFAULT 0                COMMENT '正则中作为标题的捕获组序号, 0=整行',
+--   `min_chapter_len` INT UNSIGNED    NOT NULL DEFAULT 100              COMMENT '章节最小字符数 (过滤误匹配如目录页)',
+--   `max_chapter_len` INT UNSIGNED    NOT NULL DEFAULT 100000           COMMENT '章节最大字符数 (过大可能是未切分)',
+--   `priority`        INT             NOT NULL DEFAULT 0                COMMENT '优先级 (越大越先匹配)',
+--   `description`     VARCHAR(255)    NULL     DEFAULT NULL             COMMENT '说明 / 示例',
+--   `status`          CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-启用, 2-禁用',
+--   `create_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建人 (存 sys_user.id)',
+--   `create_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+--   `update_by`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '更新人 (存 sys_user.id)',
+--   `update_time`     DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+--   `deleted_at`      DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间',
+--   PRIMARY KEY (`id`),
+--   KEY `idx_scope` (`scope_type`, `book_id`),
+--   KEY `idx_priority` (`priority`),
+--   KEY `idx_deleted_at` (`deleted_at`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节识别规则表';
 
 -- ---------------------------------------------------------------------
 -- Table: book_content_filter_rule (内容净化规则)
