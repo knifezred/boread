@@ -69,48 +69,6 @@ type FileResponse struct {
 	model.BookFile
 }
 
-// ==================== 章节 ====================
-
-// ChapterSearch 章节搜索
-type ChapterSearch struct {
-	PageRequest
-	BookID    *uint64 `json:"bookId"`
-	FileID    *uint64 `json:"fileId"`
-	ChapterNo *uint32 `json:"chapterNo"`
-}
-
-// ChapterListRequest 章节列表请求（不分页）
-type ChapterListRequest struct {
-	BookID uint64 `json:"bookId"` // 书籍ID
-}
-
-// ChapterResponse 章节响应
-type ChapterResponse struct {
-	model.BookChapter
-}
-
-// ChapterContentResponse 章节内容响应（含文本）
-type ChapterContentResponse struct {
-	model.BookChapter
-	Content string `json:"content"`
-}
-
-// ==================== 重新识别章节 ====================
-
-// ReParseRequest 重新识别章节请求
-type ReParseRequest struct {
-	BookID uint64 `json:"bookId" binding:"required"`
-}
-
-// ReParseResponse 重新识别章节响应
-type ReParseResponse struct {
-	BookID     uint64 `json:"bookId"`
-	BookTitle  string `json:"bookTitle"`
-	OldCount   uint32 `json:"oldCount"`
-	NewCount   uint32 `json:"newCount"`
-	TotalWords uint32 `json:"totalWords"`
-}
-
 // ==================== 章节识别规则 ====================
 
 // ChapterRuleRequest 规则请求

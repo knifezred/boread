@@ -31,7 +31,10 @@ const (
 	HasBoundRef       = 3003 // 仍有绑定关系不可删除
 
 	// 章节
-	ChapterNotExist = 3041 // 章节不存在
+	ChapterNotExist         = 3041 // 章节不存在
+	ChapterFileUpdateFailed = 3042 // 章节文件更新失败
+	ChapterMergeNotAdjacent = 3043 // 章节非连续无法合并
+	ChapterContentTooLarge  = 3044 // 章节内容过大
 
 	// ========== 业务 - 书架 (3100-3199) ==========
 	BookshelfNotFound  = 3101 // 书架记录不存在
@@ -76,31 +79,34 @@ func Text(code int) string {
 
 // errMsgMap 错误码与中文消息映射
 var errMsgMap = map[int]string{
-	ParamInvalid:          "请求参数无效",
-	FileInvalid:           "文件错误",
-	AuthFailed:            "认证失败",
-	TokenInvalid:          "Token 无效或过期",
-	UserDisabled:          "账号已禁用",
-	UserLocked:            "账号已锁定",
-	PermissionDenied:      "权限不足",
-	ResourceConflict:      "资源冲突或不存在",
-	ResourceProtected:     "系统内置资源不可操作",
-	HasBoundRef:           "仍有绑定关系不可删除",
-	ChapterNotExist:       "章节不存在",
-	BookshelfNotFound:     "书架记录不存在",
-	AlreadyInBookshelf:    "该书已在书架中",
-	ProgressNotFound:      "阅读进度不存在",
-	NoteNotFound:          "笔记不存在",
-	NoteNotOwner:          "无权修改他人笔记",
-	ReviewNotFound:        "书评不存在",
-	ReviewNotOwner:        "无权修改他人书评",
-	CommentNotFound:       "评论不存在",
-	CommentNotOwner:       "无权删除他人评论",
-	ParentCommentNotFound: "父评论不存在",
-	CharacterNotFound:     "角色不存在",
-	CharacterRelNotFound:  "角色关系不存在",
-	SearchParamInvalid:    "搜索参数错误",
-	ServerError:           "服务器内部错误",
+	ParamInvalid:            "请求参数无效",
+	FileInvalid:             "文件错误",
+	AuthFailed:              "认证失败",
+	TokenInvalid:            "Token 无效或过期",
+	UserDisabled:            "账号已禁用",
+	UserLocked:              "账号已锁定",
+	PermissionDenied:        "权限不足",
+	ResourceConflict:        "资源冲突或不存在",
+	ResourceProtected:       "系统内置资源不可操作",
+	HasBoundRef:             "仍有绑定关系不可删除",
+	ChapterNotExist:         "章节不存在",
+	ChapterFileUpdateFailed: "章节文件更新失败",
+	ChapterMergeNotAdjacent: "章节非连续无法合并",
+	ChapterContentTooLarge:  "章节内容过大",
+	BookshelfNotFound:       "书架记录不存在",
+	AlreadyInBookshelf:      "该书已在书架中",
+	ProgressNotFound:        "阅读进度不存在",
+	NoteNotFound:            "笔记不存在",
+	NoteNotOwner:            "无权修改他人笔记",
+	ReviewNotFound:          "书评不存在",
+	ReviewNotOwner:          "无权修改他人书评",
+	CommentNotFound:         "评论不存在",
+	CommentNotOwner:         "无权删除他人评论",
+	ParentCommentNotFound:   "父评论不存在",
+	CharacterNotFound:       "角色不存在",
+	CharacterRelNotFound:    "角色关系不存在",
+	SearchParamInvalid:      "搜索参数错误",
+	ServerError:             "服务器内部错误",
 }
 
 // MapServiceError 将 service 层 sentinel error 映射为业务错误码
@@ -149,6 +155,14 @@ func MapServiceError(err error) int {
 		errors.Is(err, service.ErrRuleNotFound),
 		errors.Is(err, service.ErrFilterRuleNotFound):
 		return ResourceConflict
+
+	// book_chapter
+	case errors.Is(err, service.ErrChapterContentTooLarge):
+		return ChapterContentTooLarge
+	case errors.Is(err, service.ErrChapterFileUpdateFailed):
+		return ChapterFileUpdateFailed
+	case errors.Is(err, service.ErrChapterMergeNotAdjacent):
+		return ChapterMergeNotAdjacent
 
 	// book_reader
 	case errors.Is(err, service.ErrProgressNotFound):

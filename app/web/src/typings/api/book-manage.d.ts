@@ -233,7 +233,7 @@ declare namespace Api {
 
     /** chapter search params */
     type ChapterSearchParams = CommonType.RecordNullable<
-      { bookId: number | null; fileId: number | null; chapterNo: number | null } & CommonSearchParams
+      { bookId: number | null; fileId: number | null; chapterNo: number | null; title: string; status: string } & CommonSearchParams
     >;
 
     /** chapter content response */
@@ -241,7 +241,48 @@ declare namespace Api {
       content: string;
     };
 
-    // ==================== Book Chapter Rule ====================
+    // ==================== Chapter Management ====================
+
+    /** update chapter title request */
+    type ChapterTitleUpdateRequest = {
+      title: string;
+    };
+
+    /** batch update chapter titles request */
+    type ChapterTitleBatchRequest = {
+      ids: number[];
+      title: string;
+    };
+
+    /** batch update chapter status request */
+    type ChapterStatusBatchRequest = {
+      ids: number[];
+      status: string;
+    };
+
+    /** merge chapters request */
+    type ChapterMergeRequest = {
+      bookId: number;
+      targetId: number;
+      sourceIds: number[];
+    };
+
+    /** format chapter numbers request */
+    type ChapterFormatRequest = {
+      ids: number[];
+    };
+
+    /** save chapter content request */
+    type ChapterContentSaveRequest = {
+      bookId: number;
+      content: string;
+    };
+
+    /** re-parse chapters request */
+    type ReParseRequest = {
+      bookId: number;
+      ruleId?: number;
+    };
 
     /** re-parse chapters response */
     type ReParseResponse = {

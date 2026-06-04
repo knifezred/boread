@@ -227,6 +227,46 @@ func (r *BookChapterRepository) GetMaxChapterNo(ctx context.Context, bookID, fil
 	return maxNo, err
 }
 
+func (r *BookChapterRepository) Update(ctx context.Context, m *model.BookChapter) error {
+	return r.db.WithContext(ctx).Save(m).Error
+}
+
+func (r *BookChapterRepository) BatchUpdateStatus(ctx context.Context, ids []uint64, status string) error {
+	return r.db.WithContext(ctx).Model(&model.BookChapter{}).Where("id IN ?", ids).Update("status", status).Error
+}
+
+func (r *BookChapterRepository) BatchUpdateTitles(ctx context.Context, ids []uint64, title string) error {
+	return r.db.WithContext(ctx).Model(&model.BookChapter{}).Where("id IN ?", ids).Update("title", title).Error
+}
+
+func (r *BookChapterRepository) ListByIDs(ctx context.Context, ids []uint64) ([]model.BookChapter, error) {
+	var rows []model.BookChapter
+	err := r.db.WithContext(ctx).Model(&model.BookChapter{}).Where("id IN ?", ids).Order("chapter_no ASC").Find(&rows).Error
+	return rows, err
+}
+
+func (r *BookChapterRepository) DeleteByIDSoft(ctx context.Context, id uint64) error {
+	return r.db.WithContext(ctx).Delete(&model.BookChapter{}, id).Error
+}
+
+func (r *BookChapterRepository) GetMaxChapterNoByBook(ctx context.Context, bookID uint64) (uint32, error) {
+	var maxNo uint32
+	err := r.db.WithContext(ctx).Model(&model.BookChapter{}).
+		Where("book_id = ?", bookID).
+		Select("COALESCE(MAX(chapter_no), 0)").
+		Scan(&maxNo).Error
+	return maxNo, err
+}
+
+func (r *BookChapterRepository) GetByBookIDRange(ctx context.Context, bookID uint64, fromNo, toNo uint32) ([]model.BookChapter, error) {
+	var rows []model.BookChapter
+	err := r.db.WithContext(ctx).Model(&model.BookChapter{}).
+		Where("book_id = ? AND chapter_no >= ? AND chapter_no <= ?", bookID, fromNo, toNo).
+		Order("chapter_no ASC").
+		Find(&rows).Error
+	return rows, err
+}
+
 // ==================== BookChapterRuleRepository ====================
 
 type BookChapterRuleRepository struct {

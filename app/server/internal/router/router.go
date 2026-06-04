@@ -72,6 +72,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
 	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo, bookChapterRepo)
 	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookChapterRuleRelRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
+	bookChapterSvc := service.NewBookChapterService(db, bookChapterRepo, bookFileRepo, bookRepo, bookFilterRuleRepo)
 	bookReaderSvc := service.NewBookReaderService(db, readerBookshelfRepo, readerReadProgressRepo, readerReadEventRepo, bookRepo, bookChapterRepo)
 	bookReadStatsSvc := service.NewBookReadStatsService(readerReadStatsRepo, bookRepo)
 	bookSocialSvc := service.NewBookSocialService(db, readerNoteRepo, bookReviewRepo, bookCommentRepo, readerLikeRepo, bookRepo, bookChapterRepo, userRepo)
@@ -90,6 +91,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
 	bookHandler := v1.NewBookHandler(bookSvc)
 	bookFileHandler := v1.NewBookFileHandler(bookFileSvc)
+	bookChapterHandler := v1.NewBookChapterHandler(bookChapterSvc)
 	bookReaderHandler := v1.NewBookReaderHandler(bookReaderSvc)
 	bookReadStatsHandler := v1.NewBookReadStatsHandler(bookReadStatsSvc)
 	bookshelfSvc := service.NewReaderBookshelfService(db, readerBookshelfRepo, readerReadProgressRepo, bookRepo, bookChapterRepo)
@@ -220,12 +222,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			bookGroup.POST("/scan", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanAll)
 			bookGroup.POST("/scan-path", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanPath)
 			bookGroup.POST("/scan/:id", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanByID)
-			bookGroup.GET("/:id/chapter/:chapterNo", bookFileHandler.GetChapterContent)
 			bookGroup.POST("/upload/page", bookFileHandler.PageUpload)
 			bookGroup.POST("/file/page", bookFileHandler.PageFile)
-			bookGroup.POST("/chapter/page", bookFileHandler.PageChapter)
-			bookGroup.POST("/chapter/list", bookFileHandler.ListChapter)
-			bookGroup.POST("/re-parse", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.ReParseChapters)
 
 			// Chapter Rule
 			bookGroup.GET("/chapter-rule/:id", bookFileHandler.GetChapterRuleByID)
@@ -245,6 +243,23 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			bookGroup.POST("/filter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateFilterRule)
 			bookGroup.PUT("/filter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateFilterRule)
 			bookGroup.DELETE("/filter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteFilterRule)
+		}
+
+		// --- Book Chapter ---
+		bookChapterGroup := api.Group("/book/chapter")
+		bookChapterGroup.Use(middleware.Auth())
+		{
+			bookChapterGroup.POST("/page", bookChapterHandler.PageChapter)
+			bookChapterGroup.POST("/list", bookChapterHandler.ListChapter)
+			bookChapterGroup.GET("/:id/content", bookChapterHandler.GetChapterContent)
+			bookChapterGroup.PUT("/:id/title", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.UpdateChapterTitle)
+			bookChapterGroup.PUT("/batch-title", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.BatchUpdateChapterTitle)
+			bookChapterGroup.PUT("/status", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.UpdateChapterStatus)
+			bookChapterGroup.DELETE("/:id", middleware.RequireButton(authSvc, "book:delete"), bookChapterHandler.DeleteChapter)
+			bookChapterGroup.POST("/merge", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.MergeChapters)
+			bookChapterGroup.POST("/format-numbers", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.FormatChapterNumbers)
+			bookChapterGroup.PUT("/:id/content", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.SaveChapterContent)
+			bookChapterGroup.POST("/re-parse", middleware.RequireButton(authSvc, "book:update"), bookChapterHandler.ReParseChapters)
 		}
 
 		// --- Book Character ---

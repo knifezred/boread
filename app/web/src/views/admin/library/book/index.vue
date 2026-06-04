@@ -1,41 +1,41 @@
 <script setup lang="tsx">
-import { ref, computed } from "vue";
-import type { Ref } from "vue";
+import { ref, computed } from "vue"
+import type { Ref } from "vue"
 import {
   NButton,
   NPopconfirm,
   NTag,
   NTree,
-} from "naive-ui";
-import type { TreeOption } from "naive-ui";
-import { useBoolean } from "@sa/hooks";
-import { useDictItems } from "@/hooks/business/dict";
+} from "naive-ui"
+import type { TreeOption } from "naive-ui"
+import { useBoolean } from "@sa/hooks"
+import { useDictItems } from "@/hooks/business/dict"
 import {
   fetchGetBookList,
   fetchDeleteBook,
   fetchGetCategoryTree,
   fetchUpdateBookStatus,
-} from "@/service/api";
-import { useAppStore } from "@/store/modules/app";
+} from "@/service/api"
+import { useAppStore } from "@/store/modules/app"
 import {
   defaultTransform,
   useNaivePaginatedTable,
   useTableOperate,
-} from "@/hooks/common/table";
-import { $t } from "@/locales";
-import BookOperateModal from "./modules/book-operate-modal.vue";
-import BookUploadModal from "./modules/book-upload-modal.vue";
-import BookChapterModal from "./modules/book-chapter-modal.vue";
-import BookScanModal from "./modules/book-scan-modal.vue";
-import BookSearch from "./modules/book-search.vue";
-import { formatWordCount } from "@/utils/book.js";
+} from "@/hooks/common/table"
+import { $t } from "@/locales"
+import BookOperateModal from "./modules/book-operate-modal.vue"
+import BookUploadModal from "./modules/book-upload-modal.vue"
+import BookChapterDrawer from "./modules/book-chapter-drawer.vue"
+import BookScanModal from "./modules/book-scan-modal.vue"
+import BookSearch from "./modules/book-search.vue"
+import { formatWordCount } from "@/utils/book.js"
 
 const appStore = useAppStore();
 
 const { bool: visible, setTrue: openModal } = useBoolean();
 const { bool: uploadVisible, setTrue: openUploadModal } = useBoolean();
 const { bool: scanVisible, setTrue: openScanModal } = useBoolean();
-const { bool: chapterVisible, setTrue: openChapterModal } = useBoolean();
+const { bool: chapterVisible, setTrue: openChapterDrawer } = useBoolean();
 
 const chapterBookId = ref(0);
 const chapterBookTitle = ref("");
@@ -310,7 +310,7 @@ async function handleScan() {
 function showChapters(row: Api.BookManage.Book) {
   chapterBookId.value = row.id;
   chapterBookTitle.value = row.title;
-  openChapterModal();
+  openChapterDrawer();
 }
 
 async function handleToggleListing(row: Api.BookManage.Book) {
@@ -397,7 +397,7 @@ function handleSearchReset() {
     </div>
     <BookUploadModal v-model:visible="uploadVisible" @imported="getData" />
     <BookScanModal v-model:visible="scanVisible" @scanned="getData" />
-    <BookChapterModal
+    <BookChapterDrawer
       v-model:visible="chapterVisible"
       :book-id="chapterBookId"
       :book-title="chapterBookTitle"

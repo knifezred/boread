@@ -237,25 +237,7 @@ export function fetchGetFileList(params?: Api.BookManage.FileSearchParams) {
   });
 }
 
-/** 章节分页 */
-export function fetchGetChapterList(params?: Api.BookManage.ChapterSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookChapter>>({
-    url: "/book/chapter/page",
-    method: "post",
-    data: params,
-  });
-}
-
-/** 章节列表（不分页） */
-export function fetchChapterList(bookId: number) {
-  return request<Api.BookManage.BookChapter[]>({
-    url: "/book/chapter/list",
-    method: "post",
-    data: { bookId },
-  });
-}
-
-/** 读取章节内容 */
+/** 读取章节内容（向前兼容 - 读者端使用，通过bookId+chapterNo查找） */
 export function fetchGetChapterContent(bookId: string | number, chapterNo: string | number) {
   return request<Api.BookManage.ChapterContentResponse>({
     url: `/book/${bookId}/chapter/${chapterNo}`,
@@ -280,10 +262,10 @@ export function fetchGetPublicChapterList(bookId: string | number) {
   });
 }
 
-/** 重新识别章节 */
+/** 重新识别章节（旧签名，向后兼容） */
 export function fetchReParseChapters(bookId: number, ruleId?: number) {
   return request<Api.BookManage.ReParseResponse>({
-    url: "/book/re-parse",
+    url: "/book/chapter/re-parse",
     method: "post",
     data: ruleId ? { bookId, ruleId } : { bookId },
   });

@@ -13,7 +13,6 @@ import (
 
 var (
 	_ = model.BookFile{}
-	_ = model.BookChapter{}
 	_ = model.BookUpload{}
 	_ = model.BookChapterRule{}
 	_ = model.BookContentFilterRule{}
@@ -136,57 +135,6 @@ func (h *BookFileHandler) ScanByID(c *gin.Context) {
 	response.Success(c, resp)
 }
 
-// GetChapterContent 读取章节内容
-// @Summary   读取章节内容
-// @Tags      book-file
-// @Security  BearerAuth
-// @Produce   json
-// @Param    id     path  int  true  "书籍ID"
-// @Param    chapterNo  path  int  true  "章节序号"
-// @Success  200  {object}  response.Response{data=dto.ChapterContentResponse}
-// @Router   /api/book/{id}/chapter/{chapterNo} [get]
-func (h *BookFileHandler) GetChapterContent(c *gin.Context) {
-	bookID, err := utils.ParseUint64Param(c, "id")
-	if err != nil {
-		response.Error(c, code.ParamInvalid, "invalid bookId")
-		return
-	}
-	chapterNo, err := utils.ParseUint64Param(c, "chapterNo")
-	if err != nil {
-		response.Error(c, code.ParamInvalid, "invalid chapterNo")
-		return
-	}
-	resp, err := h.svc.GetChapterContent(c.Request.Context(), bookID, uint32(chapterNo))
-	if err != nil {
-		response.Error(c, mapFileErr(err), err.Error())
-		return
-	}
-	response.Success(c, resp)
-}
-
-// ReParseChapters 重新识别章节
-// @Summary   重新识别章节（删除旧章节索引，重新解析并创建）
-// @Tags      book-file
-// @Security  BearerAuth
-// @Accept    json
-// @Produce   json
-// @Param    body  body  dto.ReParseRequest  true  "请求参数"
-// @Success  200  {object}  response.Response{data=dto.ReParseResponse}
-// @Router   /api/book/re-parse [post]
-func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
-	var req dto.ReParseRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, code.ParamInvalid, err.Error())
-		return
-	}
-	resp, err := h.svc.ReParseChapters(c.Request.Context(), &req, utils.GetUserID(c))
-	if err != nil {
-		response.Error(c, mapFileErr(err), err.Error())
-		return
-	}
-	response.Success(c, resp)
-}
-
 // ==================== 上传记录 ====================
 
 // PageUpload 上传记录分页
@@ -230,54 +178,6 @@ func (h *BookFileHandler) PageFile(c *gin.Context) {
 		return
 	}
 	resp, err := h.svc.PageFile(c.Request.Context(), &req)
-	if err != nil {
-		response.Error(c, code.ServerError, err.Error())
-		return
-	}
-	response.Success(c, resp)
-}
-
-// ==================== 章节 ====================
-
-// PageChapter 章节分页
-// @Summary   章节分页列表
-// @Tags      book-file
-// @Security  BearerAuth
-// @Accept    json
-// @Produce   json
-// @Param    body  body  dto.ChapterSearch  true  "搜索参数"
-// @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/book/chapter/page [post]
-func (h *BookFileHandler) PageChapter(c *gin.Context) {
-	var req dto.ChapterSearch
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, code.ParamInvalid, err.Error())
-		return
-	}
-	resp, err := h.svc.PageChapter(c.Request.Context(), &req)
-	if err != nil {
-		response.Error(c, code.ServerError, err.Error())
-		return
-	}
-	response.Success(c, resp)
-}
-
-// ListChapter 章节列表（不分页）
-// @Summary   章节列表
-// @Tags      book-file
-// @Security  BearerAuth
-// @Accept    json
-// @Produce   json
-// @Param    body  body  dto.ChapterListRequest  true  "请求参数"
-// @Success  200  {object}  response.Response{data=[]dto.ChapterResponse}
-// @Router   /api/book/chapter/list [post]
-func (h *BookFileHandler) ListChapter(c *gin.Context) {
-	var req dto.ChapterListRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, code.ParamInvalid, err.Error())
-		return
-	}
-	resp, err := h.svc.ListChapter(c.Request.Context(), &req)
 	if err != nil {
 		response.Error(c, code.ServerError, err.Error())
 		return
