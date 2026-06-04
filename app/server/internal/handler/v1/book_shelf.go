@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -29,7 +30,7 @@ func NewBookshelfHandler(svc *service.ReaderBookshelfService) *BookshelfHandler 
 func (h *BookshelfHandler) AddToBookshelf(c *gin.Context) {
 	var req dto.BookshelfRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.AddToBookshelf(c.Request.Context(), utils.GetUserID(c), &req)
@@ -51,7 +52,7 @@ func (h *BookshelfHandler) AddToBookshelf(c *gin.Context) {
 func (h *BookshelfHandler) RemoveFromBookshelf(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	if err := h.svc.RemoveFromBookshelf(c.Request.Context(), utils.GetUserID(c), bookID); err != nil {
@@ -74,12 +75,12 @@ func (h *BookshelfHandler) RemoveFromBookshelf(c *gin.Context) {
 func (h *BookshelfHandler) UpdateBookshelf(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	var req dto.BookshelfUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.UpdateBookshelf(c.Request.Context(), utils.GetUserID(c), bookID, &req)
@@ -102,12 +103,12 @@ func (h *BookshelfHandler) UpdateBookshelf(c *gin.Context) {
 func (h *BookshelfHandler) GetBookshelfPage(c *gin.Context) {
 	var req dto.BookshelfSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.GetBookshelfPage(c.Request.Context(), utils.GetUserID(c), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -123,21 +124,12 @@ func (h *BookshelfHandler) GetBookshelfPage(c *gin.Context) {
 func (h *BookshelfHandler) ListGroups(c *gin.Context) {
 	groups, err := h.svc.ListGroups(c.Request.Context(), utils.GetUserID(c))
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, groups)
 }
 
 func mapBookshelfErr(err error) int {
-	switch {
-	case service.ErrBookshelfNotFound == err:
-		return 3101
-	case service.ErrBookNotExist == err:
-		return 3001
-	case service.ErrAlreadyInBookshelf == err:
-		return 3102
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

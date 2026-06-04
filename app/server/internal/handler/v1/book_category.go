@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -30,7 +31,7 @@ func NewBookCategoryHandler(svc *service.BookCategoryService) *BookCategoryHandl
 func (h *BookCategoryHandler) Tree(c *gin.Context) {
 	tree, err := h.svc.Tree(c.Request.Context())
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, tree)
@@ -47,12 +48,12 @@ func (h *BookCategoryHandler) Tree(c *gin.Context) {
 func (h *BookCategoryHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 3001, err.Error())
+		response.Error(c, code.ResourceConflict, err.Error())
 		return
 	}
 	response.Success(c, m)
@@ -70,7 +71,7 @@ func (h *BookCategoryHandler) GetByID(c *gin.Context) {
 func (h *BookCategoryHandler) Create(c *gin.Context) {
 	var req dto.CategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -94,12 +95,12 @@ func (h *BookCategoryHandler) Create(c *gin.Context) {
 func (h *BookCategoryHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.CategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -121,7 +122,7 @@ func (h *BookCategoryHandler) Update(c *gin.Context) {
 func (h *BookCategoryHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -143,27 +144,19 @@ func (h *BookCategoryHandler) Delete(c *gin.Context) {
 func (h *BookCategoryHandler) Page(c *gin.Context) {
 	var req dto.CategorySearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 4001, err.Error())
+		response.Error(c, code.SearchParamInvalid, err.Error())
 		return
 	}
 	res, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, res)
 }
 
 func mapCategoryErr(err error) int {
-	switch {
-	case service.ErrCategoryCodeExists == err,
-		service.ErrCategoryParentNotFound == err:
-		return 3001
-	case service.ErrCategoryHasChildren == err:
-		return 3002
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }
 
 // HotList 热门分类列表（公开，无需认证）
@@ -175,7 +168,7 @@ func mapCategoryErr(err error) int {
 func (h *BookCategoryHandler) HotList(c *gin.Context) {
 	items, err := h.svc.GetHotCategories(c.Request.Context())
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, items)

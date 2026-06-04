@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -28,12 +29,12 @@ func NewLogHandler(svc *service.LogService) *LogHandler {
 func (h *LogHandler) PageLogin(c *gin.Context) {
 	var req dto.LoginLogSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageLogin(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -51,12 +52,12 @@ func (h *LogHandler) PageLogin(c *gin.Context) {
 func (h *LogHandler) PageOperation(c *gin.Context) {
 	var req dto.OperationLogSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageOperation(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)

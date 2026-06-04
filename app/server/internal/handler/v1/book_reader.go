@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -33,12 +34,12 @@ func NewBookReaderHandler(svc *service.BookReaderService) *BookReaderHandler {
 func (h *BookReaderHandler) ReportProgress(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	var req dto.ReadProgressRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.ReportProgress(c.Request.Context(), utils.GetUserID(c), bookID, &req)
@@ -60,7 +61,7 @@ func (h *BookReaderHandler) ReportProgress(c *gin.Context) {
 func (h *BookReaderHandler) GetProgress(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	resp, err := h.svc.GetProgress(c.Request.Context(), utils.GetUserID(c), bookID)
@@ -85,7 +86,7 @@ func (h *BookReaderHandler) GetProgress(c *gin.Context) {
 func (h *BookReaderHandler) ReportEvent(c *gin.Context) {
 	var req dto.ReadEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	if err := h.svc.ReportEvent(c.Request.Context(), utils.GetUserID(c), &req); err != nil {
@@ -98,12 +99,5 @@ func (h *BookReaderHandler) ReportEvent(c *gin.Context) {
 // ======================== 错误码映射 ========================
 
 func mapReaderErr(err error) int {
-	switch {
-	case service.ErrProgressNotFound == err:
-		return 3201
-	case service.ErrBookNotExist == err:
-		return 3001
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

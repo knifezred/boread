@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -32,12 +33,12 @@ func NewBookTagHandler(svc *service.BookTagService) *BookTagHandler {
 func (h *BookTagHandler) Page(c *gin.Context) {
 	var req dto.TagSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -54,12 +55,12 @@ func (h *BookTagHandler) Page(c *gin.Context) {
 func (h *BookTagHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 3001, err.Error())
+		response.Error(c, code.ResourceConflict, err.Error())
 		return
 	}
 	response.Success(c, m)
@@ -77,7 +78,7 @@ func (h *BookTagHandler) GetByID(c *gin.Context) {
 func (h *BookTagHandler) Create(c *gin.Context) {
 	var req dto.TagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -101,12 +102,12 @@ func (h *BookTagHandler) Create(c *gin.Context) {
 func (h *BookTagHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.TagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -128,7 +129,7 @@ func (h *BookTagHandler) Update(c *gin.Context) {
 func (h *BookTagHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -139,8 +140,5 @@ func (h *BookTagHandler) Delete(c *gin.Context) {
 }
 
 func mapTagErr(err error) int {
-	if service.ErrTagNameExists == err {
-		return 3001
-	}
-	return 5001
+	return code.MapServiceError(err)
 }

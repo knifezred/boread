@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -31,7 +32,7 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 
@@ -41,13 +42,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrUserNotFound), errors.Is(err, service.ErrInvalidPassword):
-			response.Error(c, 2001, "用户名或密码错误")
+			response.Error(c, code.AuthFailed, "用户名或密码错误")
 		case errors.Is(err, service.ErrUserDisabled):
-			response.Error(c, 2003, "账号已禁用")
+			response.Error(c, code.UserDisabled, "账号已禁用")
 		case errors.Is(err, service.ErrUserLocked):
-			response.Error(c, 2004, "账号已锁定, 请稍后再试")
+			response.Error(c, code.UserLocked, "账号已锁定, 请稍后再试")
 		default:
-			response.Error(c, 5001, "登录失败")
+			response.Error(c, code.ServerError, "登录失败")
 		}
 		return
 	}
@@ -65,13 +66,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
-		response.Error(c, 2001, "unauthorized")
+		response.Error(c, code.AuthFailed, "unauthorized")
 		return
 	}
 
 	info, err := h.authService.GetUserInfo(c.Request.Context(), userID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, info)
@@ -87,13 +88,13 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 func (h *AuthHandler) GetUserMenu(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
-		response.Error(c, 2001, "unauthorized")
+		response.Error(c, code.AuthFailed, "unauthorized")
 		return
 	}
 
 	tree, err := h.authService.GetUserMenuTree(c.Request.Context(), userID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, tree)
@@ -109,13 +110,13 @@ func (h *AuthHandler) GetUserMenu(c *gin.Context) {
 func (h *AuthHandler) GetButtons(c *gin.Context) {
 	userID := getUserID(c)
 	if userID == 0 {
-		response.Error(c, 2001, "unauthorized")
+		response.Error(c, code.AuthFailed, "unauthorized")
 		return
 	}
 
 	codes, err := h.authService.GetButtons(c.Request.Context(), userID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, codes)

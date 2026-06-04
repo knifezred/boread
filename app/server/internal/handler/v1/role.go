@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -35,12 +34,12 @@ func NewRoleHandler(svc *service.RoleService) *RoleHandler {
 func (h *RoleHandler) Page(c *gin.Context) {
 	var req dto.RoleSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -57,12 +56,12 @@ func (h *RoleHandler) Page(c *gin.Context) {
 func (h *RoleHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 3001, err.Error())
+		response.Error(c, code.ResourceConflict, err.Error())
 		return
 	}
 	response.Success(c, m)
@@ -78,7 +77,7 @@ func (h *RoleHandler) GetByID(c *gin.Context) {
 func (h *RoleHandler) AllBrief(c *gin.Context) {
 	rows, err := h.svc.AllBrief(c.Request.Context())
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, rows)
@@ -96,7 +95,7 @@ func (h *RoleHandler) AllBrief(c *gin.Context) {
 func (h *RoleHandler) Create(c *gin.Context) {
 	var req dto.RoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -120,12 +119,12 @@ func (h *RoleHandler) Create(c *gin.Context) {
 func (h *RoleHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.RoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -147,7 +146,7 @@ func (h *RoleHandler) Update(c *gin.Context) {
 func (h *RoleHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -170,16 +169,16 @@ func (h *RoleHandler) Delete(c *gin.Context) {
 func (h *RoleHandler) GrantMenus(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.RoleMenuRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	if err := h.svc.GrantMenus(c.Request.Context(), id, req.MenuIDs); err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, nil)
@@ -198,16 +197,16 @@ func (h *RoleHandler) GrantMenus(c *gin.Context) {
 func (h *RoleHandler) GrantButtons(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.RoleButtonRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	if err := h.svc.GrantButtons(c.Request.Context(), id, req.ButtonIDs); err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, nil)
@@ -224,12 +223,12 @@ func (h *RoleHandler) GrantButtons(c *gin.Context) {
 func (h *RoleHandler) GetMenuIDs(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	ids, err := h.svc.GetMenuIDs(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, ids)
@@ -246,26 +245,17 @@ func (h *RoleHandler) GetMenuIDs(c *gin.Context) {
 func (h *RoleHandler) GetButtonIDs(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	ids, err := h.svc.GetButtonIDs(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, ids)
 }
 
 func mapRoleErr(err error) int {
-	switch {
-	case errors.Is(err, service.ErrRoleCodeExists):
-		return 3001
-	case errors.Is(err, service.ErrRoleSystem):
-		return 3002
-	case errors.Is(err, service.ErrRoleHasUsers):
-		return 3003
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

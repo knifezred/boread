@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -35,12 +34,12 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 func (h *UserHandler) Page(c *gin.Context) {
 	var req dto.UserSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -57,12 +56,12 @@ func (h *UserHandler) Page(c *gin.Context) {
 func (h *UserHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 3001, err.Error())
+		response.Error(c, code.ResourceConflict, err.Error())
 		return
 	}
 	response.Success(c, m)
@@ -80,7 +79,7 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 func (h *UserHandler) Create(c *gin.Context) {
 	var req dto.UserCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -104,12 +103,12 @@ func (h *UserHandler) Create(c *gin.Context) {
 func (h *UserHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.UserUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -131,11 +130,11 @@ func (h *UserHandler) Update(c *gin.Context) {
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, nil)
@@ -154,24 +153,21 @@ func (h *UserHandler) Delete(c *gin.Context) {
 func (h *UserHandler) ResetPassword(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.UserResetPwdRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	if err := h.svc.ResetPassword(c.Request.Context(), id, req.Password, utils.GetUserID(c)); err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, nil)
 }
 
 func mapUserErr(err error) int {
-	if errors.Is(err, service.ErrUserExists) {
-		return 3001
-	}
-	return 5001
+	return code.MapServiceError(err)
 }

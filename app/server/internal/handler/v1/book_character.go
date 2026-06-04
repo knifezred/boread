@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -31,7 +32,7 @@ func NewCharacterHandler(svc *service.BookCharacterService) *CharacterHandler {
 func (h *CharacterHandler) CreateCharacter(c *gin.Context) {
 	var req dto.CharacterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Create(c.Request.Context(), utils.GetUserID(c), &req)
@@ -55,12 +56,12 @@ func (h *CharacterHandler) CreateCharacter(c *gin.Context) {
 func (h *CharacterHandler) UpdateCharacter(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.CharacterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Update(c.Request.Context(), utils.GetUserID(c), id, &req)
@@ -82,7 +83,7 @@ func (h *CharacterHandler) UpdateCharacter(c *gin.Context) {
 func (h *CharacterHandler) DeleteCharacter(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -103,7 +104,7 @@ func (h *CharacterHandler) DeleteCharacter(c *gin.Context) {
 func (h *CharacterHandler) GetCharacter(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	resp, err := h.svc.GetByID(c.Request.Context(), id)
@@ -126,12 +127,12 @@ func (h *CharacterHandler) GetCharacter(c *gin.Context) {
 func (h *CharacterHandler) PageCharacter(c *gin.Context) {
 	var req dto.CharacterSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -148,12 +149,12 @@ func (h *CharacterHandler) PageCharacter(c *gin.Context) {
 func (h *CharacterHandler) ListByCharacterBook(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	resp, err := h.svc.ListByBook(c.Request.Context(), bookID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -181,7 +182,7 @@ func NewCharacterRelHandler(svc *service.BookCharacterRelService) *CharacterRelH
 func (h *CharacterRelHandler) CreateRelation(c *gin.Context) {
 	var req dto.CharacterRelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Create(c.Request.Context(), utils.GetUserID(c), &req)
@@ -203,7 +204,7 @@ func (h *CharacterRelHandler) CreateRelation(c *gin.Context) {
 func (h *CharacterRelHandler) DeleteRelation(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -224,7 +225,7 @@ func (h *CharacterRelHandler) DeleteRelation(c *gin.Context) {
 func (h *CharacterRelHandler) GetRelation(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	resp, err := h.svc.GetByID(c.Request.Context(), id)
@@ -246,12 +247,12 @@ func (h *CharacterRelHandler) GetRelation(c *gin.Context) {
 func (h *CharacterRelHandler) ListRelationsByCharacter(c *gin.Context) {
 	characterID, err := utils.ParseUint64Param(c, "characterId")
 	if err != nil {
-		response.Error(c, 1001, "invalid characterId")
+		response.Error(c, code.ParamInvalid, "invalid characterId")
 		return
 	}
 	resp, err := h.svc.ListByCharacter(c.Request.Context(), characterID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -268,12 +269,12 @@ func (h *CharacterRelHandler) ListRelationsByCharacter(c *gin.Context) {
 func (h *CharacterRelHandler) ListRelationsByBook(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	resp, err := h.svc.ListByBook(c.Request.Context(), bookID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -282,23 +283,9 @@ func (h *CharacterRelHandler) ListRelationsByBook(c *gin.Context) {
 // ======================== 错误码映射 ========================
 
 func mapCharErr(err error) int {
-	switch {
-	case service.ErrCharacterNotFound == err:
-		return 3601
-	case service.ErrBookExists == err:
-		return 3001
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }
 
 func mapCharRelErr(err error) int {
-	switch {
-	case service.ErrCharacterRelNotFound == err:
-		return 3701
-	case service.ErrCharacterNotFound == err:
-		return 3601
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

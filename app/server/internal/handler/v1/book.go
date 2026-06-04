@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -31,7 +32,7 @@ func NewBookHandler(svc *service.BookService) *BookHandler {
 func (h *BookHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
@@ -54,7 +55,7 @@ func (h *BookHandler) GetByID(c *gin.Context) {
 func (h *BookHandler) Create(c *gin.Context) {
 	var req dto.BookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -78,12 +79,12 @@ func (h *BookHandler) Create(c *gin.Context) {
 func (h *BookHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.BookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -105,7 +106,7 @@ func (h *BookHandler) Update(c *gin.Context) {
 func (h *BookHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -127,12 +128,12 @@ func (h *BookHandler) Delete(c *gin.Context) {
 func (h *BookHandler) Page(c *gin.Context) {
 	var req dto.BookSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -151,12 +152,12 @@ func (h *BookHandler) Page(c *gin.Context) {
 func (h *BookHandler) UpdateStatus(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.BookUpdateStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	if err := h.svc.UpdateStatus(c.Request.Context(), id, req.Status, utils.GetUserID(c)); err != nil {
@@ -167,13 +168,5 @@ func (h *BookHandler) UpdateStatus(c *gin.Context) {
 }
 
 func mapBookErr(err error) int {
-	switch {
-	case service.ErrBookNotFound == err:
-		return 3001
-	case service.ErrBookTagInvalid == err,
-		service.ErrCategoryInvalid == err:
-		return 3002
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/service"
 	"boread/pkg/response"
 )
@@ -21,20 +22,20 @@ func RequireButton(authSvc *service.AuthService, requiredCode string) gin.Handle
 	return func(c *gin.Context) {
 		v, ok := c.Get("user_id")
 		if !ok {
-			response.Error(c, 2001, "unauthorized")
+			response.Error(c, code.AuthFailed, "unauthorized")
 			c.Abort()
 			return
 		}
 		userID, ok := v.(uint64)
 		if !ok {
-			response.Error(c, 2001, "invalid user_id type")
+			response.Error(c, code.AuthFailed, "invalid user_id type")
 			c.Abort()
 			return
 		}
 
 		codes, err := authSvc.GetButtons(c.Request.Context(), userID)
 		if err != nil {
-			response.Error(c, 5001, "failed to load permissions")
+			response.Error(c, code.ServerError, "failed to load permissions")
 			c.Abort()
 			return
 		}
@@ -46,7 +47,7 @@ func RequireButton(authSvc *service.AuthService, requiredCode string) gin.Handle
 			}
 		}
 
-		response.Error(c, 2005, "permission denied: "+requiredCode)
+		response.Error(c, code.PermissionDenied, "permission denied: "+requiredCode)
 		c.Abort()
 	}
 }

@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -30,12 +31,12 @@ func NewBookReadStatsHandler(svc *service.BookReadStatsService) *BookReadStatsHa
 func (h *BookReadStatsHandler) GetDailyStats(c *gin.Context) {
 	var req dto.ReadStatsQuery
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.GetDailyStats(c.Request.Context(), utils.GetUserID(c), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -53,12 +54,12 @@ func (h *BookReadStatsHandler) GetDailyStats(c *gin.Context) {
 func (h *BookReadStatsHandler) GetBookStats(c *gin.Context) {
 	var req dto.ReadStatsQuery
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.GetBookStats(c.Request.Context(), utils.GetUserID(c), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -74,7 +75,7 @@ func (h *BookReadStatsHandler) GetBookStats(c *gin.Context) {
 func (h *BookReadStatsHandler) GetTotalStats(c *gin.Context) {
 	resp, err := h.svc.GetTotalStats(c.Request.Context(), utils.GetUserID(c))
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)

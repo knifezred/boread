@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -38,7 +37,7 @@ func NewMenuHandler(svc *service.MenuService) *MenuHandler {
 func (h *MenuHandler) Page(c *gin.Context) {
 	var req dto.MenuSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 4001, err.Error())
+		response.Error(c, code.SearchParamInvalid, err.Error())
 		return
 	}
 	// 分页参数默认值
@@ -50,7 +49,7 @@ func (h *MenuHandler) Page(c *gin.Context) {
 	}
 	res, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, res)
@@ -66,7 +65,7 @@ func (h *MenuHandler) Page(c *gin.Context) {
 func (h *MenuHandler) Tree(c *gin.Context) {
 	tree, err := h.svc.Tree(c.Request.Context())
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, tree)
@@ -83,12 +82,12 @@ func (h *MenuHandler) Tree(c *gin.Context) {
 func (h *MenuHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 3001, err.Error())
+		response.Error(c, code.ResourceConflict, err.Error())
 		return
 	}
 	response.Success(c, m)
@@ -106,7 +105,7 @@ func (h *MenuHandler) GetByID(c *gin.Context) {
 func (h *MenuHandler) Create(c *gin.Context) {
 	var req dto.MenuRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -130,12 +129,12 @@ func (h *MenuHandler) Create(c *gin.Context) {
 func (h *MenuHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.MenuRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -157,7 +156,7 @@ func (h *MenuHandler) Update(c *gin.Context) {
 func (h *MenuHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -179,12 +178,12 @@ func (h *MenuHandler) Delete(c *gin.Context) {
 func (h *MenuHandler) CreateButton(c *gin.Context) {
 	var req dto.MenuButtonRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	b, err := h.svc.CreateButton(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, b)
@@ -201,11 +200,11 @@ func (h *MenuHandler) CreateButton(c *gin.Context) {
 func (h *MenuHandler) DeleteButton(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.DeleteButton(c.Request.Context(), id); err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, nil)
@@ -222,26 +221,17 @@ func (h *MenuHandler) DeleteButton(c *gin.Context) {
 func (h *MenuHandler) ListButtonsByMenu(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "menuId")
 	if err != nil {
-		response.Error(c, 1001, "invalid menuId")
+		response.Error(c, code.ParamInvalid, "invalid menuId")
 		return
 	}
 	rows, err := h.svc.ListButtonsByMenu(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, rows)
 }
 
 func mapMenuErr(err error) int {
-	switch {
-	case errors.Is(err, service.ErrMenuRouteExists):
-		return 3001
-	case errors.Is(err, service.ErrMenuSystem):
-		return 3002
-	case errors.Is(err, service.ErrMenuHasChildren):
-		return 3003
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

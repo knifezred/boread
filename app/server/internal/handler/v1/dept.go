@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -35,7 +34,7 @@ func NewDeptHandler(svc *service.DeptService) *DeptHandler {
 func (h *DeptHandler) Page(c *gin.Context) {
 	var req dto.DeptSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 4001, err.Error())
+		response.Error(c, code.SearchParamInvalid, err.Error())
 		return
 	}
 	// 分页参数默认值
@@ -47,7 +46,7 @@ func (h *DeptHandler) Page(c *gin.Context) {
 	}
 	res, err := h.svc.Page(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, res)
@@ -66,12 +65,12 @@ func (h *DeptHandler) Page(c *gin.Context) {
 func (h *DeptHandler) Tree(c *gin.Context) {
 	var search dto.DeptSearch
 	if err := c.ShouldBindQuery(&search); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	tree, err := h.svc.Tree(c.Request.Context(), &search)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, tree)
@@ -88,12 +87,12 @@ func (h *DeptHandler) Tree(c *gin.Context) {
 func (h *DeptHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetByID(c.Request.Context(), id)
 	if err != nil {
-		response.Error(c, 3001, err.Error())
+		response.Error(c, code.ResourceConflict, err.Error())
 		return
 	}
 	response.Success(c, m)
@@ -111,7 +110,7 @@ func (h *DeptHandler) GetByID(c *gin.Context) {
 func (h *DeptHandler) Create(c *gin.Context) {
 	var req dto.DeptRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Create(c.Request.Context(), &req, utils.GetUserID(c))
@@ -135,12 +134,12 @@ func (h *DeptHandler) Create(c *gin.Context) {
 func (h *DeptHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.DeptRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.Update(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -162,7 +161,7 @@ func (h *DeptHandler) Update(c *gin.Context) {
 func (h *DeptHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
@@ -173,14 +172,5 @@ func (h *DeptHandler) Delete(c *gin.Context) {
 }
 
 func mapDeptErr(err error) int {
-	switch {
-	case errors.Is(err, service.ErrDeptCodeExists),
-		errors.Is(err, service.ErrParentNotFound):
-		return 3001
-	case errors.Is(err, service.ErrDeptHasChildren),
-		errors.Is(err, service.ErrDeptHasUsers):
-		return 3002
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/service"
@@ -38,7 +39,7 @@ func NewBookFileHandler(svc *service.BookFileService) *BookFileHandler {
 func (h *BookFileHandler) Upload(c *gin.Context) {
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		response.Error(c, 1001, "请选择要上传的文件")
+		response.Error(c, code.ParamInvalid, "请选择要上传的文件")
 		return
 	}
 	defer file.Close()
@@ -63,7 +64,7 @@ func (h *BookFileHandler) Upload(c *gin.Context) {
 func (h *BookFileHandler) ConfirmImport(c *gin.Context) {
 	var req dto.ConfirmImportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.ConfirmImport(c.Request.Context(), &req, utils.GetUserID(c))
@@ -84,7 +85,7 @@ func (h *BookFileHandler) ConfirmImport(c *gin.Context) {
 func (h *BookFileHandler) ScanAll(c *gin.Context) {
 	resp, err := h.svc.ScanPending(c.Request.Context())
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -102,12 +103,12 @@ func (h *BookFileHandler) ScanAll(c *gin.Context) {
 func (h *BookFileHandler) ScanPath(c *gin.Context) {
 	var req dto.ScanPathRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.ScanPath(c.Request.Context(), req.Path, utils.GetUserID(c))
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -124,7 +125,7 @@ func (h *BookFileHandler) ScanPath(c *gin.Context) {
 func (h *BookFileHandler) ScanByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	resp, err := h.svc.ScanByID(c.Request.Context(), id)
@@ -147,12 +148,12 @@ func (h *BookFileHandler) ScanByID(c *gin.Context) {
 func (h *BookFileHandler) GetChapterContent(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	chapterNo, err := utils.ParseUint64Param(c, "chapterNo")
 	if err != nil {
-		response.Error(c, 1001, "invalid chapterNo")
+		response.Error(c, code.ParamInvalid, "invalid chapterNo")
 		return
 	}
 	resp, err := h.svc.GetChapterContent(c.Request.Context(), bookID, uint32(chapterNo))
@@ -175,7 +176,7 @@ func (h *BookFileHandler) GetChapterContent(c *gin.Context) {
 func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
 	var req dto.ReParseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.ReParseChapters(c.Request.Context(), &req, utils.GetUserID(c))
@@ -200,12 +201,12 @@ func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
 func (h *BookFileHandler) PageUpload(c *gin.Context) {
 	var req dto.UploadSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageUpload(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -225,12 +226,12 @@ func (h *BookFileHandler) PageUpload(c *gin.Context) {
 func (h *BookFileHandler) PageFile(c *gin.Context) {
 	var req dto.FileSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageFile(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -250,12 +251,12 @@ func (h *BookFileHandler) PageFile(c *gin.Context) {
 func (h *BookFileHandler) PageChapter(c *gin.Context) {
 	var req dto.ChapterSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageChapter(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -273,12 +274,12 @@ func (h *BookFileHandler) PageChapter(c *gin.Context) {
 func (h *BookFileHandler) ListChapter(c *gin.Context) {
 	var req dto.ChapterListRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.ListChapter(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -298,7 +299,7 @@ func (h *BookFileHandler) ListChapter(c *gin.Context) {
 func (h *BookFileHandler) CreateChapterRule(c *gin.Context) {
 	var req dto.ChapterRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.CreateChapterRule(c.Request.Context(), &req, utils.GetUserID(c))
@@ -322,12 +323,12 @@ func (h *BookFileHandler) CreateChapterRule(c *gin.Context) {
 func (h *BookFileHandler) UpdateChapterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.ChapterRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.UpdateChapterRule(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -349,7 +350,7 @@ func (h *BookFileHandler) UpdateChapterRule(c *gin.Context) {
 func (h *BookFileHandler) DeleteChapterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.DeleteChapterRule(c.Request.Context(), id); err != nil {
@@ -370,7 +371,7 @@ func (h *BookFileHandler) DeleteChapterRule(c *gin.Context) {
 func (h *BookFileHandler) GetChapterRuleByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetChapterRuleByID(c.Request.Context(), id)
@@ -393,12 +394,12 @@ func (h *BookFileHandler) GetChapterRuleByID(c *gin.Context) {
 func (h *BookFileHandler) PageChapterRule(c *gin.Context) {
 	var req dto.ChapterRuleSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageChapterRule(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -418,7 +419,7 @@ func (h *BookFileHandler) PageChapterRule(c *gin.Context) {
 func (h *BookFileHandler) BindChapterRule(c *gin.Context) {
 	var req dto.ChapterRuleBindRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.BindChapterRule(c.Request.Context(), &req, utils.GetUserID(c))
@@ -440,7 +441,7 @@ func (h *BookFileHandler) BindChapterRule(c *gin.Context) {
 func (h *BookFileHandler) UnbindChapterRule(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	if err := h.svc.UnbindChapterRule(c.Request.Context(), bookID, utils.GetUserID(c)); err != nil {
@@ -461,7 +462,7 @@ func (h *BookFileHandler) UnbindChapterRule(c *gin.Context) {
 func (h *BookFileHandler) GetBoundChapterRule(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	resp, err := h.svc.GetBoundChapterRule(c.Request.Context(), bookID, utils.GetUserID(c))
@@ -486,7 +487,7 @@ func (h *BookFileHandler) GetBoundChapterRule(c *gin.Context) {
 func (h *BookFileHandler) CreateFilterRule(c *gin.Context) {
 	var req dto.FilterRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.CreateFilterRule(c.Request.Context(), &req, utils.GetUserID(c))
@@ -510,12 +511,12 @@ func (h *BookFileHandler) CreateFilterRule(c *gin.Context) {
 func (h *BookFileHandler) UpdateFilterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.FilterRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	m, err := h.svc.UpdateFilterRule(c.Request.Context(), id, &req, utils.GetUserID(c))
@@ -537,7 +538,7 @@ func (h *BookFileHandler) UpdateFilterRule(c *gin.Context) {
 func (h *BookFileHandler) DeleteFilterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.DeleteFilterRule(c.Request.Context(), id); err != nil {
@@ -558,7 +559,7 @@ func (h *BookFileHandler) DeleteFilterRule(c *gin.Context) {
 func (h *BookFileHandler) GetFilterRuleByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	m, err := h.svc.GetFilterRuleByID(c.Request.Context(), id)
@@ -581,31 +582,17 @@ func (h *BookFileHandler) GetFilterRuleByID(c *gin.Context) {
 func (h *BookFileHandler) PageFilterRule(c *gin.Context) {
 	var req dto.FilterRuleSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageFilterRule(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
 }
 
 func mapFileErr(err error) int {
-	switch {
-	case service.ErrFileTooLarge == err,
-		service.ErrFileTypeUnsupported == err,
-		service.ErrFileEmpty == err,
-		service.ErrFileMD5Exists == err:
-		return 1002
-	case service.ErrUploadNotFound == err,
-		service.ErrChapterNotFound == err,
-		service.ErrBookFileNotFound == err,
-		service.ErrRuleNotFound == err,
-		service.ErrFilterRuleNotFound == err:
-		return 3001
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }

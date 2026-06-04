@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
@@ -31,7 +32,7 @@ func NewNoteHandler(svc *service.BookSocialService) *NoteHandler {
 func (h *NoteHandler) CreateNote(c *gin.Context) {
 	var req dto.NoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.CreateNote(c.Request.Context(), utils.GetUserID(c), &req)
@@ -55,12 +56,12 @@ func (h *NoteHandler) CreateNote(c *gin.Context) {
 func (h *NoteHandler) UpdateNote(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.NoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.UpdateNote(c.Request.Context(), utils.GetUserID(c), id, &req)
@@ -82,7 +83,7 @@ func (h *NoteHandler) UpdateNote(c *gin.Context) {
 func (h *NoteHandler) DeleteNote(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.DeleteNote(c.Request.Context(), utils.GetUserID(c), id); err != nil {
@@ -103,7 +104,7 @@ func (h *NoteHandler) DeleteNote(c *gin.Context) {
 func (h *NoteHandler) GetNote(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	resp, err := h.svc.GetNote(c.Request.Context(), id, utils.GetUserID(c))
@@ -126,12 +127,12 @@ func (h *NoteHandler) GetNote(c *gin.Context) {
 func (h *NoteHandler) PageNote(c *gin.Context) {
 	var req dto.NoteSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageNote(c.Request.Context(), utils.GetUserID(c), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -148,7 +149,7 @@ func (h *NoteHandler) PageNote(c *gin.Context) {
 func (h *NoteHandler) ListNotesByBook(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
-		response.Error(c, 1001, "invalid bookId")
+		response.Error(c, code.ParamInvalid, "invalid bookId")
 		return
 	}
 	noteType := c.Query("noteType")
@@ -157,23 +158,14 @@ func (h *NoteHandler) ListNotesByBook(c *gin.Context) {
 	pageReq.Size = 50
 	resp, err := h.svc.ListNotesByBook(c.Request.Context(), bookID, noteType, &pageReq)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
 }
 
 func mapNoteErr(err error) int {
-	switch {
-	case service.ErrNoteNotFound == err:
-		return 3301
-	case service.ErrNoteNotOwner == err:
-		return 3302
-	case service.ErrBookNotExists == err:
-		return 3001
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }
 
 // ======================== ReviewHandler ========================
@@ -198,7 +190,7 @@ func NewReviewHandler(svc *service.BookSocialService) *ReviewHandler {
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	var req dto.ReviewRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.CreateReview(c.Request.Context(), utils.GetUserID(c), &req)
@@ -222,12 +214,12 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	var req dto.ReviewRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.UpdateReview(c.Request.Context(), utils.GetUserID(c), id, &req)
@@ -249,7 +241,7 @@ func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.DeleteReview(c.Request.Context(), utils.GetUserID(c), id); err != nil {
@@ -270,7 +262,7 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 func (h *ReviewHandler) GetReview(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	resp, err := h.svc.GetReview(c.Request.Context(), id, utils.GetUserID(c))
@@ -293,28 +285,19 @@ func (h *ReviewHandler) GetReview(c *gin.Context) {
 func (h *ReviewHandler) PageReview(c *gin.Context) {
 	var req dto.ReviewSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageReview(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
 }
 
 func mapReviewErr(err error) int {
-	switch {
-	case service.ErrReviewNotFound == err:
-		return 3401
-	case service.ErrNoteNotOwner == err:
-		return 3402
-	case service.ErrBookNotExists == err:
-		return 3001
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }
 
 // ======================== CommentHandler ========================
@@ -339,7 +322,7 @@ func NewCommentHandler(svc *service.BookSocialService) *CommentHandler {
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var req dto.CommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.CreateComment(c.Request.Context(), utils.GetUserID(c), &req)
@@ -361,7 +344,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	if err := h.svc.DeleteComment(c.Request.Context(), utils.GetUserID(c), id); err != nil {
@@ -382,7 +365,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 func (h *CommentHandler) GetComment(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
-		response.Error(c, 1001, "invalid id")
+		response.Error(c, code.ParamInvalid, "invalid id")
 		return
 	}
 	resp, err := h.svc.GetComment(c.Request.Context(), id, utils.GetUserID(c))
@@ -405,30 +388,19 @@ func (h *CommentHandler) GetComment(c *gin.Context) {
 func (h *CommentHandler) PageComment(c *gin.Context) {
 	var req dto.CommentSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.PageComment(c.Request.Context(), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
 }
 
 func mapCommentErr(err error) int {
-	switch {
-	case service.ErrCommentNotFound == err:
-		return 3501
-	case service.ErrCommentNotOwner == err:
-		return 3502
-	case service.ErrParentCommentNotExist == err:
-		return 3503
-	case service.ErrChapterNotExists == err:
-		return 3041
-	default:
-		return 5001
-	}
+	return code.MapServiceError(err)
 }
 
 // ======================== LikeHandler ========================
@@ -453,12 +425,12 @@ func NewLikeHandler(svc *service.BookSocialService) *LikeHandler {
 func (h *LikeHandler) ToggleLike(c *gin.Context) {
 	var req dto.LikeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.ToggleLike(c.Request.Context(), utils.GetUserID(c), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -476,12 +448,12 @@ func (h *LikeHandler) ToggleLike(c *gin.Context) {
 func (h *LikeHandler) GetLikeStatus(c *gin.Context) {
 	var req dto.LikeStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, 1001, err.Error())
+		response.Error(c, code.ParamInvalid, err.Error())
 		return
 	}
 	resp, err := h.svc.GetLikeStatus(c.Request.Context(), utils.GetUserID(c), &req)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, resp)
@@ -500,12 +472,12 @@ func (h *LikeHandler) CountLikes(c *gin.Context) {
 	targetType := c.Param("targetType")
 	targetID, err := utils.ParseUint64Param(c, "targetId")
 	if err != nil {
-		response.Error(c, 1001, "invalid targetId")
+		response.Error(c, code.ParamInvalid, "invalid targetId")
 		return
 	}
 	count, err := h.svc.CountLikes(c.Request.Context(), targetType, targetID)
 	if err != nil {
-		response.Error(c, 5001, err.Error())
+		response.Error(c, code.ServerError, err.Error())
 		return
 	}
 	response.Success(c, count)
