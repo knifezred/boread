@@ -2,17 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrMenuRouteExists = errors.New("路由名已存在")
-	ErrMenuSystem      = errors.New("系统内置菜单不可删除/不可改 route_name")
-	ErrMenuHasChildren = errors.New("存在子菜单, 不能删除")
 )
 
 type MenuService struct {
@@ -25,7 +19,7 @@ func NewMenuService(repo *repository.SysMenuRepository) *MenuService {
 
 func (s *MenuService) Create(ctx context.Context, req *dto.MenuRequest, opID uint64) (*model.SysMenu, error) {
 	if _, err := s.repo.GetByRouteName(ctx, req.RouteName); err == nil {
-		return nil, ErrMenuRouteExists
+		return nil, code.ErrMenuRouteExists
 	}
 	status := req.Status
 	if status == "" {
@@ -85,11 +79,11 @@ func (s *MenuService) Update(ctx context.Context, id uint64, req *dto.MenuReques
 		return nil, err
 	}
 	if m.IsSystem && req.RouteName != m.RouteName {
-		return nil, ErrMenuSystem
+		return nil, code.ErrMenuSystem
 	}
 	if req.RouteName != m.RouteName {
 		if _, e := s.repo.GetByRouteName(ctx, req.RouteName); e == nil {
-			return nil, ErrMenuRouteExists
+			return nil, code.ErrMenuRouteExists
 		}
 	}
 	m.ParentID = req.ParentID
@@ -148,12 +142,12 @@ func (s *MenuService) Delete(ctx context.Context, id uint64) error {
 		return err
 	}
 	if m.IsSystem {
-		return ErrMenuSystem
+		return code.ErrMenuSystem
 	}
 	if has, err := s.repo.HasChildren(ctx, id); err != nil {
 		return err
 	} else if has {
-		return ErrMenuHasChildren
+		return code.ErrMenuHasChildren
 	}
 	return s.repo.Delete(ctx, id)
 }

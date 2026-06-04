@@ -2,16 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrDictCodeExists = errors.New("字典编码已存在")
-	ErrDictSystem     = errors.New("系统内置字典不可操作")
 )
 
 type DictService struct {
@@ -24,7 +19,7 @@ func NewDictService(repo *repository.SysDictRepository) *DictService {
 
 func (s *DictService) Create(ctx context.Context, req *dto.DictRequest, opID uint64) (*model.SysDict, error) {
 	if _, err := s.repo.GetByCode(ctx, req.DictCode); err == nil {
-		return nil, ErrDictCodeExists
+		return nil, code.ErrDictCodeExists
 	}
 	status := req.Status
 	if status == "" {
@@ -52,11 +47,11 @@ func (s *DictService) Update(ctx context.Context, id uint64, req *dto.DictReques
 		return nil, err
 	}
 	if m.IsSystem && req.DictCode != m.DictCode {
-		return nil, ErrDictSystem
+		return nil, code.ErrDictSystem
 	}
 	if req.DictCode != m.DictCode {
 		if _, e := s.repo.GetByCode(ctx, req.DictCode); e == nil {
-			return nil, ErrDictCodeExists
+			return nil, code.ErrDictCodeExists
 		}
 	}
 	m.DictName = req.DictName
@@ -80,7 +75,7 @@ func (s *DictService) Delete(ctx context.Context, id uint64) error {
 		return err
 	}
 	if m.IsSystem {
-		return ErrDictSystem
+		return code.ErrDictSystem
 	}
 	return s.repo.Delete(ctx, id)
 }

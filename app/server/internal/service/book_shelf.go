@@ -2,19 +2,14 @@ package service
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrBookshelfNotFound  = errors.New("书架记录不存在")
-	ErrAlreadyInBookshelf = errors.New("该书已在书架中")
 )
 
 // ReaderBookshelfService 读者书架服务
@@ -46,12 +41,12 @@ func NewReaderBookshelfService(
 func (s *ReaderBookshelfService) AddToBookshelf(ctx context.Context, userID uint64, req *dto.BookshelfRequest) (*dto.BookshelfResponse, error) {
 	// 校验书籍存在
 	if _, err := s.bookRepo.GetByID(ctx, req.BookID); err != nil {
-		return nil, ErrBookNotExist
+		return nil, code.ErrBookNotExist
 	}
 	// 检查是否已在书架
 	existing, err := s.bookshelfRepo.GetByReaderAndBook(ctx, userID, req.BookID)
 	if err == nil && existing != nil {
-		return nil, ErrAlreadyInBookshelf
+		return nil, code.ErrAlreadyInBookshelf
 	}
 	groupName := req.GroupName
 	if groupName == "" {
@@ -79,7 +74,7 @@ func (s *ReaderBookshelfService) AddToBookshelf(ctx context.Context, userID uint
 func (s *ReaderBookshelfService) RemoveFromBookshelf(ctx context.Context, userID uint64, bookID uint64) error {
 	_, err := s.bookshelfRepo.GetByReaderAndBook(ctx, userID, bookID)
 	if err != nil {
-		return ErrBookshelfNotFound
+		return code.ErrBookshelfNotFound
 	}
 	return s.bookshelfRepo.DeleteByReaderAndBook(ctx, userID, bookID)
 }
@@ -88,7 +83,7 @@ func (s *ReaderBookshelfService) RemoveFromBookshelf(ctx context.Context, userID
 func (s *ReaderBookshelfService) UpdateBookshelf(ctx context.Context, userID uint64, bookID uint64, req *dto.BookshelfUpdateRequest) (*dto.BookshelfResponse, error) {
 	m, err := s.bookshelfRepo.GetByReaderAndBook(ctx, userID, bookID)
 	if err != nil {
-		return nil, ErrBookshelfNotFound
+		return nil, code.ErrBookshelfNotFound
 	}
 	if req.GroupName != nil {
 		m.GroupName = *req.GroupName

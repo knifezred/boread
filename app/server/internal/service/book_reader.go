@@ -2,20 +2,15 @@ package service
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrBookNotExist     = errors.New("书籍不存在")
-	ErrProgressNotFound = errors.New("阅读进度不存在")
 )
 
 // BookReaderService 读者阅读服务 (阅读进度 + 阅读事件)
@@ -52,7 +47,7 @@ func NewBookReaderService(
 func (s *BookReaderService) ReportProgress(ctx context.Context, userID uint64, bookID uint64, req *dto.ReadProgressRequest) (*dto.ReadProgressResponse, error) {
 	// 校验书籍存在
 	if _, err := s.bookRepo.GetByID(ctx, bookID); err != nil {
-		return nil, ErrBookNotExist
+		return nil, code.ErrBookNotExist
 	}
 
 	m := &model.ReaderReadProgress{
@@ -100,7 +95,7 @@ func (s *BookReaderService) ReportProgress(ctx context.Context, userID uint64, b
 func (s *BookReaderService) GetProgress(ctx context.Context, userID uint64, bookID uint64) (*dto.ReadProgressResponse, error) {
 	m, err := s.progressRepo.GetByReaderAndBook(ctx, userID, bookID)
 	if err != nil {
-		return nil, ErrProgressNotFound
+		return nil, code.ErrProgressNotFound
 	}
 	return &dto.ReadProgressResponse{ReaderReadProgress: *m}, nil
 }
@@ -110,7 +105,7 @@ func (s *BookReaderService) GetProgress(ctx context.Context, userID uint64, book
 // ReportEvent 上报阅读事件
 func (s *BookReaderService) ReportEvent(ctx context.Context, readerID uint64, req *dto.ReadEventRequest) error {
 	if _, err := s.bookRepo.GetByID(ctx, req.BookID); err != nil {
-		return ErrBookNotExist
+		return code.ErrBookNotExist
 	}
 	sessionID := req.SessionID
 	if sessionID == "" {

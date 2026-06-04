@@ -6,13 +6,10 @@ import (
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrTagNameExists = errors.New("标签名已存在")
 )
 
 type BookTagService struct {
@@ -25,7 +22,7 @@ func NewBookTagService(repo *repository.BookTagRepository) *BookTagService {
 
 func (s *BookTagService) Create(ctx context.Context, req *dto.TagRequest, userID uint64) (*model.BookTag, error) {
 	if _, err := s.repo.GetByName(ctx, req.TagName); err == nil {
-		return nil, ErrTagNameExists
+		return nil, code.ErrTagNameExists
 	}
 	m := &model.BookTag{TagName: req.TagName, Description: req.Description}
 	m.CreateBy = &userID
@@ -43,7 +40,7 @@ func (s *BookTagService) Update(ctx context.Context, id uint64, req *dto.TagRequ
 	}
 	if req.TagName != m.TagName {
 		if _, e := s.repo.GetByName(ctx, req.TagName); e == nil {
-			return nil, ErrTagNameExists
+			return nil, code.ErrTagNameExists
 		}
 	}
 	m.TagName = req.TagName

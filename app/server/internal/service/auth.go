@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
@@ -19,13 +20,6 @@ import (
 const (
 	maxPwdErrorCount = 5
 	lockDuration     = 15 * time.Minute
-)
-
-var (
-	ErrUserNotFound    = errors.New("user not found")
-	ErrInvalidPassword = errors.New("invalid password")
-	ErrUserDisabled    = errors.New("user is disabled")
-	ErrUserLocked      = errors.New("user is locked")
 )
 
 // AuthService 认证服务
@@ -45,19 +39,19 @@ func (s *AuthService) Login(ctx context.Context, req *dto.LoginRequest, ip, ua s
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			s.writeLoginLog(ctx, nil, req.Username, ip, ua, model.LoginResultFail, "user not found")
-			return nil, ErrUserNotFound
+			return nil, code.ErrUserNotFound
 		}
 		return nil, err
 	}
 
 	if user.Status == model.StatusDisabled {
 		s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultFail, "user disabled")
-		return nil, ErrUserDisabled
+		return nil, code.ErrUserDisabled
 	}
 
 	if user.LockedUntil != nil && user.LockedUntil.After(time.Now()) {
 		s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultFail, "user locked")
-		return nil, ErrUserLocked
+		return nil, code.ErrUserLocked
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
@@ -67,7 +61,7 @@ func (s *AuthService) Login(ctx context.Context, req *dto.LoginRequest, ip, ua s
 			_ = s.userRepo.LockUser(ctx, user.ID, lockUntil)
 		}
 		s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultFail, "wrong password")
-		return nil, ErrInvalidPassword
+		return nil, code.ErrInvalidPassword
 	}
 
 	now := time.Now()

@@ -2,20 +2,14 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrBookNotFound    = errors.New("书籍不存在")
-	ErrBookTagInvalid  = errors.New("标签无效")
-	ErrCategoryInvalid = errors.New("分类不存在")
 )
 
 type BookService struct {
@@ -48,14 +42,14 @@ func NewBookService(
 func (s *BookService) Create(ctx context.Context, req *dto.BookRequest, userID uint64) (*dto.BookResponse, error) {
 	if req.CategoryID != nil && *req.CategoryID > 0 {
 		if _, err := s.categoryRepo.GetByID(ctx, *req.CategoryID); err != nil {
-			return nil, ErrCategoryInvalid
+			return nil, code.ErrCategoryInvalid
 		}
 	}
 	if len(req.TagIDs) > 0 {
 		req.TagIDs = uniqueUint64Slice(req.TagIDs)
 		for _, tid := range req.TagIDs {
 			if _, err := s.tagRepo.GetByID(ctx, tid); err != nil {
-				return nil, fmt.Errorf("%w: tag_id=%d", ErrBookTagInvalid, tid)
+				return nil, fmt.Errorf("%w: tag_id=%d", code.ErrBookTagInvalid, tid)
 			}
 		}
 	}
@@ -121,18 +115,18 @@ func (s *BookService) Create(ctx context.Context, req *dto.BookRequest, userID u
 func (s *BookService) Update(ctx context.Context, id uint64, req *dto.BookRequest, userID uint64) (*dto.BookResponse, error) {
 	m, err := s.bookRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, ErrBookNotFound
+		return nil, code.ErrBookNotFound
 	}
 	if req.CategoryID != nil && *req.CategoryID > 0 {
 		if _, err := s.categoryRepo.GetByID(ctx, *req.CategoryID); err != nil {
-			return nil, ErrCategoryInvalid
+			return nil, code.ErrCategoryInvalid
 		}
 	}
 	if len(req.TagIDs) > 0 {
 		req.TagIDs = uniqueUint64Slice(req.TagIDs)
 		for _, tid := range req.TagIDs {
 			if _, err := s.tagRepo.GetByID(ctx, tid); err != nil {
-				return nil, fmt.Errorf("%w: tag_id=%d", ErrBookTagInvalid, tid)
+				return nil, fmt.Errorf("%w: tag_id=%d", code.ErrBookTagInvalid, tid)
 			}
 		}
 	}
@@ -212,7 +206,7 @@ func (s *BookService) Update(ctx context.Context, id uint64, req *dto.BookReques
 
 func (s *BookService) Delete(ctx context.Context, id uint64) error {
 	if _, err := s.bookRepo.GetByID(ctx, id); err != nil {
-		return ErrBookNotFound
+		return code.ErrBookNotFound
 	}
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Delete(&model.Book{}, id).Error; err != nil {
@@ -239,7 +233,7 @@ func (s *BookService) Delete(ctx context.Context, id uint64) error {
 func (s *BookService) GetByID(ctx context.Context, id uint64) (*dto.BookResponse, error) {
 	m, err := s.bookRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, ErrBookNotFound
+		return nil, code.ErrBookNotFound
 	}
 	tagIDs, err := s.tagRelRepo.GetTagIDsByBookID(ctx, id)
 	if err != nil {
@@ -327,7 +321,7 @@ func (s *BookService) Page(ctx context.Context, req *dto.BookSearch) (*dto.PageR
 func (s *BookService) UpdateStatus(ctx context.Context, id uint64, status string, userID uint64) error {
 	m, err := s.bookRepo.GetByID(ctx, id)
 	if err != nil {
-		return ErrBookNotFound
+		return code.ErrBookNotFound
 	}
 	m.Status = model.BookStatus(status)
 	m.UpdateBy = &userID

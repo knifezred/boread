@@ -34,7 +34,8 @@ type ChapterContentResponse struct {
 
 // ReParseRequest 重新识别章节请求
 type ReParseRequest struct {
-	BookID uint64 `json:"bookId" binding:"required"`
+	BookID uint64  `json:"bookId" binding:"required"`
+	RuleID *uint64 `json:"ruleId"`
 }
 
 // ReParseResponse 重新识别章节响应

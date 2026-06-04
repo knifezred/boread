@@ -9,25 +9,21 @@ import (
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
 )
 
-var (
-	ErrChapterContentTooLarge  = errors.New("章节内容过大")
-	ErrChapterFileUpdateFailed = errors.New("章节文件更新失败")
-	ErrChapterMergeNotAdjacent = errors.New("章节非连续无法合并")
-	ErrChapterNoConflict       = errors.New("章节编号冲突")
-)
-
 // BookChapterService 章节管理服务
 type BookChapterService struct {
-	db             *gorm.DB
-	chapterRepo    *repository.BookChapterRepository
-	bookFileRepo   *repository.BookFileRepository
-	bookRepo       *repository.BookRepository
-	filterRuleRepo *repository.BookContentFilterRuleRepository
+	db                 *gorm.DB
+	chapterRepo        *repository.BookChapterRepository
+	bookFileRepo       *repository.BookFileRepository
+	bookRepo           *repository.BookRepository
+	filterRuleRepo     *repository.BookContentFilterRuleRepository
+	chapterRuleRepo    *repository.BookChapterRuleRepository
+	chapterRuleRelRepo *repository.BookChapterRuleRelRepository
 }
 
 func NewBookChapterService(
@@ -36,13 +32,17 @@ func NewBookChapterService(
 	bookFileRepo *repository.BookFileRepository,
 	bookRepo *repository.BookRepository,
 	filterRuleRepo *repository.BookContentFilterRuleRepository,
+	chapterRuleRepo *repository.BookChapterRuleRepository,
+	chapterRuleRelRepo *repository.BookChapterRuleRelRepository,
 ) *BookChapterService {
 	return &BookChapterService{
-		db:             db,
-		chapterRepo:    chapterRepo,
-		bookFileRepo:   bookFileRepo,
-		bookRepo:       bookRepo,
-		filterRuleRepo: filterRuleRepo,
+		db:                 db,
+		chapterRepo:        chapterRepo,
+		bookFileRepo:       bookFileRepo,
+		bookRepo:           bookRepo,
+		filterRuleRepo:     filterRuleRepo,
+		chapterRuleRepo:    chapterRuleRepo,
+		chapterRuleRelRepo: chapterRuleRelRepo,
 	}
 }
 
@@ -79,11 +79,11 @@ func (s *BookChapterService) ListChapter(ctx context.Context, req *dto.ChapterLi
 func (s *BookChapterService) GetChapterContent(ctx context.Context, chapterID uint64) (*dto.ChapterContentResponse, error) {
 	chapter, err := s.chapterRepo.GetByID(ctx, chapterID)
 	if err != nil {
-		return nil, ErrChapterNotFound
+		return nil, code.ErrChapterNotFound
 	}
 	file, err := s.bookFileRepo.GetByID(ctx, chapter.FileID)
 	if err != nil {
-		return nil, ErrBookFileNotFound
+		return nil, code.ErrBookFileNotFound
 	}
 	if file.ContentPath == nil {
 		return nil, errors.New("文件路径为空")
@@ -111,6 +111,15 @@ func (s *BookChapterService) GetChapterContent(ctx context.Context, chapterID ui
 	}, nil
 }
 
+// GetChapterContentByBook 通过 bookId + chapterNo 获取章节内容（读者端使用）
+func (s *BookChapterService) GetChapterContentByBook(ctx context.Context, bookID uint64, chapterNo uint32) (*dto.ChapterContentResponse, error) {
+	chapter, err := s.chapterRepo.GetByBookAndNo(ctx, bookID, chapterNo)
+	if err != nil {
+		return nil, code.ErrChapterNotFound
+	}
+	return s.GetChapterContent(ctx, chapter.ID)
+}
+
 // ==================== 重新识别章节 ====================
 
 // ReParseChapters 重新识别章节
@@ -124,7 +133,7 @@ func (s *BookChapterService) ReParseChapters(ctx context.Context, req *dto.RePar
 	}
 	file, err := s.bookFileRepo.GetByID(ctx, *book.PrimaryFileID)
 	if err != nil {
-		return nil, ErrBookFileNotFound
+		return nil, code.ErrBookFileNotFound
 	}
 	if file.ContentPath == nil {
 		return nil, errors.New("文件路径为空")
@@ -134,11 +143,41 @@ func (s *BookChapterService) ReParseChapters(ctx context.Context, req *dto.RePar
 		return nil, fmt.Errorf("读取内容文件失败: %w", err)
 	}
 
-	// 获取章节识别规则：优先检查书籍是否绑定了固定规则
-	// 使用 chapterRuleRelRepo 和 chapterRuleRepo，但本章节服务未注入
-	// 此处沿用文件原有逻辑，通过 bookRepo 获取相关规则
+	// 检测编码，非 UTF-8 自动转码，并将文件持久化为 UTF-8（修复已有 GBK 书籍）
+	originalLen := len(data)
+	data = decodeToUTF8(data)
+	if len(data) != originalLen {
+		// 编码已被转换，写回 UTF-8 以保持字节偏移一致
+		if err := os.WriteFile(*file.ContentPath, data, 0644); err != nil {
+			return nil, fmt.Errorf("写入 UTF-8 内容文件失败: %w", err)
+		}
+	}
 
-	parser := NewChapterParser(nil)
+	// 获取章节识别规则：优先使用请求中指定的规则，其次检查书籍绑定的规则，最后使用用户默认规则
+	var rules []model.BookChapterRule
+	if req.RuleID != nil {
+		// 使用请求中指定的规则
+		rule, err := s.chapterRuleRepo.GetByID(ctx, *req.RuleID)
+		if err != nil {
+			return nil, fmt.Errorf("指定的规则不存在: %w", err)
+		}
+		rules = []model.BookChapterRule{*rule}
+	} else {
+		// 检查书籍是否绑定了固定规则
+		rel, err := s.chapterRuleRelRepo.GetByBookAndReader(ctx, req.BookID, userID)
+		if err == nil && rel != nil {
+			rule, err := s.chapterRuleRepo.GetByID(ctx, rel.RuleID)
+			if err == nil {
+				rules = []model.BookChapterRule{*rule}
+			}
+		}
+	}
+	if len(rules) == 0 {
+		// 没有指定或绑定的规则，使用系统默认规则
+		rules, _ = s.chapterRuleRepo.ListEffective(ctx, userID)
+	}
+
+	parser := NewChapterParser(rules)
 	parseResult := parser.Parse(data)
 
 	oldCount := book.TotalChapters
@@ -197,7 +236,7 @@ func (s *BookChapterService) ReParseChapters(ctx context.Context, req *dto.RePar
 func (s *BookChapterService) UpdateChapterTitle(ctx context.Context, id uint64, title string, userID uint64) error {
 	chapter, err := s.chapterRepo.GetByID(ctx, id)
 	if err != nil {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 	chapter.Title = title
 	chapter.UpdateBy = &userID
@@ -212,7 +251,7 @@ func (s *BookChapterService) BatchUpdateChapterTitles(ctx context.Context, ids [
 		return err
 	}
 	if len(chapters) != len(ids) {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 	return s.chapterRepo.BatchUpdateTitles(ctx, ids, title)
 }
@@ -225,7 +264,7 @@ func (s *BookChapterService) UpdateChapterStatus(ctx context.Context, ids []uint
 		return err
 	}
 	if len(chapters) != len(ids) {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 	return s.chapterRepo.BatchUpdateStatus(ctx, ids, status)
 }
@@ -234,7 +273,7 @@ func (s *BookChapterService) UpdateChapterStatus(ctx context.Context, ids []uint
 func (s *BookChapterService) DeleteChapter(ctx context.Context, id uint64, userID uint64) error {
 	chapter, err := s.chapterRepo.GetByID(ctx, id)
 	if err != nil {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 	// 先更新状态为下架
 	chapter.Status = model.ChapterRemoved
@@ -254,7 +293,7 @@ func (s *BookChapterService) MergeChapters(ctx context.Context, bookID, targetID
 	// 验证目标章节和源章节属于同一本书
 	targetChapter, err := s.chapterRepo.GetByID(ctx, targetID)
 	if err != nil {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 	if targetChapter.BookID != bookID {
 		return errors.New("目标章节不属于指定书籍")
@@ -266,14 +305,14 @@ func (s *BookChapterService) MergeChapters(ctx context.Context, bookID, targetID
 	}
 	for _, sc := range sourceChapters {
 		if sc.BookID != bookID {
-			return ErrChapterMergeNotAdjacent
+			return code.ErrChapterMergeNotAdjacent
 		}
 	}
 
 	// 读取目标章节文件
 	file, err := s.bookFileRepo.GetByID(ctx, targetChapter.FileID)
 	if err != nil {
-		return ErrBookFileNotFound
+		return code.ErrBookFileNotFound
 	}
 	if file.ContentPath == nil {
 		return errors.New("文件路径为空")
@@ -281,7 +320,7 @@ func (s *BookChapterService) MergeChapters(ctx context.Context, bookID, targetID
 
 	data, err := os.ReadFile(*file.ContentPath)
 	if err != nil {
-		return ErrChapterFileUpdateFailed
+		return code.ErrChapterFileUpdateFailed
 	}
 
 	// 收集源章节内容并拼接
@@ -327,7 +366,7 @@ func (s *BookChapterService) MergeChapters(ctx context.Context, bookID, targetID
 	}
 
 	if err := os.WriteFile(*file.ContentPath, newFullContent, 0644); err != nil {
-		return ErrChapterFileUpdateFailed
+		return code.ErrChapterFileUpdateFailed
 	}
 
 	// 事务更新数据库
@@ -366,7 +405,7 @@ func (s *BookChapterService) FormatChapterNumbers(ctx context.Context, ids []uin
 		return err
 	}
 	if len(chapters) == 0 {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 
 	for i, ch := range chapters {
@@ -384,15 +423,15 @@ func (s *BookChapterService) FormatChapterNumbers(ctx context.Context, ids []uin
 func (s *BookChapterService) SaveChapterContent(ctx context.Context, bookID, chapterID uint64, content string, userID uint64) error {
 	chapter, err := s.chapterRepo.GetByID(ctx, chapterID)
 	if err != nil {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 	if chapter.BookID != bookID {
-		return ErrChapterNotFound
+		return code.ErrChapterNotFound
 	}
 
 	file, err := s.bookFileRepo.GetByID(ctx, chapter.FileID)
 	if err != nil {
-		return ErrBookFileNotFound
+		return code.ErrBookFileNotFound
 	}
 	if file.ContentPath == nil {
 		return errors.New("文件路径为空")
@@ -400,7 +439,7 @@ func (s *BookChapterService) SaveChapterContent(ctx context.Context, bookID, cha
 
 	data, err := os.ReadFile(*file.ContentPath)
 	if err != nil {
-		return ErrChapterFileUpdateFailed
+		return code.ErrChapterFileUpdateFailed
 	}
 
 	newData := []byte(content)
@@ -431,7 +470,7 @@ func (s *BookChapterService) SaveChapterContent(ctx context.Context, bookID, cha
 	}
 
 	if err := os.WriteFile(*file.ContentPath, newFullContent, 0644); err != nil {
-		return ErrChapterFileUpdateFailed
+		return code.ErrChapterFileUpdateFailed
 	}
 
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {

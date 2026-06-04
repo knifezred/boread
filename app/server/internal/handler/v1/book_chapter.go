@@ -86,6 +86,34 @@ func (h *BookChapterHandler) GetChapterContent(c *gin.Context) {
 	response.Success(c, resp)
 }
 
+// GetChapterContentByBook 通过 bookId + chapterNo 获取章节内容
+// @Summary   读取章节内容
+// @Tags      book-chapter
+// @Security  BearerAuth
+// @Produce   json
+// @Param    id      path  int  true  "书籍ID"
+// @Param    chapterNo   path  int  true  "章节编号"
+// @Success  200  {object}  response.Response{data=dto.ChapterContentResponse}
+// @Router   /api/book/{id}/chapter/{chapterNo} [get]
+func (h *BookChapterHandler) GetChapterContentByBook(c *gin.Context) {
+	bookID, err := utils.ParseUint64Param(c, "id")
+	if err != nil {
+		response.Error(c, code.ParamInvalid, "invalid bookId")
+		return
+	}
+	chapterNo, err := utils.ParseUint64Param(c, "chapterNo")
+	if err != nil {
+		response.Error(c, code.ParamInvalid, "invalid chapterNo")
+		return
+	}
+	resp, err := h.svc.GetChapterContentByBook(c.Request.Context(), bookID, uint32(chapterNo))
+	if err != nil {
+		response.Error(c, mapChapterErr(err), err.Error())
+		return
+	}
+	response.Success(c, resp)
+}
+
 // UpdateChapterTitle 更新章节标题
 // @Summary   更新章节标题
 // @Tags      book-chapter

@@ -2,25 +2,14 @@ package service
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrNoteNotFound          = errors.New("笔记不存在")
-	ErrReviewNotFound        = errors.New("书评不存在")
-	ErrCommentNotFound       = errors.New("评论不存在")
-	ErrNoteNotOwner          = errors.New("无权修改他人笔记")
-	ErrCommentNotOwner       = errors.New("无权删除他人评论")
-	ErrParentCommentNotExist = errors.New("父评论不存在")
-	ErrBookNotExists         = errors.New("书籍不存在")
-	ErrChapterNotExists      = errors.New("章节不存在")
 )
 
 type BookSocialService struct {
@@ -60,7 +49,7 @@ func NewBookSocialService(
 
 func (s *BookSocialService) CreateNote(ctx context.Context, readerID uint64, req *dto.NoteRequest) (*dto.NoteResponse, error) {
 	if _, err := s.bookRepo.GetByID(ctx, req.BookID); err != nil {
-		return nil, ErrBookNotExists
+		return nil, code.ErrBookNotExists
 	}
 	visibility := req.Visibility
 	if visibility == "" {
@@ -90,10 +79,10 @@ func (s *BookSocialService) CreateNote(ctx context.Context, readerID uint64, req
 func (s *BookSocialService) UpdateNote(ctx context.Context, readerID, noteID uint64, req *dto.NoteRequest) (*dto.NoteResponse, error) {
 	m, err := s.noteRepo.GetByID(ctx, noteID)
 	if err != nil {
-		return nil, ErrNoteNotFound
+		return nil, code.ErrNoteNotFound
 	}
 	if m.ReaderID != readerID {
-		return nil, ErrNoteNotOwner
+		return nil, code.ErrNoteNotOwner
 	}
 	// 可更新字段
 	m.NoteType = req.NoteType
@@ -120,7 +109,7 @@ func (s *BookSocialService) DeleteNote(ctx context.Context, readerID, noteID uin
 func (s *BookSocialService) GetNote(ctx context.Context, noteID, readerID uint64) (*dto.NoteResponse, error) {
 	m, err := s.noteRepo.GetByID(ctx, noteID)
 	if err != nil {
-		return nil, ErrNoteNotFound
+		return nil, code.ErrNoteNotFound
 	}
 	return s.buildNoteResponse(ctx, m, readerID)
 }
@@ -162,7 +151,7 @@ func (s *BookSocialService) ListNotesByBook(ctx context.Context, bookID uint64, 
 func (s *BookSocialService) CreateReview(ctx context.Context, readerID uint64, req *dto.ReviewRequest) (*dto.ReviewResponse, error) {
 	book, err := s.bookRepo.GetByID(ctx, req.BookID)
 	if err != nil {
-		return nil, ErrBookNotExists
+		return nil, code.ErrBookNotExists
 	}
 	m := &model.BookReview{
 		BookID:   req.BookID,
@@ -186,10 +175,10 @@ func (s *BookSocialService) CreateReview(ctx context.Context, readerID uint64, r
 func (s *BookSocialService) UpdateReview(ctx context.Context, readerID, reviewID uint64, req *dto.ReviewRequest) (*dto.ReviewResponse, error) {
 	m, err := s.reviewRepo.GetByID(ctx, reviewID)
 	if err != nil {
-		return nil, ErrReviewNotFound
+		return nil, code.ErrReviewNotFound
 	}
 	if m.ReaderID != readerID {
-		return nil, ErrNoteNotOwner // 复用: 无权修改他人书评
+		return nil, code.ErrNoteNotOwner // 复用: 无权修改他人书评
 	}
 	m.Rating = req.Rating
 	m.Title = req.Title
@@ -206,10 +195,10 @@ func (s *BookSocialService) UpdateReview(ctx context.Context, readerID, reviewID
 func (s *BookSocialService) DeleteReview(ctx context.Context, readerID, reviewID uint64) error {
 	m, err := s.reviewRepo.GetByID(ctx, reviewID)
 	if err != nil {
-		return ErrReviewNotFound
+		return code.ErrReviewNotFound
 	}
 	if m.ReaderID != readerID {
-		return ErrNoteNotOwner
+		return code.ErrNoteNotOwner
 	}
 	return s.reviewRepo.Delete(ctx, reviewID)
 }
@@ -217,7 +206,7 @@ func (s *BookSocialService) DeleteReview(ctx context.Context, readerID, reviewID
 func (s *BookSocialService) GetReview(ctx context.Context, reviewID, readerID uint64) (*dto.ReviewResponse, error) {
 	m, err := s.reviewRepo.GetByID(ctx, reviewID)
 	if err != nil {
-		return nil, ErrReviewNotFound
+		return nil, code.ErrReviewNotFound
 	}
 	return s.buildReviewResponse(ctx, m, readerID)
 }
@@ -242,11 +231,11 @@ func (s *BookSocialService) PageReview(ctx context.Context, req *dto.ReviewSearc
 
 func (s *BookSocialService) CreateComment(ctx context.Context, readerID uint64, req *dto.CommentRequest) (*dto.CommentResponse, error) {
 	if _, err := s.chapterRepo.GetByID(ctx, req.ChapterID); err != nil {
-		return nil, ErrChapterNotExists
+		return nil, code.ErrChapterNotExists
 	}
 	if req.ParentID > 0 {
 		if _, err := s.commentRepo.GetByID(ctx, req.ParentID); err != nil {
-			return nil, ErrParentCommentNotExist
+			return nil, code.ErrParentCommentNotExist
 		}
 	}
 	m := &model.BookChapterComment{
@@ -275,7 +264,7 @@ func (s *BookSocialService) DeleteComment(ctx context.Context, readerID, comment
 func (s *BookSocialService) GetComment(ctx context.Context, commentID, readerID uint64) (*dto.CommentResponse, error) {
 	m, err := s.commentRepo.GetByID(ctx, commentID)
 	if err != nil {
-		return nil, ErrCommentNotFound
+		return nil, code.ErrCommentNotFound
 	}
 	return s.buildCommentResponse(ctx, m, readerID)
 }

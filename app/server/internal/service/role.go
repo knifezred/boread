@@ -2,17 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrRoleCodeExists    = errors.New("角色编码已存在")
-	ErrRoleSystem        = errors.New("系统内置角色不可操作")
-	ErrRoleHasUsers      = errors.New("角色下还有用户, 不能删除")
 )
 
 type RoleService struct {
@@ -25,7 +19,7 @@ func NewRoleService(repo *repository.SysRoleRepository) *RoleService {
 
 func (s *RoleService) Create(ctx context.Context, req *dto.RoleRequest, userID uint64) (*model.SysRole, error) {
 	if _, err := s.repo.GetByCode(ctx, req.RoleCode); err == nil {
-		return nil, ErrRoleCodeExists
+		return nil, code.ErrRoleCodeExists
 	}
 	status := req.Status
 	if status == "" {
@@ -58,11 +52,11 @@ func (s *RoleService) Update(ctx context.Context, id uint64, req *dto.RoleReques
 		return nil, err
 	}
 	if m.IsSystem && req.RoleCode != m.RoleCode {
-		return nil, ErrRoleSystem // 系统角色不允许改 code
+		return nil, code.ErrRoleSystem // 系统角色不允许改 code
 	}
 	if req.RoleCode != m.RoleCode {
 		if _, e := s.repo.GetByCode(ctx, req.RoleCode); e == nil {
-			return nil, ErrRoleCodeExists
+			return nil, code.ErrRoleCodeExists
 		}
 	}
 	m.RoleName = req.RoleName
@@ -91,12 +85,12 @@ func (s *RoleService) Delete(ctx context.Context, id uint64) error {
 		return err
 	}
 	if m.IsSystem {
-		return ErrRoleSystem
+		return code.ErrRoleSystem
 	}
 	if has, err := s.repo.HasUsers(ctx, id); err != nil {
 		return err
 	} else if has {
-		return ErrRoleHasUsers
+		return code.ErrRoleHasUsers
 	}
 	return s.repo.Delete(ctx, id)
 }

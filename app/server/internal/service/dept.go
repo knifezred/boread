@@ -7,16 +7,10 @@ import (
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrDeptCodeExists  = errors.New("部门编码已存在")
-	ErrDeptHasChildren = errors.New("存在子部门, 不能删除")
-	ErrDeptHasUsers    = errors.New("部门下有用户, 不能删除")
-	ErrParentNotFound  = errors.New("父部门不存在")
 )
 
 type DeptService struct {
@@ -30,14 +24,14 @@ func NewDeptService(repo *repository.SysDeptRepository) *DeptService {
 // Create 新建部门
 func (s *DeptService) Create(ctx context.Context, req *dto.DeptRequest, userID uint64) (*model.SysDept, error) {
 	if _, err := s.repo.GetByCode(ctx, req.DeptCode); err == nil {
-		return nil, ErrDeptCodeExists
+		return nil, code.ErrDeptCodeExists
 	}
 
 	ancestors := "0"
 	if req.ParentID > 0 {
 		parent, err := s.repo.GetByID(ctx, req.ParentID)
 		if err != nil {
-			return nil, ErrParentNotFound
+			return nil, code.ErrParentNotFound
 		}
 		ancestors = fmt.Sprintf("%s,%d", parent.Ancestors, parent.ID)
 	}
@@ -75,7 +69,7 @@ func (s *DeptService) Update(ctx context.Context, id uint64, req *dto.DeptReques
 	// 编码变更需查重
 	if req.DeptCode != m.DeptCode {
 		if _, e := s.repo.GetByCode(ctx, req.DeptCode); e == nil {
-			return nil, ErrDeptCodeExists
+			return nil, code.ErrDeptCodeExists
 		}
 	}
 
@@ -85,7 +79,7 @@ func (s *DeptService) Update(ctx context.Context, id uint64, req *dto.DeptReques
 		if req.ParentID > 0 {
 			parent, e := s.repo.GetByID(ctx, req.ParentID)
 			if e != nil {
-				return nil, ErrParentNotFound
+				return nil, code.ErrParentNotFound
 			}
 			ancestors = fmt.Sprintf("%s,%d", parent.Ancestors, parent.ID)
 		}
@@ -115,12 +109,12 @@ func (s *DeptService) Delete(ctx context.Context, id uint64) error {
 	if has, err := s.repo.HasChildren(ctx, id); err != nil {
 		return err
 	} else if has {
-		return ErrDeptHasChildren
+		return code.ErrDeptHasChildren
 	}
 	if has, err := s.repo.HasUsers(ctx, id); err != nil {
 		return err
 	} else if has {
-		return ErrDeptHasUsers
+		return code.ErrDeptHasUsers
 	}
 	return s.repo.Delete(ctx, id)
 }

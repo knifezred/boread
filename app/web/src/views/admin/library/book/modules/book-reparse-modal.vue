@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { NButton, NCard, NModal, NRadioGroup, NRadio, NSpace, NSpin, NAlert, NScrollbar } from "naive-ui";
-import { fetchReParseChapters, fetchGetChapterRuleList, fetchGetBoundChapterRule, fetchBindChapterRule } from "@/service/api";
-import { $t } from "@/locales";
+import { ref, watch } from "vue"
+import { NButton, NCard, NModal, NRadioGroup, NRadio, NSpace, NSpin, NAlert, NScrollbar } from "naive-ui"
+import { fetchReParseChapters, fetchGetChapterRuleList, fetchGetBoundChapterRule, fetchBindChapterRule } from "@/service/api"
+import { $t } from "@/locales"
 
 defineOptions({ name: "BookReparseModal" });
 
@@ -21,6 +21,10 @@ const rulesLoading = ref(false);
 const selectedRuleId = ref<number>(0);
 const ruleList = ref<Api.BookManage.BookChapterRule[]>([]);
 const actionLoading = ref(false);
+
+watch(visible, (val) => {
+  if (val) loadRules();
+});
 
 async function loadRules() {
   rulesLoading.value = true;
@@ -75,7 +79,7 @@ function closeModal() {
 </script>
 
 <template>
-  <NModal v-model:show="visible" preset="card" :title="$t('page.admin.library.bookChapterRule.form.reParse.title')" class="w-550px" @update:show="(val) => { if (val) loadRules(); }">
+  <NModal v-model:show="visible" preset="card" :title="$t('page.admin.library.bookChapterRule.form.reParse.title')" class="w-550px">
     <NScrollbar class="max-h-400px pr-12px">
       <div class="mb-16px">
         <NAlert type="info" closable>

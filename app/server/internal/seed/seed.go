@@ -404,7 +404,7 @@ func ensureRoleButtons(ctx context.Context, db *gorm.DB, roleID uint64, buttonID
 
 // upsertDefaultChapterRule 插入默认章节识别规则（幂等）
 func upsertDefaultChapterRule(ctx context.Context, db *gorm.DB) error {
-	ruleName := "默认章节规则-中文"
+	ruleName := "常规模式"
 	var count int64
 	if err := db.WithContext(ctx).Model(&model.BookChapterRule{}).
 		Where("rule_name = ?", ruleName).Count(&count).Error; err != nil {
@@ -413,14 +413,15 @@ func upsertDefaultChapterRule(ctx context.Context, db *gorm.DB) error {
 	if count > 0 {
 		return nil
 	}
-	desc := "匹配中文数字章节格式: 第X章/节/回/卷/篇"
+	desc := "第一章 xxx"
+	groupPattern := "^(第[一二三四五六七八九十百千万0-9０-９]+[卷部])"
 	rule := model.BookChapterRule{
 		RuleName:      ruleName,
 		RuleType:      model.RuleTypeSystem,
-		TitlePattern:  `^(第[一二三四五六七八九十百千万0-9０-９]+[章章节回卷篇部集])`,
-		GroupPattern:  nil,
+		TitlePattern:  `^(第[一二三四五六七八九十百千万0-9０-９]+[章节回篇集])`,
+		GroupPattern:  &groupPattern,
 		MinChapterLen: 100,
-		MaxChapterLen: 100000,
+		MaxChapterLen: 50000,
 		SortOrder:     0,
 		Description:   &desc,
 		Status:        model.StatusEnabled,

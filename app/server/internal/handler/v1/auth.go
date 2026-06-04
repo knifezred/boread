@@ -41,11 +41,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	)
 	if err != nil {
 		switch {
-		case errors.Is(err, service.ErrUserNotFound), errors.Is(err, service.ErrInvalidPassword):
+		case errors.Is(err, code.ErrUserNotFound), errors.Is(err, code.ErrInvalidPassword):
 			response.Error(c, code.AuthFailed, "用户名或密码错误")
-		case errors.Is(err, service.ErrUserDisabled):
+		case errors.Is(err, code.ErrUserDisabled):
 			response.Error(c, code.UserDisabled, "账号已禁用")
-		case errors.Is(err, service.ErrUserLocked):
+		case errors.Is(err, code.ErrUserLocked):
 			response.Error(c, code.UserLocked, "账号已锁定, 请稍后再试")
 		default:
 			response.Error(c, code.ServerError, "登录失败")

@@ -2,18 +2,14 @@ package service
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrUserExists = errors.New("用户名已存在")
 )
 
 type UserService struct {
@@ -26,7 +22,7 @@ func NewUserService(repo *repository.SysUserRepository) *UserService {
 
 func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest, opID uint64) (*model.SysUser, error) {
 	if _, err := s.repo.GetByUserName(ctx, req.UserName); err == nil {
-		return nil, ErrUserExists
+		return nil, code.ErrUserExists
 	}
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -38,13 +34,13 @@ func (s *UserService) Create(ctx context.Context, req *dto.UserCreateRequest, op
 	}
 	now := time.Now()
 	m := &model.SysUser{
-		DeptID:        req.DeptID,
-		UserName:      req.UserName,
-		Password:      string(hashed),
-		PwdUpdatedAt:  &now,
-		NickName:      req.NickName,
-		UserGender:    req.UserGender,
-		Status:        status,
+		DeptID:       req.DeptID,
+		UserName:     req.UserName,
+		Password:     string(hashed),
+		PwdUpdatedAt: &now,
+		NickName:     req.NickName,
+		UserGender:   req.UserGender,
+		Status:       status,
 	}
 	if req.UserPhone != "" {
 		m.UserPhone = &req.UserPhone
@@ -130,11 +126,11 @@ func (s *UserService) ResetPassword(ctx context.Context, id uint64, newPwd strin
 		return err
 	}
 	return s.repo.UpdateFields(ctx, id, map[string]any{
-		"password":         string(hashed),
-		"pwd_updated_at":   time.Now(),
-		"pwd_error_count":  0,
-		"locked_until":     nil,
-		"update_by":        opID,
+		"password":        string(hashed),
+		"pwd_updated_at":  time.Now(),
+		"pwd_error_count": 0,
+		"locked_until":    nil,
+		"update_by":       opID,
 	})
 }
 

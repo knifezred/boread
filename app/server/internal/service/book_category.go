@@ -8,15 +8,10 @@ import (
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrCategoryCodeExists     = errors.New("分类编码已存在")
-	ErrCategoryHasChildren    = errors.New("存在子分类, 不能删除")
-	ErrCategoryParentNotFound = errors.New("父分类不存在")
 )
 
 type BookCategoryService struct {
@@ -29,14 +24,14 @@ func NewBookCategoryService(repo *repository.BookCategoryRepository) *BookCatego
 
 func (s *BookCategoryService) Create(ctx context.Context, req *dto.CategoryRequest, userID uint64) (*model.BookCategory, error) {
 	if _, err := s.repo.GetByCode(ctx, req.CategoryCode); err == nil {
-		return nil, ErrCategoryCodeExists
+		return nil, code.ErrCategoryCodeExists
 	}
 
 	ancestors := "0"
 	if req.ParentID > 0 {
 		parent, err := s.repo.GetByID(ctx, req.ParentID)
 		if err != nil {
-			return nil, ErrCategoryParentNotFound
+			return nil, code.ErrCategoryParentNotFound
 		}
 		ancestors = fmt.Sprintf("%s,%d", parent.Ancestors, parent.ID)
 	}
@@ -73,7 +68,7 @@ func (s *BookCategoryService) Update(ctx context.Context, id uint64, req *dto.Ca
 
 	if req.CategoryCode != m.CategoryCode {
 		if _, e := s.repo.GetByCode(ctx, req.CategoryCode); e == nil {
-			return nil, ErrCategoryCodeExists
+			return nil, code.ErrCategoryCodeExists
 		}
 	}
 
@@ -82,7 +77,7 @@ func (s *BookCategoryService) Update(ctx context.Context, id uint64, req *dto.Ca
 		if req.ParentID > 0 {
 			parent, e := s.repo.GetByID(ctx, req.ParentID)
 			if e != nil {
-				return nil, ErrCategoryParentNotFound
+				return nil, code.ErrCategoryParentNotFound
 			}
 			ancestors = fmt.Sprintf("%s,%d", parent.Ancestors, parent.ID)
 		}
@@ -112,7 +107,7 @@ func (s *BookCategoryService) Delete(ctx context.Context, id uint64) error {
 	if has, err := s.repo.HasChildren(ctx, id); err != nil {
 		return err
 	} else if has {
-		return ErrCategoryHasChildren
+		return code.ErrCategoryHasChildren
 	}
 	return s.repo.Delete(ctx, id)
 }

@@ -16,28 +16,15 @@ import (
 	"golang.org/x/text/transform"
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
 )
 
-var (
-	ErrFileTooLarge        = errors.New("文件大小超出限制 (最大 200MB)")
-	ErrFileTypeUnsupported = errors.New("不支持的文件格式，仅支持 txt/epub/mobi/pdf")
-	ErrFileEmpty           = errors.New("文件为空")
-	ErrUploadNotFound      = errors.New("上传记录不存在")
-	ErrChapterNotFound     = errors.New("章节不存在")
-	ErrRuleNotFound        = errors.New("规则不存在")
-	ErrFilterRuleNotFound  = errors.New("过滤规则不存在")
-	ErrBookFileNotFound    = errors.New("文件记录不存在")
-	ErrFileMD5Exists       = errors.New("文件 MD5 已存在（重复文件）")
-)
-
 const (
-	MaxFileSize       = 200 * 1024 * 1024 // 200MB
-	StorageBaseDir    = "storage/books"
-	DefaultChapterLen = 100
-	MaxChapterLen     = 100000
+	MaxFileSize    = 200 * 1024 * 1024 // 200MB
+	StorageBaseDir = "storage/books"
 )
 
 // BookFileService 小说文件管理服务
@@ -87,11 +74,11 @@ func (s *BookFileService) Upload(ctx context.Context, reader io.Reader, original
 	// 1. 格式验证
 	ext := strings.ToLower(filepath.Ext(originalName))
 	if !ValidateFileType(ext) {
-		return nil, ErrFileTypeUnsupported
+		return nil, code.ErrFileTypeUnsupported
 	}
 	// 2. 大小验证
 	if fileSize > MaxFileSize {
-		return nil, ErrFileTooLarge
+		return nil, code.ErrFileTooLarge
 	}
 	// 3. 读取内容并计算 MD5
 	data, err := io.ReadAll(reader)
@@ -99,7 +86,7 @@ func (s *BookFileService) Upload(ctx context.Context, reader io.Reader, original
 		return nil, fmt.Errorf("读取文件失败: %w", err)
 	}
 	if len(data) == 0 {
-		return nil, ErrFileEmpty
+		return nil, code.ErrFileEmpty
 	}
 	md5Hash := fmt.Sprintf("%x", md5.Sum(data))
 
@@ -159,7 +146,7 @@ func (s *BookFileService) Upload(ctx context.Context, reader io.Reader, original
 func (s *BookFileService) ConfirmImport(ctx context.Context, req *dto.ConfirmImportRequest, userID uint64) (*dto.ConfirmImportResponse, error) {
 	up, err := s.uploadRepo.GetByID(ctx, req.UploadID)
 	if err != nil {
-		return nil, ErrUploadNotFound
+		return nil, code.ErrUploadNotFound
 	}
 	if up.ParseStatus != model.ParsePending {
 		return nil, errors.New("该上传记录已处理，不可重复入库")
@@ -170,6 +157,9 @@ func (s *BookFileService) ConfirmImport(ctx context.Context, req *dto.ConfirmImp
 	if err != nil {
 		return nil, fmt.Errorf("读取文件失败: %w", err)
 	}
+
+	// 检测编码，非 UTF-8 自动转码
+	data = decodeToUTF8(data)
 
 	// 获取章节识别规则（全局默认规则，扫描任务不使用用户ID）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
@@ -502,7 +492,7 @@ func (s *BookFileService) scanLocalFile(ctx context.Context, fpath string, userI
 func (s *BookFileService) ScanByID(ctx context.Context, uploadID uint64) (*dto.ScanResult, error) {
 	up, err := s.uploadRepo.GetByID(ctx, uploadID)
 	if err != nil {
-		return nil, ErrUploadNotFound
+		return nil, code.ErrUploadNotFound
 	}
 	result := s.scanSingle(ctx, up)
 	return &result, nil
@@ -532,6 +522,9 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 		result.ParseMessage = &failMsg
 		return result
 	}
+
+	// 检测编码，非 UTF-8 自动转码
+	data = decodeToUTF8(data)
 
 	// 获取章节识别规则（系统默认规则）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0) // bookID=0 取系统默认规则
@@ -644,153 +637,6 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 	return result
 }
 
-// ==================== 章节识别规则 CRUD ====================
-
-func (s *BookFileService) CreateChapterRule(ctx context.Context, req *dto.ChapterRuleRequest, userID uint64) (*model.BookChapterRule, error) {
-	m := &model.BookChapterRule{
-		RuleName:      req.RuleName,
-		RuleType:      model.RuleTypeCustom,
-		UserID:        &userID,
-		TitlePattern:  req.TitlePattern,
-		GroupPattern:  req.GroupPattern,
-		MinChapterLen: req.MinChapterLen,
-		MaxChapterLen: req.MaxChapterLen,
-		SortOrder:     req.SortOrder,
-		Description:   req.Description,
-		Status:        model.EnableStatus(req.Status),
-	}
-	if m.Status == "" {
-		m.Status = model.StatusEnabled
-	}
-	if m.MinChapterLen == 0 {
-		m.MinChapterLen = DefaultChapterLen
-	}
-	if m.MaxChapterLen == 0 {
-		m.MaxChapterLen = MaxChapterLen
-	}
-	m.CreateBy = &userID
-	m.UpdateBy = &userID
-	if err := s.chapterRuleRepo.Create(ctx, m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (s *BookFileService) UpdateChapterRule(ctx context.Context, id uint64, req *dto.ChapterRuleRequest, userID uint64) (*model.BookChapterRule, error) {
-	m, err := s.chapterRuleRepo.GetByID(ctx, id)
-	if err != nil {
-		return nil, ErrRuleNotFound
-	}
-	m.RuleName = req.RuleName
-	m.TitlePattern = req.TitlePattern
-	m.GroupPattern = req.GroupPattern
-	m.MinChapterLen = req.MinChapterLen
-	m.MaxChapterLen = req.MaxChapterLen
-	m.SortOrder = req.SortOrder
-	m.Description = req.Description
-	if req.Status != "" {
-		m.Status = model.EnableStatus(req.Status)
-	}
-	m.UpdateBy = &userID
-	if err := s.chapterRuleRepo.Update(ctx, m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (s *BookFileService) DeleteChapterRule(ctx context.Context, id uint64) error {
-	if _, err := s.chapterRuleRepo.GetByID(ctx, id); err != nil {
-		return ErrRuleNotFound
-	}
-	return s.chapterRuleRepo.Delete(ctx, id)
-}
-
-func (s *BookFileService) GetChapterRuleByID(ctx context.Context, id uint64) (*model.BookChapterRule, error) {
-	return s.chapterRuleRepo.GetByID(ctx, id)
-}
-
-func (s *BookFileService) PageChapterRule(ctx context.Context, req *dto.ChapterRuleSearch) (*dto.PageResponse, error) {
-	req.Normalize()
-	rows, total, err := s.chapterRuleRepo.Page(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	records := make([]dto.ChapterRuleResponse, len(rows))
-	for i, r := range rows {
-		records[i] = dto.ChapterRuleResponse{BookChapterRule: r}
-	}
-	return dto.NewPageResponse(records, total, &req.PageRequest), nil
-}
-
-// ==================== 章节规则绑定 ====================
-
-// BindChapterRule 为书籍绑定固定章节识别规则
-func (s *BookFileService) BindChapterRule(ctx context.Context, req *dto.ChapterRuleBindRequest, userID uint64) (*dto.ChapterRuleBindResponse, error) {
-	// 验证规则存在
-	_, err := s.chapterRuleRepo.GetByID(ctx, req.RuleID)
-	if err != nil {
-		return nil, ErrRuleNotFound
-	}
-
-	// 删除旧的绑定（如果有）
-	_ = s.chapterRuleRelRepo.DeleteByBookAndReader(ctx, req.BookID, userID)
-
-	rel := &model.BookChapterRuleRel{
-		BookID:   req.BookID,
-		ReaderID: userID,
-		RuleID:   req.RuleID,
-	}
-	rel.CreateBy = &userID
-	rel.UpdateBy = &userID
-	if err := s.chapterRuleRelRepo.Create(ctx, rel); err != nil {
-		return nil, err
-	}
-
-	// 获取规则名称
-	rule, _ := s.chapterRuleRepo.GetByID(ctx, req.RuleID)
-	ruleName := ""
-	if rule != nil {
-		ruleName = rule.RuleName
-	}
-
-	return &dto.ChapterRuleBindResponse{
-		ID:         rel.ID,
-		BookID:     rel.BookID,
-		ReaderID:   rel.ReaderID,
-		RuleID:     rel.RuleID,
-		RuleName:   ruleName,
-		CreateTime: rel.CreateTime.Format("2006-01-02 15:04:05"),
-	}, nil
-}
-
-// UnbindChapterRule 解绑书籍的章节识别规则
-func (s *BookFileService) UnbindChapterRule(ctx context.Context, bookID, userID uint64) error {
-	return s.chapterRuleRelRepo.DeleteByBookAndReader(ctx, bookID, userID)
-}
-
-// GetBoundChapterRule 获取书籍绑定的章节识别规则
-func (s *BookFileService) GetBoundChapterRule(ctx context.Context, bookID, userID uint64) (*dto.ChapterRuleBindResponse, error) {
-	rel, err := s.chapterRuleRelRepo.GetByBookAndReader(ctx, bookID, userID)
-	if err != nil {
-		return nil, nil // 未绑定返回 nil
-	}
-
-	rule, _ := s.chapterRuleRepo.GetByID(ctx, rel.RuleID)
-	ruleName := ""
-	if rule != nil {
-		ruleName = rule.RuleName
-	}
-
-	return &dto.ChapterRuleBindResponse{
-		ID:         rel.ID,
-		BookID:     rel.BookID,
-		ReaderID:   rel.ReaderID,
-		RuleID:     rel.RuleID,
-		RuleName:   ruleName,
-		CreateTime: rel.CreateTime.Format("2006-01-02 15:04:05"),
-	}, nil
-}
-
 // ==================== 内容净化规则 CRUD ====================
 
 func (s *BookFileService) CreateFilterRule(ctx context.Context, req *dto.FilterRuleRequest, userID uint64) (*model.BookContentFilterRule, error) {
@@ -826,7 +672,7 @@ func (s *BookFileService) CreateFilterRule(ctx context.Context, req *dto.FilterR
 func (s *BookFileService) UpdateFilterRule(ctx context.Context, id uint64, req *dto.FilterRuleRequest, userID uint64) (*model.BookContentFilterRule, error) {
 	m, err := s.filterRuleRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, ErrFilterRuleNotFound
+		return nil, code.ErrFilterRuleNotFound
 	}
 	m.RuleName = req.RuleName
 	m.MatchType = model.FilterMatchType(req.MatchType)
@@ -849,7 +695,7 @@ func (s *BookFileService) UpdateFilterRule(ctx context.Context, id uint64, req *
 
 func (s *BookFileService) DeleteFilterRule(ctx context.Context, id uint64) error {
 	if _, err := s.filterRuleRepo.GetByID(ctx, id); err != nil {
-		return ErrFilterRuleNotFound
+		return code.ErrFilterRuleNotFound
 	}
 	return s.filterRuleRepo.Delete(ctx, id)
 }

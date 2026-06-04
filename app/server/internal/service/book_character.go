@@ -2,19 +2,13 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"gorm.io/gorm"
 
+	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
-)
-
-var (
-	ErrCharacterNotFound    = errors.New("角色不存在")
-	ErrCharacterRelNotFound = errors.New("角色关系不存在")
-	ErrBookExists           = errors.New("书籍不存在")
 )
 
 // ======================== BookCharacterService ========================
@@ -31,7 +25,7 @@ func NewBookCharacterService(db *gorm.DB, charRepo *repository.BookCharacterRepo
 
 func (s *BookCharacterService) Create(ctx context.Context, userID uint64, req *dto.CharacterRequest) (*dto.CharacterResponse, error) {
 	if _, err := s.bookRepo.GetByID(ctx, req.BookID); err != nil {
-		return nil, ErrBookExists
+		return nil, code.ErrBookExists
 	}
 	m := &model.BookCharacter{
 		BookID:    req.BookID,
@@ -54,7 +48,7 @@ func (s *BookCharacterService) Create(ctx context.Context, userID uint64, req *d
 func (s *BookCharacterService) Update(ctx context.Context, userID, charID uint64, req *dto.CharacterRequest) (*dto.CharacterResponse, error) {
 	m, err := s.charRepo.GetByID(ctx, charID)
 	if err != nil {
-		return nil, ErrCharacterNotFound
+		return nil, code.ErrCharacterNotFound
 	}
 	m.Name = req.Name
 	m.Alias = req.Alias
@@ -72,7 +66,7 @@ func (s *BookCharacterService) Update(ctx context.Context, userID, charID uint64
 
 func (s *BookCharacterService) Delete(ctx context.Context, charID uint64) error {
 	if _, err := s.charRepo.GetByID(ctx, charID); err != nil {
-		return ErrCharacterNotFound
+		return code.ErrCharacterNotFound
 	}
 	return s.charRepo.Delete(ctx, charID)
 }
@@ -80,7 +74,7 @@ func (s *BookCharacterService) Delete(ctx context.Context, charID uint64) error 
 func (s *BookCharacterService) GetByID(ctx context.Context, charID uint64) (*dto.CharacterResponse, error) {
 	m, err := s.charRepo.GetByID(ctx, charID)
 	if err != nil {
-		return nil, ErrCharacterNotFound
+		return nil, code.ErrCharacterNotFound
 	}
 	return &dto.CharacterResponse{BookCharacter: *m}, nil
 }
@@ -124,10 +118,10 @@ func NewBookCharacterRelService(db *gorm.DB, relRepo *repository.BookCharacterRe
 
 func (s *BookCharacterRelService) Create(ctx context.Context, userID uint64, req *dto.CharacterRelRequest) (*dto.CharacterRelResponse, error) {
 	if _, err := s.charRepo.GetByID(ctx, req.CharacterAID); err != nil {
-		return nil, ErrCharacterNotFound
+		return nil, code.ErrCharacterNotFound
 	}
 	if _, err := s.charRepo.GetByID(ctx, req.CharacterBID); err != nil {
-		return nil, ErrCharacterNotFound
+		return nil, code.ErrCharacterNotFound
 	}
 	m := &model.BookCharacterRel{
 		BookID:       req.BookID,
@@ -147,7 +141,7 @@ func (s *BookCharacterRelService) Create(ctx context.Context, userID uint64, req
 
 func (s *BookCharacterRelService) Delete(ctx context.Context, relID uint64) error {
 	if _, err := s.relRepo.GetByID(ctx, relID); err != nil {
-		return ErrCharacterRelNotFound
+		return code.ErrCharacterRelNotFound
 	}
 	return s.relRepo.Delete(ctx, relID)
 }
@@ -155,7 +149,7 @@ func (s *BookCharacterRelService) Delete(ctx context.Context, relID uint64) erro
 func (s *BookCharacterRelService) GetByID(ctx context.Context, relID uint64) (*dto.CharacterRelResponse, error) {
 	m, err := s.relRepo.GetByID(ctx, relID)
 	if err != nil {
-		return nil, ErrCharacterRelNotFound
+		return nil, code.ErrCharacterRelNotFound
 	}
 	return s.buildRelResponse(ctx, m)
 }

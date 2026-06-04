@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strings"
@@ -11,6 +12,8 @@ import (
 	"unicode/utf8"
 
 	"boread/internal/model"
+
+	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 // =====================================================================
@@ -23,6 +26,9 @@ import (
 //  4. 支持常见章节格式内置识别: "第X章", "Chapter X", 数字编号
 //  5. 按章节切分并返回偏移索引
 // =====================================================================
+
+// maxChapterTitleLen 章节标题最大长度（数据库字段 size:255，预留后缀空间）
+const maxChapterTitleLen = 200
 
 // ChapterMatch 单个章节匹配结果
 type ChapterMatch struct {
@@ -84,16 +90,10 @@ func (p *ChapterParser) Parse(content []byte) *ParseResult {
 	// 1. 按行扫描，找到所有章节标题位置（含卷标题）
 	rawMatches := p.scanTitles(content)
 	if len(rawMatches) == 0 {
-		// 无匹配：整本书作为一个章节
-		wordCount := countWords(content)
-		return &ParseResult{
-			Chapters: []ChapterSegment{{
-				Title:      "全文",
-				ByteOffset: 0,
-				ByteLength: uint32(len(content)),
-				WordCount:  wordCount,
-			}},
-		}
+		// 无匹配：按 max_chapter_len 强制拆分，防止整书作为一章
+		maxLen := p.getMaxChapterLen()
+		segments := p.forceSplitContent(content, maxLen)
+		return &ParseResult{Chapters: segments}
 	}
 
 	// 2. 按标题位置切分章节
@@ -106,6 +106,7 @@ func (p *ChapterParser) Parse(content []byte) *ParseResult {
 }
 
 // buildSegments 按匹配结果构建章节段，同时处理卷信息
+// 自动截取超长章节，防止 uint32(ByteLength) 溢出
 func (p *ChapterParser) buildSegments(content []byte, matches []ChapterMatch) []ChapterSegment {
 	contentLen := uint64(len(content))
 	segments := make([]ChapterSegment, 0, len(matches))
@@ -113,23 +114,17 @@ func (p *ChapterParser) buildSegments(content []byte, matches []ChapterMatch) []
 	var currentVolumeTitle *string
 
 	for i, m := range matches {
-		// 内容起始位置：标题行结束（下一行起始）
 		contentStart := m.TitleEndOffset
 		if contentStart > contentLen {
 			contentStart = contentLen
 		}
 
-		// 内容结束位置：下一章节标题行起始
-		var endOffset uint64
+		endOffset := contentLen
 		if i+1 < len(matches) {
 			endOffset = matches[i+1].ByteOffset
-		} else {
-			endOffset = contentLen
 		}
 
-		// 判断是否是卷标题行
 		if m.VolumeTitle != "" {
-			// 卷标题所在行不做为章节，但更新当前的卷信息
 			volNo := uint32(1)
 			if currentVolumeNo != nil {
 				volNo = *currentVolumeNo + 1
@@ -140,25 +135,60 @@ func (p *ChapterParser) buildSegments(content []byte, matches []ChapterMatch) []
 			continue
 		}
 
-		var segBytes []byte
-		if contentStart < endOffset {
-			segBytes = content[contentStart:endOffset]
-		} else {
-			segBytes = nil
+		// 限制单章最大字节数，防止 uint32 溢出
+		// 同一标题下的剩余内容会被下一轮循环截取为独立章节
+		rawEnd := endOffset
+		maxSegmentBytes := uint64(math.MaxUint32)
+		if endOffset-contentStart > maxSegmentBytes {
+			endOffset = contentStart + maxSegmentBytes
 		}
 
-		seg := ChapterSegment{
-			Title:       m.Title,
-			VolumeNo:    copyUint32Ptr(currentVolumeNo),
-			VolumeTitle: copyStringPtr(currentVolumeTitle),
-			ByteOffset:  contentStart,
-			ByteLength:  uint32(len(segBytes)),
-			WordCount:   countWords(segBytes),
+		segments = p.appendOrSplitSegment(content, segments, m, contentStart, endOffset, currentVolumeNo, currentVolumeTitle, false)
+
+		// 如果内容被截断，继续处理剩余部分直到原结束位置
+		for endOffset < rawEnd {
+			contentStart = endOffset
+			nextEnd := rawEnd
+			if nextEnd-contentStart > maxSegmentBytes {
+				nextEnd = contentStart + maxSegmentBytes
+			}
+			segments = p.appendOrSplitSegment(content, segments, m, contentStart, nextEnd, currentVolumeNo, currentVolumeTitle, true)
+			endOffset = nextEnd
 		}
-		segments = append(segments, seg)
 	}
 
 	return segments
+}
+
+// appendOrSplitSegment 构建并追加章节段，防止 uint32 ByteLength 溢出
+// isContinuation 为 true 时表示是截断后的续接部分，标题追加"（续）"后缀
+func (p *ChapterParser) appendOrSplitSegment(content []byte, segments []ChapterSegment, m ChapterMatch,
+	contentStart, endOffset uint64, currentVolumeNo *uint32, currentVolumeTitle *string, isContinuation bool) []ChapterSegment {
+	var segBytes []byte
+	if contentStart < endOffset {
+		byteLen := endOffset - contentStart
+		if byteLen > uint64(math.MaxUint32) {
+			byteLen = uint64(math.MaxUint32)
+		}
+		segBytes = content[contentStart : contentStart+byteLen]
+	} else {
+		segBytes = nil
+	}
+
+	title := m.Title
+	if isContinuation {
+		title = truncateTitle(m.Title + "（续）")
+	}
+
+	seg := ChapterSegment{
+		Title:       title,
+		VolumeNo:    copyUint32Ptr(currentVolumeNo),
+		VolumeTitle: copyStringPtr(currentVolumeTitle),
+		ByteOffset:  contentStart,
+		ByteLength:  uint32(len(segBytes)),
+		WordCount:   countWords(segBytes),
+	}
+	return append(segments, seg)
 }
 
 // filterByLength 根据每个规则的 min_chapter_len / max_chapter_len 过滤/拆分章节
@@ -176,9 +206,9 @@ func (p *ChapterParser) filterByLength(content []byte, segments []ChapterSegment
 		// 检查是否过短（跳过太短的章节，并入上一章）
 		if seg.ByteLength < minLen && i > 0 && minLen > 0 {
 			prev := &result[len(result)-1]
-			prev.ByteLength += seg.ByteLength
-			prev.WordCount += seg.WordCount
-			prev.Title = prev.Title + " / " + seg.Title
+			prev.ByteLength = safeAddUint32(prev.ByteLength, seg.ByteLength)
+			prev.WordCount = safeAddUint32(prev.WordCount, seg.WordCount)
+			prev.Title = truncateTitle(prev.Title + " / " + seg.Title)
 			continue
 		}
 
@@ -218,7 +248,7 @@ func (p *ChapterParser) splitLongChapter(content []byte, seg ChapterSegment, max
 
 		title := seg.Title
 		if partNo > 1 {
-			title = fmt.Sprintf("%s（%d）", seg.Title, partNo)
+			title = truncateTitle(fmt.Sprintf("%s（%d）", seg.Title, partNo))
 		}
 
 		subContent := chapterContent[offset : offset+uint64(byteLen)]
@@ -263,7 +293,7 @@ func findRuneSplitLength(data []byte, maxRunes uint32) int {
 }
 
 // getEffectiveLimits 获取作用于该章节的有效 min/max 限制
-// 遍历所有规则，取匹配该章节标题的规则的限制值；如果无匹配，使用默认值
+// 遍历所有规则，取匹配该章节标题的规则的限制值；如果无匹配，使用所有规则中最小的 maxLen 作为安全兜底
 func (p *ChapterParser) getEffectiveLimits(seg ChapterSegment) (uint32, uint32) {
 	minLen := uint32(100)    // 默认值
 	maxLen := uint32(100000) // 默认值
@@ -277,11 +307,92 @@ func (p *ChapterParser) getEffectiveLimits(seg ChapterSegment) (uint32, uint32) 
 			if cr.rule.MaxChapterLen > 0 {
 				maxLen = cr.rule.MaxChapterLen
 			}
-			break
+			return minLen, maxLen
+		}
+	}
+
+	// 没有规则匹配时，使用所有规则中最小的 maxLen 作为安全兜底
+	if len(p.rules) > 0 {
+		for _, cr := range p.rules {
+			if cr.rule.MaxChapterLen > 0 && cr.rule.MaxChapterLen < maxLen {
+				maxLen = cr.rule.MaxChapterLen
+			}
 		}
 	}
 
 	return minLen, maxLen
+}
+
+// getMaxChapterLen 获取所有规则中最小的 max_chapter_len，无规则时返回默认值
+func (p *ChapterParser) getMaxChapterLen() uint32 {
+	maxLen := uint32(100000)
+	for _, cr := range p.rules {
+		if cr.rule.MaxChapterLen > 0 && cr.rule.MaxChapterLen < maxLen {
+			maxLen = cr.rule.MaxChapterLen
+		}
+	}
+	return maxLen
+}
+
+// forceSplitContent 无标题匹配时，按 maxLen 强制切分内容
+func (p *ChapterParser) forceSplitContent(content []byte, maxLen uint32) []ChapterSegment {
+	contentLen := uint64(len(content))
+	if contentLen == 0 {
+		return nil
+	}
+	// 如果内容不超过 maxLen，返回单章
+	if uint64(maxLen) >= uint64(len(content))/3 { // 粗略估计：中文~3字节/字符
+		if countWords(content) <= maxLen {
+			wordCount := countWords(content)
+			byteLen := contentLen
+			if byteLen > uint64(math.MaxUint32) {
+				byteLen = uint64(math.MaxUint32)
+			}
+			return []ChapterSegment{{
+				Title:      "全文",
+				ByteOffset: 0,
+				ByteLength: uint32(byteLen),
+				WordCount:  wordCount,
+			}}
+		}
+	}
+
+	var segments []ChapterSegment
+	offset := uint64(0)
+	partNo := 1
+	for offset < contentLen {
+		byteLen := findRuneSplitLength(content[offset:], maxLen)
+		if byteLen == 0 {
+			break
+		}
+		title := fmt.Sprintf("第%d部分", partNo)
+		segContent := content[offset : offset+uint64(byteLen)]
+		segments = append(segments, ChapterSegment{
+			Title:      truncateTitle(title),
+			ByteOffset: offset,
+			ByteLength: uint32(byteLen),
+			WordCount:  countWords(segContent),
+		})
+		offset += uint64(byteLen)
+		partNo++
+	}
+
+	if len(segments) == 0 {
+		// 兜底：整书作为一章
+		wordCount := countWords(content)
+		byteLen := contentLen
+		if byteLen > uint64(math.MaxUint32) {
+			byteLen = uint64(math.MaxUint32)
+		}
+		segments = []ChapterSegment{{
+			Title:      "全文",
+			ByteOffset: 0,
+			ByteLength: uint32(byteLen),
+			WordCount:  wordCount,
+		}}
+	}
+
+	return segments
 }
 
 // scanTitles 扫描文本中所有章节标题
@@ -369,6 +480,8 @@ func (p *ChapterParser) scanWithRegex(content []byte, re *regexp.Regexp, titleGr
 		if titleGroup > 0 && titleGroup < len(subs) {
 			title = subs[titleGroup]
 		}
+		// 截断超长标题，防止数据库字段溢出
+		title = truncateTitle(title)
 		titleEnd := offset + uint64(lineBytes) + 1
 		matches = append(matches, ChapterMatch{
 			Title:          title,
@@ -383,16 +496,16 @@ func (p *ChapterParser) scanWithRegex(content []byte, re *regexp.Regexp, titleGr
 // matchBuiltin 内置常见章节格式识别
 func (p *ChapterParser) matchBuiltin(content []byte) []ChapterMatch {
 	patterns := []*regexp.Regexp{
-		// 第X章/节/回/卷/篇
-		regexp.MustCompile(`^第[一二三四五六七八九十百千万0-9０-９]+[章章节回卷篇部集]`),
+		// 第X章/节/回/篇/集
+		regexp.MustCompile(`^\s*第[一二三四五六七八九十百千万0-9０-９]+[章节回篇集]`),
 		// Chapter X / Chapter XX
 		regexp.MustCompile(`(?i)^chapter\s+\d+`),
 		// 数字编号: 001, 01, 1.
 		regexp.MustCompile(`^\d{1,4}[.、．\s]`),
-		// 卷/部/集 前缀
-		regexp.MustCompile(`^[卷部集][一二三四五六七八九十0-9]+`),
+		// 卷/部/篇 前缀
+		regexp.MustCompile(`^\s*[卷部篇][一二三四五六七八九十0-9]+`),
 		// 序言/前言/后记/尾声/楔子/番外
-		regexp.MustCompile(`^(序言|前言|后记|尾声|楔子|番外|引子|简介|说明)`),
+		regexp.MustCompile(`^\s*(序言|前言|后记|尾声|楔子|番外|引子|简介|说明)`),
 	}
 
 	scanner := bufio.NewScanner(bytes.NewReader(content))
@@ -413,7 +526,7 @@ func (p *ChapterParser) matchBuiltin(content []byte) []ChapterMatch {
 			if pat.MatchString(trimmed) {
 				titleEnd := offset + uint64(lineBytes) + 1
 				matches = append(matches, ChapterMatch{
-					Title:          trimmed,
+					Title:          truncateTitle(trimmed),
 					ByteOffset:     offset,
 					TitleEndOffset: titleEnd,
 					LineNumber:     lineNum,
@@ -427,6 +540,24 @@ func (p *ChapterParser) matchBuiltin(content []byte) []ChapterMatch {
 }
 
 // 辅助函数
+// safeAddUint32 安全 uint32 加法，溢出时截断到 math.MaxUint32
+func safeAddUint32(a, b uint32) uint32 {
+	sum := uint64(a) + uint64(b)
+	if sum > uint64(math.MaxUint32) {
+		return math.MaxUint32
+	}
+	return uint32(sum)
+}
+
+// truncateTitle 截断章节标题，防止数据库字段溢出
+func truncateTitle(title string) string {
+	runes := []rune(title)
+	if len(runes) > maxChapterTitleLen {
+		return string(runes[:maxChapterTitleLen])
+	}
+	return title
+}
+
 func copyUint32Ptr(v *uint32) *uint32 {
 	if v == nil {
 		return nil
@@ -580,7 +711,21 @@ func compactWhitespace(s string) string {
 	return buf.String()
 }
 
-// countWords 统计字符数（非空字符）
+// decodeToUTF8 检测并转换非 UTF-8 编码（如 GBK/GB2312）到 UTF-8
+func decodeToUTF8(data []byte) []byte {
+	// 已经是有效 UTF-8，直接返回
+	if utf8.Valid(data) {
+		return data
+	}
+	// 尝试 GBK 解码
+	decoder := simplifiedchinese.GBK.NewDecoder()
+	utf8Data, err := decoder.Bytes(data)
+	if err == nil {
+		return utf8Data
+	}
+	// 解码失败，返回原始数据
+	return data
+}
 func countWords(data []byte) uint32 {
 	if len(data) == 0 {
 		return 0

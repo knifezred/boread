@@ -1,16 +1,16 @@
 <script setup lang="tsx">
-import { h, ref, computed, watch } from "vue"
+import { ref, computed, watch } from "vue"
 import {
-    NButton, NDataTable, NDrawer, NDrawerContent, NInput, NSelect, NSpace,
-    NTag, NModal, NPopconfirm, NScrollbar,
+  NButton, NInput, NSelect, NSpace,
+  NTag, NModal, NScrollbar, NCheckbox,
+  NDrawer, NDrawerContent, NSpin, NVirtualList,
 } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
 import {
-    fetchGetChapterList, fetchGetChapterContentByID, fetchUpdateChapterTitle,
-    fetchBatchUpdateChapterTitle, fetchUpdateChapterStatus, fetchDeleteChapter,
-    fetchMergeChapters, fetchFormatChapterNumbers, fetchSaveChapterContent,
+  fetchChapterList,
+  fetchBatchUpdateChapterTitle, fetchUpdateChapterStatus,
+  fetchMergeChapters, fetchFormatChapterNumbers,
 } from "@/service/api"
-import { defaultTransform, useNaivePaginatedTable } from "@/hooks/common/table"
 import { $t } from "@/locales"
 import BookReparseModal from "./book-reparse-modal.vue"
 
@@ -20,161 +20,146 @@ interface Props { bookId: number; bookTitle: string }
 const props = defineProps<Props>()
 const visible = defineModel<boolean>("visible", { default: false })
 
+// ==================== 数据 ====================
+const allChapters = ref<Api.BookManage.BookChapter[]>([])
+const checkedRowKeys = ref<number[]>([])
+const loading = ref(false)
+
+interface VolumeGroup {
+  volumeNo: number | null
+  volumeTitle: string
+  chapters: Api.BookManage.BookChapter[]
+}
+
+/** 展开状态，默认全部展开 */
+const expandedVolumes = ref<Set<number | string>>(new Set())
+
+function toggleVolume(volumeNo: number | null) {
+  const key = volumeNo ?? "__main__"
+  const next = new Set(expandedVolumes.value)
+  if (next.has(key)) next.delete(key); else next.add(key)
+  expandedVolumes.value = next
+}
+
+function isVolumeExpanded(volumeNo: number | null): boolean {
+  return expandedVolumes.value.has(volumeNo ?? "__main__")
+}
+
 // ==================== 搜索 ====================
 const searchTitle = ref("")
 const searchStatus = ref("")
 
-const paginationRef = ref({ page: 1, pageSize: 20 })
-
-const searchParams = computed(() => ({
-  current: paginationRef.value.page || 1,
-  size: paginationRef.value.pageSize || 20,
-  bookId: props.bookId || null,
-  fileId: null,
-  chapterNo: null,
-  title: searchTitle.value || null,
-  status: searchStatus.value || null,
-}))
-
-// ==================== 表格 ====================
-const { columns, data, pagination, loading, getDataByPage } = useNaivePaginatedTable({
-  api: () => fetchGetChapterList(searchParams.value),
-  onPaginationParamsChange: (params) => {
-    paginationRef.value = { page: params.page || 1, pageSize: params.pageSize || 10 }
-  },
-  transform: (response) => defaultTransform(response),
-  columns: () => [
-    { type: "selection", align: "center", width: 48 },
-    {
-      key: "chapterNo", title: $t("page.admin.library.book.chapterNo"), align: "center", width: 90,
-      render: (row: Api.BookManage.BookChapter) => {
-        return h("span", { class: "font-mono" }, `第${String(row.chapterNo).padStart(3, "0")}章`)
-      },
-    },
-    {
-      key: "volumeNo", title: "卷号", align: "center", width: 80,
-      render: (row: Api.BookManage.BookChapter) => {
-        if (!row.volumeNo) return null
-        return h(NTag, { type: "info", size: "small" }, () => row.volumeTitle || `卷${row.volumeNo}`)
-      },
-    },
-    {
-      key: "title", title: $t("page.admin.library.book.chapterTitle"), align: "left",
-      ellipsis: { tooltip: true }, minWidth: 200,
-    },
-    {
-      key: "wordCount", title: $t("page.admin.library.book.wordCount"), align: "center", width: 80,
-    },
-    {
-      key: "status", title: $t("page.admin.library.book.chapterStatus"), align: "center", width: 90,
-      render: (row: Api.BookManage.BookChapter) => {
-        const typeMap: Record<string, NaiveUI.ThemeColor> = { "1": "success", "2": "warning", "3": "error" }
-        const labelMap: Record<string, string> = { "1": "启用", "2": "草稿", "3": "下架" }
-        return h(NTag, { type: typeMap[row.status] || "default", size: "small" }, () => labelMap[row.status] || row.status)
-      },
-    },
-    {
-      key: "updateTime", title: $t("common.updateTime"), align: "center", width: 170,
-    },
-    {
-      key: "operate", title: $t("common.operate"), align: "center", width: 260, fixed: "right",
-      render: (row: Api.BookManage.BookChapter) => (
-        <div class="flex-center gap-4px">
-          <NButton size="tiny" quaternary onClick={() => openContentEdit(row)}>编辑内容</NButton>
-          <NButton size="tiny" quaternary onClick={() => openTitleEdit(row)}>编辑标题</NButton>
-          <NButton size="tiny" quaternary onClick={() => handleToggleStatus(row)}>
-            {row.status === "1" ? "禁用" : "启用"}
-          </NButton>
-          <NPopconfirm onPositiveClick={() => handleDelete(row)}>
-            {{
-              default: () => $t("common.confirmDelete"),
-              trigger: () => <NButton size="tiny" quaternary type="error">{$t("common.delete")}</NButton>,
-            }}
-          </NPopconfirm>
-        </div>
-      ),
-    },
-  ],
+const filteredChapters = computed(() => {
+  let list = allChapters.value
+  if (searchTitle.value) {
+    const kw = searchTitle.value.toLowerCase()
+    list = list.filter(ch => ch.title.toLowerCase().includes(kw))
+  }
+  if (searchStatus.value) {
+    list = list.filter(ch => ch.status === searchStatus.value)
+  }
+  return list
 })
 
+/** 按分卷分组后的目录树 */
+const volumeGroups = computed<VolumeGroup[]>(() => {
+  const groups: VolumeGroup[] = []
+  let currentGroup: VolumeGroup | null = null
+  for (const ch of filteredChapters.value) {
+    if (!currentGroup || currentGroup.volumeNo !== ch.volumeNo) {
+      currentGroup = {
+        volumeNo: ch.volumeNo,
+        volumeTitle: ch.volumeTitle || (ch.volumeNo ? `第${ch.volumeNo}卷` : "正文"),
+        chapters: [],
+      }
+      groups.push(currentGroup)
+    }
+    currentGroup.chapters.push(ch)
+  }
+  return groups
+})
+
+/** 扁平化后的虚拟列表行 */
+interface FlatItem {
+  key: string
+  _type: 'volume' | 'chapter'
+  _volumeNo: number | null
+  _volumeTitle: string
+  _chapterCount: number
+  _expanded: boolean
+  data: Api.BookManage.BookChapter | null
+}
+
+const flattenedItems = computed<FlatItem[]>(() => {
+  const items: FlatItem[] = []
+  for (const group of volumeGroups.value) {
+    const expanded = volumeGroups.value.length <= 1 || isVolumeExpanded(group.volumeNo)
+    items.push({
+      key: `vol-${group.volumeNo ?? '__main__'}`,
+      _type: 'volume',
+      _volumeNo: group.volumeNo,
+      _volumeTitle: group.volumeTitle,
+      _chapterCount: group.chapters.length,
+      _expanded: expanded,
+      data: null,
+    })
+    if (expanded) {
+      for (const ch of group.chapters) {
+        items.push({
+          key: `ch-${ch.id}`,
+          _type: 'chapter',
+          _volumeNo: group.volumeNo,
+          _volumeTitle: group.volumeTitle,
+          _chapterCount: 0,
+          _expanded: true,
+          data: ch,
+        })
+      }
+    }
+  }
+  return items
+})
+
+async function loadAllChapters() {
+  loading.value = true
+  const { data } = await fetchChapterList(props.bookId)
+  if (data) {
+    allChapters.value = data
+    // 重置展开状态：全部展开
+    const groups: VolumeGroup[] = []
+    let currentGroup: VolumeGroup | null = null
+    for (const ch of data) {
+      if (!currentGroup || currentGroup.volumeNo !== ch.volumeNo) {
+        currentGroup = {
+          volumeNo: ch.volumeNo,
+          volumeTitle: ch.volumeTitle || (ch.volumeNo ? `第${ch.volumeNo}卷` : "正文"),
+          chapters: [],
+        }
+        groups.push(currentGroup)
+      }
+      currentGroup.chapters.push(ch)
+    }
+    expandedVolumes.value = new Set(groups.map(g => g.volumeNo ?? "__main__"))
+  }
+  loading.value = false
+}
+
 // ==================== 选中行 ====================
-const checkedRowKeys = ref<number[]>([])
-
-// ==================== 内容编辑 ====================
-const { bool: contentEditVisible, setTrue: openContentEditModal, setFalse: closeContentEditModal } = useBoolean()
-const editingContentChapter = ref<Api.BookManage.BookChapter | null>(null)
-const editingContent = ref("")
-const contentSaving = ref(false)
-
-function openContentEdit(row: Api.BookManage.BookChapter) {
-  editingContentChapter.value = row
-  editingContent.value = ""
-  openContentEditModal()
-  loadChapterContent(row.id)
+function isChecked(chapterId: number): boolean {
+  return checkedRowKeys.value.includes(chapterId)
 }
 
-async function loadChapterContent(chapterId: number) {
-  const { data: contentData, error } = await fetchGetChapterContentByID(chapterId)
-  if (!error && contentData) {
-    editingContent.value = contentData.content
+function toggleCheck(chapterId: number) {
+  const idx = checkedRowKeys.value.indexOf(chapterId)
+  if (idx >= 0) {
+    checkedRowKeys.value.splice(idx, 1)
+  } else {
+    checkedRowKeys.value.push(chapterId)
   }
 }
 
-async function handleSaveContent() {
-  const chapter = editingContentChapter.value
-  if (!chapter) return
-  contentSaving.value = true
-  const { error } = await fetchSaveChapterContent(chapter.id, {
-    bookId: chapter.bookId,
-    content: editingContent.value,
-  })
-  contentSaving.value = false
-  if (!error) {
-    window.$message?.success("内容保存成功")
-    closeContentEditModal()
-    getDataByPage(paginationRef.value.page || 1)
-  }
-}
-
-// ==================== 标题编辑 ====================
-const { bool: titleEditVisible, setTrue: openTitleEditModal, setFalse: closeTitleEditModal } = useBoolean()
-const editingTitleChapter = ref<Api.BookManage.BookChapter | null>(null)
-const editingTitle = ref("")
-
-function openTitleEdit(row: Api.BookManage.BookChapter) {
-  editingTitleChapter.value = row
-  editingTitle.value = row.title
-  openTitleEditModal()
-}
-
-async function handleSaveTitle() {
-  const chapter = editingTitleChapter.value
-  if (!chapter) return
-  const { error } = await fetchUpdateChapterTitle(chapter.id, { title: editingTitle.value })
-  if (!error) {
-    window.$message?.success($t("common.updateSuccess"))
-    closeTitleEditModal()
-    getDataByPage(paginationRef.value.page || 1)
-  }
-}
-
-// ==================== 禁用/启用 ====================
-async function handleToggleStatus(row: Api.BookManage.BookChapter) {
-  const newStatus = row.status === "1" ? "3" : "1"
-  const { error } = await fetchUpdateChapterStatus({ ids: [row.id], status: newStatus })
-  if (!error) {
-    window.$message?.success($t("common.updateSuccess"))
-    getDataByPage(paginationRef.value.page || 1)
-  }
-}
-
-// ==================== 删除 ====================
-async function handleDelete(row: Api.BookManage.BookChapter) {
-  const { error } = await fetchDeleteChapter(row.id)
-  if (!error) {
-    window.$message?.success($t("common.deleteSuccess"))
-    getDataByPage(paginationRef.value.page || 1)
-  }
+function isVolumeAllChecked(group: VolumeGroup): boolean {
+  return group.chapters.length > 0 && group.chapters.every(ch => checkedRowKeys.value.includes(ch.id))
 }
 
 // ==================== 批量禁用/启用 ====================
@@ -186,14 +171,16 @@ async function handleBatchStatus(status: string) {
   const { error } = await fetchUpdateChapterStatus({ ids: checkedRowKeys.value, status })
   if (!error) {
     window.$message?.success($t("common.updateSuccess"))
+    for (const ch of allChapters.value) {
+      if (checkedRowKeys.value.includes(ch.id)) (ch as any).status = status
+    }
     checkedRowKeys.value = []
-    getDataByPage(paginationRef.value.page || 1)
   }
 }
 
 // ==================== 合并章节 ====================
 const { bool: mergeVisible, setTrue: openMergeModal, setFalse: closeMergeModal } = useBoolean()
-const allChapters = ref<Api.BookManage.BookChapter[]>([])
+const allChaptersForMerge = ref<Api.BookManage.BookChapter[]>([])
 const mergeTargetId = ref<number | null>(null)
 const merging = ref(false)
 
@@ -203,11 +190,8 @@ async function openMerge() {
     return
   }
   mergeTargetId.value = null
-  const { data: chapterData } = await fetchGetChapterList({
-    current: 1, size: 9999, bookId: props.bookId || null,
-    fileId: null, chapterNo: null, title: null, status: null,
-  })
-  allChapters.value = chapterData?.records || []
+  // 直接用现有数据，避免额外请求
+  allChaptersForMerge.value = allChapters.value
   openMergeModal()
 }
 
@@ -232,7 +216,7 @@ async function handleMerge() {
     window.$message?.success("合并成功")
     checkedRowKeys.value = []
     closeMergeModal()
-    getDataByPage(paginationRef.value.page || 1)
+    loadAllChapters()
   }
 }
 
@@ -262,7 +246,6 @@ async function handleBatchTitle() {
     window.$message?.success($t("common.updateSuccess"))
     checkedRowKeys.value = []
     closeBatchTitleModal()
-    getDataByPage(paginationRef.value.page || 1)
   }
 }
 
@@ -276,7 +259,7 @@ async function handleFormatNumbers() {
   if (!error) {
     window.$message?.success("格式化成功")
     checkedRowKeys.value = []
-    getDataByPage(paginationRef.value.page || 1)
+    loadAllChapters()
   }
 }
 
@@ -285,7 +268,7 @@ const reparseVisible = ref(false)
 
 function handleReparsed() {
   reparseVisible.value = false
-  getDataByPage(1)
+  loadAllChapters()
 }
 
 // ==================== 生命周期 ====================
@@ -294,7 +277,7 @@ watch(visible, (val) => {
     searchTitle.value = ""
     searchStatus.value = ""
     checkedRowKeys.value = []
-    getDataByPage(1)
+    loadAllChapters()
   }
 })
 
@@ -304,57 +287,121 @@ function closeDrawer() {
 </script>
 
 <template>
-  <NDrawer v-model:show="visible" display-directive="show" :width="960" native-scrollbar>
+  <NDrawer v-model:show="visible" display-directive="show" width="60%" native-scrollbar>
     <NDrawerContent
       :title="`${$t('page.admin.library.book.chapters')} - ${props.bookTitle}`"
-      :native-scrollbar="false"
       closable
       @after-leave="closeDrawer"
     >
-      <!-- 搜索栏 -->
-      <div class="flex items-center gap-12px mb-16px">
-        <NInput
-          v-model:value="searchTitle"
-          placeholder="搜索章节标题"
-          clearable
-          style="width: 240px"
-          size="small"
-        />
-        <NSelect
-          v-model:value="searchStatus"
-          placeholder="全部状态"
-          :options="[
-            { label: '全部', value: '' },
-            { label: '启用', value: '1' },
-            { label: '草稿', value: '2' },
-            { label: '下架', value: '3' },
-          ]"
-          clearable
-          style="width: 130px"
-          size="small"
-        />
-        <NButton size="small" type="primary" ghost @click="getDataByPage(1)">
-          {{ $t("common.search") }}
-        </NButton>
-        <NButton size="small" @click="searchTitle = ''; searchStatus = ''; getDataByPage(1)">
-          {{ $t("common.reset") }}
-        </NButton>
-      </div>
+      <div class="h-full flex flex-col overflow-hidden">
+        <!-- 搜索栏 -->
+        <div class="flex items-center gap-12px mb-16px shrink-0">
+          <NInput
+            v-model:value="searchTitle"
+            placeholder="搜索章节标题"
+            clearable
+            style="width: 240px"
+            size="small"
+          />
+          <NSelect
+            v-model:value="searchStatus"
+            placeholder="全部状态"
+            :options="[
+              { label: '全部', value: '' },
+              { label: '启用', value: '1' },
+              { label: '草稿', value: '2' },
+              { label: '下架', value: '3' },
+            ]"
+            clearable
+            style="width: 130px"
+            size="small"
+          />
+          <NButton size="small" type="primary" ghost @click="loadAllChapters">
+            {{ $t("common.search") }}
+          </NButton>
+          <NButton size="small" @click="searchTitle = ''; searchStatus = ''; loadAllChapters()">
+            {{ $t("common.reset") }}
+          </NButton>
+          <span class="text-xs text-gray-400 ml-auto">
+            共 {{ allChapters.length }} 章
+          </span>
+        </div>
 
-      <!-- 章节表格 -->
-      <NDataTable
-        v-model:checked-row-keys="checkedRowKeys"
-        :columns="columns"
-        :data="data"
-        size="small"
-        :loading="loading"
-        :pagination="pagination"
-        :row-key="(row: Record<string, any>) => row.id"
-        remote
-        :flex-height="true"
-        min-height="400"
-        :scroll-x="1200"
-      />
+        <!-- 章节列表（虚拟滚动 + 分卷树） -->
+        <div class="flex-1" style="position: relative; min-height: 0;">
+          <!-- 加载中 -->
+          <div v-if="loading" class="flex items-center justify-center h-full">
+            <NSpin />
+          </div>
+
+          <!-- 空状态 -->
+          <div
+            v-else-if="allChapters.length === 0"
+            class="flex items-center justify-center h-full text-sm text-gray-400"
+          >
+            暂无章节
+          </div>
+
+          <!-- 虚拟列表 -->
+          <NVirtualList
+            v-else
+            :items="flattenedItems"
+            :item-size="38"
+            key-field="key"
+            class="h-full"
+          >
+            <template #default="{ item }">
+              <template v-if="item._type === 'volume'">
+                <!-- @ts-ignore -->
+                <div
+                  class="flex items-center gap-2 px-3 py-2 cursor-pointer select-none text-xs font-medium uppercase tracking-wider bg-[#fafafa] dark:bg-[#1e1e1e] border-b border-[#f0f0f0] dark:border-[#333]"
+                >
+                  <NCheckbox
+                    :checked="isVolumeAllChecked({ volumeNo: item._volumeNo, volumeTitle: item._volumeTitle, chapters: flattenedItems.filter(f => f._type === 'chapter' && f._volumeNo === item._volumeNo).map(f => (f as any).data) })"
+                    :indeterminate="(() => { const chs = flattenedItems.filter(f => f._type === 'chapter' && f._volumeNo === item._volumeNo).map(f => (f as any).data as Api.BookManage.BookChapter); return chs.some(c => checkedRowKeys.includes(c.id)) && !chs.every(c => checkedRowKeys.includes(c.id)) })()"
+                    @update:checked="() => { const chs = flattenedItems.filter(f => f._type === 'chapter' && f._volumeNo === item._volumeNo).map(f => (f as any).data as Api.BookManage.BookChapter); const allChecked = chs.every(c => checkedRowKeys.includes(c.id)); for (const c of chs) { const i = checkedRowKeys.indexOf(c.id); if (allChecked && i >= 0) checkedRowKeys.splice(i, 1); else if (!allChecked && i < 0) checkedRowKeys.push(c.id) } }"
+                  />
+                  <span
+                    class="text-[10px] transition-transform duration-200"
+                    :class="isVolumeExpanded(item._volumeNo) ? 'rotate-90' : ''"
+                    @click="toggleVolume(item._volumeNo)"
+                  >
+                    ▸
+                  </span>
+                  <span
+                    class="text-gray-500 dark:text-gray-400"
+                    :class="isVolumeExpanded(item._volumeNo) ? 'text-primary' : ''"
+                    @click="toggleVolume(item._volumeNo)"
+                  >
+                    {{ item._volumeTitle }}
+                  </span>
+                  <span class="text-[10px] opacity-50">({{ item._chapterCount }}章)</span>
+                </div>
+              </template>
+              <template v-else>
+                <!-- @ts-ignore -->
+                <div
+                  class="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors duration-200 text-sm border-b border-[#f5f5f5] dark:border-[#2a2a2a] hover:bg-[#fafafa] dark:hover:bg-[#252525]"
+                >
+                  <!-- @ts-ignore -->
+                  <NCheckbox
+                    :checked="isChecked((item.data as any).id)"
+                    @update:checked="toggleCheck((item.data as any).id)"
+                  />
+                  <!-- @ts-ignore -->
+                  <span class="text-xs shrink-0 w-8 text-right text-gray-400">
+                    {{ (item.data as any).chapterNo }}
+                  </span>
+                  <!-- @ts-ignore -->
+                  <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                    {{ (item.data as any).title }}
+                  </span>
+                </div>
+              </template>
+            </template>
+          </NVirtualList>
+        </div>
+      </div>
 
       <!-- 底部操作栏 -->
       <template #footer>
@@ -384,39 +431,6 @@ function closeDrawer() {
         </div>
       </template>
 
-      <!-- 内容编辑弹窗 -->
-      <NModal
-        v-model:show="contentEditVisible" preset="card" title="内容编辑" style="width: 800px"
-        :bordered="false" :segmented="false"
-      >
-        <div class="mb-12px text-14px font-medium">
-          {{ editingContentChapter?.title }}
-        </div>
-        <NInput
-          v-model:value="editingContent"
-          type="textarea"
-          :autosize="{ minRows: 15, maxRows: 30 }"
-          placeholder="请输入章节内容"
-        />
-        <template #footer>
-          <NSpace justify="end">
-            <NButton @click="closeContentEditModal">{{ $t("common.cancel") }}</NButton>
-            <NButton type="primary" :loading="contentSaving" @click="handleSaveContent">
-              保存内容
-            </NButton>
-          </NSpace>
-        </template>
-      </NModal>
-
-      <!-- 标题编辑弹窗 -->
-      <NModal
-        v-model:show="titleEditVisible" preset="dialog" title="编辑标题"
-        positive-text="确认" negative-text="取消"
-        @positive-click="handleSaveTitle" @negative-click="closeTitleEditModal"
-      >
-        <NInput v-model:value="editingTitle" :placeholder="$t('page.admin.library.book.chapterTitle')" />
-      </NModal>
-
       <!-- 合并弹窗 -->
       <NModal v-model:show="mergeVisible" preset="card" title="合并章节" style="width: 560px" :bordered="false">
         <div class="mb-12px text-14px">
@@ -424,7 +438,7 @@ function closeDrawer() {
         </div>
         <NScrollbar style="max-height: 360px">
           <div
-            v-for="ch in allChapters" :key="ch.id"
+            v-for="ch in allChaptersForMerge" :key="ch.id"
             class="flex items-center gap-8px py-6px px-8px rounded-4px cursor-pointer hover:bg-[#f5f5f5]"
             :class="{ 'bg-[#e6f7ff]': mergeTargetId === ch.id }"
             @click="mergeTargetId = ch.id"
