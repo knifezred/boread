@@ -218,3 +218,115 @@ type ScanPathResponse struct {
 	Failed   int          `json:"failed"`
 	Results  []ScanResult `json:"results"`
 }
+
+// ==================== 笔记/划线 ====================
+
+// NoteRequest 创建/更新笔记请求
+type NoteRequest struct {
+	BookID         uint64  `json:"bookId" binding:"required"`
+	ChapterID      *uint64 `json:"chapterId"`
+	NoteType       string  `json:"noteType" binding:"required,oneof=1 2 3"`
+	SelectedText   *string `json:"selectedText"`
+	StartOffset    *uint32 `json:"startOffset"`
+	EndOffset      *uint32 `json:"endOffset"`
+	HighlightColor *string `json:"highlightColor"`
+	Content        *string `json:"content"`
+	Visibility     string  `json:"visibility" binding:"oneof=1 2"`
+}
+
+// NoteResponse 笔记响应
+type NoteResponse struct {
+	model.ReaderNote
+	ReaderName   *string `json:"readerName,omitempty"`
+	BookTitle    *string `json:"bookTitle,omitempty"`
+	ChapterTitle *string `json:"chapterTitle,omitempty"`
+	LikeCount    int64   `json:"likeCount"`
+	Liked        bool    `json:"liked"`
+}
+
+// NoteSearch 笔记搜索
+type NoteSearch struct {
+	PageRequest
+	BookID    *uint64 `json:"bookId"`
+	ChapterID *uint64 `json:"chapterId"`
+	NoteType  string  `json:"noteType"`
+}
+
+// ==================== 书评 ====================
+
+// ReviewRequest 创建/更新书评请求
+type ReviewRequest struct {
+	BookID  uint64  `json:"bookId" binding:"required"`
+	Rating  *uint8  `json:"rating" binding:"omitempty,min=1,max=5"`
+	Title   *string `json:"title"`
+	Content string  `json:"content" binding:"required"`
+}
+
+// ReviewResponse 书评响应
+type ReviewResponse struct {
+	model.BookReview
+	ReaderName *string `json:"readerName,omitempty"`
+	BookTitle  *string `json:"bookTitle,omitempty"`
+	LikeCount  int64   `json:"likeCount"`
+	Liked      bool    `json:"liked"`
+}
+
+// ReviewSearch 书评搜索
+type ReviewSearch struct {
+	PageRequest
+	BookID uint64 `json:"bookId"`
+	Status string `json:"status"`
+}
+
+// ==================== 章节评论 ====================
+
+// CommentRequest 创建章节评论请求
+type CommentRequest struct {
+	BookID    uint64  `json:"bookId" binding:"required"`
+	ChapterID uint64  `json:"chapterId" binding:"required"`
+	ParentID  uint64  `json:"parentId"`
+	ReplyToID *uint64 `json:"replyToId"`
+	Content   string  `json:"content" binding:"required"`
+}
+
+// CommentResponse 章节评论响应
+type CommentResponse struct {
+	model.BookChapterComment
+	ReaderName  *string           `json:"readerName,omitempty"`
+	ReplyToName *string           `json:"replyToName,omitempty"`
+	LikeCount   int64             `json:"likeCount"`
+	Liked       bool              `json:"liked"`
+	Replies     []CommentResponse `json:"replies,omitempty"`
+}
+
+// CommentSearch 章节评论搜索
+type CommentSearch struct {
+	PageRequest
+	ChapterID uint64 `json:"chapterId"`
+	ParentID  uint64 `json:"parentId"`
+}
+
+// ==================== 点赞 ====================
+
+// LikeRequest 点赞请求
+type LikeRequest struct {
+	TargetType string `json:"targetType" binding:"required,oneof=1 2 3"`
+	TargetID   uint64 `json:"targetId" binding:"required"`
+}
+
+// LikeResponse 点赞响应
+type LikeResponse struct {
+	Liked bool  `json:"liked"`
+	Count int64 `json:"count"`
+}
+
+// LikeStatusRequest 批量查询点赞状态请求
+type LikeStatusRequest struct {
+	Targets []LikeTarget `json:"targets" binding:"required,min=1"`
+}
+
+// LikeTarget 点赞目标
+type LikeTarget struct {
+	TargetType string `json:"targetType"`
+	TargetID   uint64 `json:"targetId"`
+}

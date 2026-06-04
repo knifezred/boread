@@ -8,6 +8,7 @@
 --   3. 笔记/划线合并为 reader_note, note_type 区分类型
 --   4. 书评独立于章节评论, 支持评分 1-5 星
 --   5. 章节评论楼中楼, parent_id 自关联
+--   6. 点赞表 user_like 统一管理书评/章评/笔记的点赞, target_type 区分类型
 -- =====================================================================
 
 USE `boread`;
@@ -104,8 +105,6 @@ CREATE TABLE `book_review` (
   `rating`        TINYINT UNSIGNED NULL    DEFAULT NULL             COMMENT '评分 1-5 星',
   `title`         VARCHAR(255)    NULL     DEFAULT NULL             COMMENT '书评标题',
   `content`       TEXT            NOT NULL                          COMMENT '书评内容',
-  `like_count`    INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '点赞数',
-  `reply_count`   INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '回复数 (冗余)',
   `owner_id`      BIGINT UNSIGNED NOT NULL                          COMMENT '创建者 id (数据权限)',
   `dept_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建者所属部门 id',
   `status`        CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-正常, 2-隐藏, 3-审核中',
@@ -124,11 +123,11 @@ CREATE TABLE `book_review` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='书评表';
 
 -- ---------------------------------------------------------------------
--- Table: chapter_comment (章节评论)
+-- Table: book_chapter_comment (章节评论)
 -- 楼中楼: parent_id 自关联
 -- ---------------------------------------------------------------------
-DROP TABLE IF EXISTS `chapter_comment`;
-CREATE TABLE `chapter_comment` (
+DROP TABLE IF EXISTS `book_chapter_comment`;
+CREATE TABLE `book_chapter_comment` (
   `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
   `book_id`       BIGINT UNSIGNED NOT NULL                          COMMENT '书籍 id (冗余, 便于按书查所有评论)',
   `chapter_id`    BIGINT UNSIGNED NOT NULL                          COMMENT '章节 id',
@@ -136,7 +135,6 @@ CREATE TABLE `chapter_comment` (
   `parent_id`     BIGINT UNSIGNED NOT NULL DEFAULT 0                COMMENT '父评论 id (0=顶层)',
   `reply_to_id`   BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '回复的读者 id (@某人)',
   `content`       TEXT            NOT NULL                          COMMENT '评论内容',
-  `like_count`    INT UNSIGNED    NOT NULL DEFAULT 0                COMMENT '点赞数',
   `owner_id`      BIGINT UNSIGNED NOT NULL                          COMMENT '创建者 id (数据权限)',
   `dept_id`       BIGINT UNSIGNED NULL     DEFAULT NULL             COMMENT '创建者所属部门 id',
   `status`        CHAR(1)         NOT NULL DEFAULT '1'              COMMENT '状态: 1-正常, 2-隐藏, 3-审核中',
@@ -154,3 +152,21 @@ CREATE TABLE `chapter_comment` (
   KEY `idx_dept_id` (`dept_id`),
   KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='章节评论表';
+
+-- ---------------------------------------------------------------------
+-- Table: reader_like (点赞)
+-- target_type 区分点赞目标类型, 取消点赞走软删除 (deleted_at)
+-- ---------------------------------------------------------------------
+DROP TABLE IF EXISTS `reader_like`;
+CREATE TABLE `reader_like` (
+  `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT          COMMENT '主键 id',
+  `reader_id`     BIGINT UNSIGNED NOT NULL                          COMMENT '点赞者 id',
+  `target_type`   CHAR(1)         NOT NULL                          COMMENT '点赞目标类型: 1-书评, 2-章评, 3-笔记',
+  `target_id`     BIGINT UNSIGNED NOT NULL                          COMMENT '点赞目标 id',
+  `create_time`   DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `deleted_at`    DATETIME(3)     NULL     DEFAULT NULL             COMMENT '软删除时间 (取消点赞)',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_reader_target` (`reader_id`, `target_type`, `target_id`),
+  KEY `idx_target` (`target_type`, `target_id`),
+  KEY `idx_deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='点赞表';

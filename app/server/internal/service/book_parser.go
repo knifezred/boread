@@ -99,8 +99,8 @@ func (p *ChapterParser) Parse(content []byte) *ParseResult {
 	// 2. 按标题位置切分章节
 	segments := p.buildSegments(content, rawMatches)
 
-	// 3. 应用 min_chapter_len / max_chapter_len 过滤
-	segments = p.filterByLength(segments)
+	// 3. 应用 min_chapter_len / max_chapter_len 过滤和拆分
+	segments = p.filterByLength(content, segments)
 
 	return &ParseResult{Chapters: segments}
 }
@@ -161,44 +161,105 @@ func (p *ChapterParser) buildSegments(content []byte, matches []ChapterMatch) []
 	return segments
 }
 
-// filterByLength 根据每个规则的 min_chapter_len / max_chapter_len 过滤章节
-// 太短的章节（目录/导航行）合并到上一章，太长的章节保持原样
-func (p *ChapterParser) filterByLength(segments []ChapterSegment) []ChapterSegment {
+// filterByLength 根据每个规则的 min_chapter_len / max_chapter_len 过滤/拆分章节
+// 太短的章节（目录/导航行）合并到上一章，太长的章节自动拆分为多章
+func (p *ChapterParser) filterByLength(content []byte, segments []ChapterSegment) []ChapterSegment {
 	if len(segments) <= 1 {
 		return segments
 	}
 
-	// 按规则匹配章节：遍历规则，对符合条件的章节标记过滤
-	// 简化策略：对所有章节统一应用规则链中的最严格限制
 	result := make([]ChapterSegment, 0, len(segments))
 
 	for i, seg := range segments {
-		// 获取匹配该章节的对应规则的 min/max
-		// 使用分组匹配：找到该章节所属的匹配规则
 		minLen, maxLen := p.getEffectiveLimits(seg)
 
 		// 检查是否过短（跳过太短的章节，并入上一章）
-		// 但跳过长度过滤的条件：seg.ByteLength < minLen 且不是第一章
 		if seg.ByteLength < minLen && i > 0 && minLen > 0 {
-			// 合并到上一章
 			prev := &result[len(result)-1]
 			prev.ByteLength += seg.ByteLength
 			prev.WordCount += seg.WordCount
-			// 保留标题（追加显示）
 			prev.Title = prev.Title + " / " + seg.Title
 			continue
 		}
 
-		// 检查是否过长（不截断，仅标记）
-		// 如果超过 max_len，保留但记录
-		if seg.ByteLength > maxLen && maxLen > 0 {
-			// 超过上限，保持原样（强制按当前标题分割，但记录异常）
+		// 检查是否过长，超过 max_chapter_len 则自动拆分
+		if seg.WordCount > maxLen && maxLen > 0 {
+			splitSegs := p.splitLongChapter(content, seg, maxLen)
+			result = append(result, splitSegs...)
+			continue
 		}
 
 		result = append(result, seg)
 	}
 
 	return result
+}
+
+// splitLongChapter 将超过 max_chapter_len 的长章节拆分为多个子章节
+// 拆分后的子章节标题追加 （2）（3）... 后缀
+func (p *ChapterParser) splitLongChapter(content []byte, seg ChapterSegment, maxLen uint32) []ChapterSegment {
+	start := seg.ByteOffset
+	end := start + uint64(seg.ByteLength)
+	if end > uint64(len(content)) {
+		end = uint64(len(content))
+	}
+	chapterContent := content[start:end]
+
+	var splits []ChapterSegment
+	partNo := 1
+	offset := uint64(0)
+
+	for offset < uint64(len(chapterContent)) {
+		// 计算当前分片能包含多少字符（不超过 maxLen）
+		byteLen := findRuneSplitLength(chapterContent[offset:], maxLen)
+		if byteLen == 0 {
+			break
+		}
+
+		title := seg.Title
+		if partNo > 1 {
+			title = fmt.Sprintf("%s（%d）", seg.Title, partNo)
+		}
+
+		subContent := chapterContent[offset : offset+uint64(byteLen)]
+		splits = append(splits, ChapterSegment{
+			Title:       title,
+			VolumeNo:    copyUint32Ptr(seg.VolumeNo),
+			VolumeTitle: copyStringPtr(seg.VolumeTitle),
+			ByteOffset:  start + offset,
+			ByteLength:  uint32(byteLen),
+			WordCount:   countWords(subContent),
+		})
+
+		offset += uint64(byteLen)
+		partNo++
+	}
+
+	// 防止空结果（理论上不会发生）
+	if len(splits) == 0 {
+		splits = append(splits, seg)
+	}
+
+	return splits
+}
+
+// findRuneSplitLength 计算从 data 开头起最多 maxRunes 个字符所占的字节数
+// 用于在文本中找到合适的拆分边界
+func findRuneSplitLength(data []byte, maxRunes uint32) int {
+	var count uint32
+	var pos int
+	for pos < len(data) {
+		_, size := utf8.DecodeRune(data[pos:])
+		if size <= 0 {
+			break
+		}
+		count++
+		pos += size
+		if count >= maxRunes {
+			return pos
+		}
+	}
+	return len(data)
 }
 
 // getEffectiveLimits 获取作用于该章节的有效 min/max 限制

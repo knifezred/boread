@@ -169,6 +169,14 @@ func (r *BookChapterRepository) GetLatestByBookID(ctx context.Context, bookID ui
 	return &m, nil
 }
 
+func (r *BookChapterRepository) GetByID(ctx context.Context, id uint64) (*model.BookChapter, error) {
+	var m model.BookChapter
+	if err := r.db.WithContext(ctx).First(&m, id).Error; err != nil {
+		return nil, err
+	}
+	return &m, nil
+}
+
 func (r *BookChapterRepository) DeleteByBookID(ctx context.Context, bookID uint64) error {
 	return r.db.WithContext(ctx).Where("book_id = ?", bookID).Delete(&model.BookChapter{}).Error
 }

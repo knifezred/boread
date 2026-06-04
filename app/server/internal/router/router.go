@@ -51,6 +51,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookFilterRuleRepo := repository.NewBookContentFilterRuleRepository(db)
 	readerBookshelfRepo := repository.NewReaderBookshelfRepository(db)
 	readerReadProgressRepo := repository.NewReaderReadProgressRepository(db)
+	readerNoteRepo := repository.NewReaderNoteRepository(db)
+	bookReviewRepo := repository.NewBookReviewRepository(db)
+	bookCommentRepo := repository.NewBookChapterCommentRepository(db)
+	readerLikeRepo := repository.NewReaderLikeRepository(db)
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, bookChapterRuleRepo, db)
@@ -65,6 +69,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo, bookChapterRepo)
 	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookChapterRuleRelRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
 	readerSvc := service.NewReaderService(db, readerBookshelfRepo, readerReadProgressRepo, bookRepo, bookChapterRepo)
+	bookSocialSvc := service.NewBookSocialService(db, readerNoteRepo, bookReviewRepo, bookCommentRepo, readerLikeRepo, bookRepo, bookChapterRepo, userRepo)
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
@@ -79,6 +84,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookHandler := v1.NewBookHandler(bookSvc)
 	bookFileHandler := v1.NewBookFileHandler(bookFileSvc)
 	readerHandler := v1.NewReaderHandler(readerSvc)
+	noteHandler := v1.NewNoteHandler(bookSocialSvc)
+	reviewHandler := v1.NewReviewHandler(bookSocialSvc)
+	commentHandler := v1.NewCommentHandler(bookSocialSvc)
+	likeHandler := v1.NewLikeHandler(bookSocialSvc)
 
 	api := r.Group("/api")
 	{
@@ -219,6 +228,32 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			// --- Reader Progress ---
 			manage.PUT("/reader/progress/:bookId", readerHandler.ReportProgress)
 			manage.GET("/reader/progress/:bookId", readerHandler.GetProgress)
+
+			// --- Book Social: Reader Note ---
+			manage.POST("/reader/note", noteHandler.CreateNote)
+			manage.PUT("/reader/note/:id", noteHandler.UpdateNote)
+			manage.DELETE("/reader/note/:id", noteHandler.DeleteNote)
+			manage.GET("/reader/note/:id", noteHandler.GetNote)
+			manage.POST("/reader/note/page", noteHandler.PageNote)
+			manage.GET("/reader/note/book/:bookId", noteHandler.ListNotesByBook)
+
+			// --- Book Social: Book Review ---
+			manage.POST("/book-review", reviewHandler.CreateReview)
+			manage.PUT("/book-review/:id", reviewHandler.UpdateReview)
+			manage.DELETE("/book-review/:id", reviewHandler.DeleteReview)
+			manage.GET("/book-review/:id", reviewHandler.GetReview)
+			manage.POST("/book-review/page", reviewHandler.PageReview)
+
+			// --- Book Social: Chapter Comment ---
+			manage.POST("/book/comment", commentHandler.CreateComment)
+			manage.DELETE("/book/comment/:id", commentHandler.DeleteComment)
+			manage.GET("/book/comment/:id", commentHandler.GetComment)
+			manage.POST("/book/comment/page", commentHandler.PageComment)
+
+			// --- Book Social: Like ---
+			manage.POST("/like/toggle", likeHandler.ToggleLike)
+			manage.POST("/like/status", likeHandler.GetLikeStatus)
+			manage.GET("/like/count/:targetType/:targetId", likeHandler.CountLikes)
 		}
 	}
 
