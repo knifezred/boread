@@ -26,7 +26,7 @@ func NewBookCategoryHandler(svc *service.BookCategoryService) *BookCategoryHandl
 // @Security  BearerAuth
 // @Produce   json
 // @Success  200  {object}  response.Response{data=[]dto.CategoryNode}
-// @Router   /api/manage/book-category/tree [get]
+// @Router   /api/book/category/tree [get]
 func (h *BookCategoryHandler) Tree(c *gin.Context) {
 	tree, err := h.svc.Tree(c.Request.Context())
 	if err != nil {
@@ -43,7 +43,7 @@ func (h *BookCategoryHandler) Tree(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "分类ID"
 // @Success  200  {object}  response.Response{data=model.BookCategory}
-// @Router   /api/manage/book-category/{id} [get]
+// @Router   /api/book/category/{id} [get]
 func (h *BookCategoryHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -66,7 +66,7 @@ func (h *BookCategoryHandler) GetByID(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.CategoryRequest  true  "分类"
 // @Success  200  {object}  response.Response{data=model.BookCategory}
-// @Router   /api/manage/book-category [post]
+// @Router   /api/book/category [post]
 func (h *BookCategoryHandler) Create(c *gin.Context) {
 	var req dto.CategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -90,7 +90,7 @@ func (h *BookCategoryHandler) Create(c *gin.Context) {
 // @Param    id    path  int                true  "分类ID"
 // @Param    body  body  dto.CategoryRequest  true  "分类"
 // @Success  200  {object}  response.Response{data=model.BookCategory}
-// @Router   /api/manage/book-category/{id} [put]
+// @Router   /api/book/category/{id} [put]
 func (h *BookCategoryHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -117,7 +117,7 @@ func (h *BookCategoryHandler) Update(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "分类ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book-category/{id} [delete]
+// @Router   /api/book/category/{id} [delete]
 func (h *BookCategoryHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -139,7 +139,7 @@ func (h *BookCategoryHandler) Delete(c *gin.Context) {
 // @Produce   json
 // @Param     body  body  dto.CategorySearch  true  "搜索参数"
 // @Success   200      {object}  response.Response{data=dto.PageResponse{records=[]dto.CategoryNode}}
-// @Router   /api/manage/book-category/page [post]
+// @Router   /api/book/category/page [post]
 func (h *BookCategoryHandler) Page(c *gin.Context) {
 	var req dto.CategorySearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -171,7 +171,7 @@ func mapCategoryErr(err error) int {
 // @Tags      book-category
 // @Produce   json
 // @Success  200  {object}  response.Response{data=[]dto.HotCategoryItem}
-// @Router   /api/book-category/hot [get]
+// @Router   /api/book/category/hot [get]
 func (h *BookCategoryHandler) HotList(c *gin.Context) {
 	items, err := h.svc.GetHotCategories(c.Request.Context())
 	if err != nil {

@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { NButton, NSpin } from "naive-ui";
-import { fetchGetBook, fetchGetChapterContent } from "@/service/api";
+import { fetchGetBook, fetchGetChapterContent, fetchReportReadEvent } from "@/service/api";
 import { useBoolean } from "@sa/hooks";
 import { $t } from "@/locales";
 import { formatWordCount } from "@/utils/book";
@@ -24,6 +24,7 @@ const shiftingMore = ref(false);
 const bookInfo = ref<Api.BookManage.Book | null>(null);
 
 interface ChapterItem {
+  id: number;
   chapterNo: number;
   title: string;
   content: string;
@@ -65,6 +66,7 @@ async function loadOneChapter(no: number): Promise<ChapterItem | null> {
     const { data } = await fetchGetChapterContent(bookId, String(no));
     if (!data) return null;
     return {
+      id: data.id,
       chapterNo: no,
       title: data.title,
       content: data.content || "",
@@ -203,11 +205,97 @@ onMounted(async () => {
 
   const startChapter = Number(route.query.chapterNo) || 1;
   await initWindow(startChapter);
+  startHeartbeat();
 });
 
 onBeforeUnmount(() => {
   sentinelObserver?.disconnect();
+  stopHeartbeat();
 });
+
+// ===================== 阅读事件追踪(心跳) =====================
+const readSessionId = ref("");
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+let lastBeatTime = 0;
+const curChapterId = ref(0);
+
+function genUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function getCenterChapterId(): number {
+  const ch = sortedChapters.value[1] || sortedChapters.value[0];
+  return ch?.id || 0;
+}
+
+function reportReadBeat(chapterId: number, durationSec: number) {
+  if (!chapterId || !bookId) return;
+  fetchReportReadEvent({
+    bookId: Number(bookId),
+    chapterId,
+    sessionId: readSessionId.value,
+    durationSec,
+    deviceType:
+      /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "mobile" : "web",
+  }).catch(() => {});
+}
+
+function heartbeatTick() {
+  const now = Date.now();
+  const durationSec = Math.max(1, Math.round((now - lastBeatTime) / 1000));
+  const chId = getCenterChapterId();
+  if (chId && durationSec > 0) {
+    reportReadBeat(chId, durationSec);
+    curChapterId.value = chId;
+  }
+  lastBeatTime = now;
+}
+
+function startHeartbeat() {
+  readSessionId.value = genUUID();
+  lastBeatTime = Date.now();
+  curChapterId.value = getCenterChapterId();
+  heartbeatTimer = setInterval(heartbeatTick, 30000);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+}
+
+function stopHeartbeat() {
+  if (heartbeatTimer) {
+    const now = Date.now();
+    const durationSec = Math.max(1, Math.round((now - lastBeatTime) / 1000));
+    const chId = getCenterChapterId();
+    if (chId && durationSec > 0) {
+      reportReadBeat(chId, durationSec);
+    }
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+}
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    const now = Date.now();
+    const durationSec = Math.max(1, Math.round((now - lastBeatTime) / 1000));
+    const chId = getCenterChapterId();
+    if (chId && durationSec > 0) {
+      reportReadBeat(chId, durationSec);
+    }
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
+  } else {
+    lastBeatTime = Date.now();
+    if (!heartbeatTimer) {
+      heartbeatTimer = setInterval(heartbeatTick, 30000);
+    }
+  }
+}
 </script>
 
 <template>

@@ -35,7 +35,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -73,7 +73,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.LoginRequest"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
@@ -83,13 +83,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.LoginResponse"
+                                            "$ref": "#/definitions/dto.LoginResponse"
                                         }
                                     }
                                 }
@@ -119,13 +119,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.MenuResponse"
+                                            "$ref": "#/definitions/dto.MenuResponse"
                                         }
                                     }
                                 }
@@ -155,13 +155,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.UserInfoResponse"
+                                            "$ref": "#/definitions/dto.UserInfoResponse"
                                         }
                                     }
                                 }
@@ -171,7 +171,57 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/book-category": {
+        "/api/book": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "新增书籍",
+                "parameters": [
+                    {
+                        "description": "书籍",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BookResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/category": {
             "post": {
                 "security": [
                     {
@@ -195,7 +245,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.CategoryRequest"
+                            "$ref": "#/definitions/dto.CategoryRequest"
                         }
                     }
                 ],
@@ -205,13 +255,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.BookCategory"
+                                            "$ref": "#/definitions/model.BookCategory"
                                         }
                                     }
                                 }
@@ -221,7 +271,41 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/book-category/page": {
+        "/api/book/category/hot": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-category"
+                ],
+                "summary": "热门分类列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.HotCategoryItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/category/page": {
             "post": {
                 "security": [
                     {
@@ -245,7 +329,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.CategorySearch"
+                            "$ref": "#/definitions/dto.CategorySearch"
                         }
                     }
                 ],
@@ -255,7 +339,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -263,7 +347,7 @@ const docTemplate = `{
                                         "data": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                                    "$ref": "#/definitions/dto.PageResponse"
                                                 },
                                                 {
                                                     "type": "object",
@@ -271,7 +355,7 @@ const docTemplate = `{
                                                         "records": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/boread_internal_dto.CategoryNode"
+                                                                "$ref": "#/definitions/dto.CategoryNode"
                                                             }
                                                         }
                                                     }
@@ -286,7 +370,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/book-category/tree": {
+        "/api/book/category/tree": {
             "get": {
                 "security": [
                     {
@@ -306,7 +390,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -314,7 +398,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_dto.CategoryNode"
+                                                "$ref": "#/definitions/dto.CategoryNode"
                                             }
                                         }
                                     }
@@ -325,7 +409,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/book-category/{id}": {
+        "/api/book/category/{id}": {
             "get": {
                 "security": [
                     {
@@ -354,13 +438,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.BookCategory"
+                                            "$ref": "#/definitions/model.BookCategory"
                                         }
                                     }
                                 }
@@ -399,7 +483,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.CategoryRequest"
+                            "$ref": "#/definitions/dto.CategoryRequest"
                         }
                     }
                 ],
@@ -409,13 +493,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.BookCategory"
+                                            "$ref": "#/definitions/model.BookCategory"
                                         }
                                     }
                                 }
@@ -450,13 +534,2885 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
             }
         },
-        "/api/manage/book-tag": {
+        "/api/book/chapter-rule": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "创建章节识别规则",
+                "parameters": [
+                    {
+                        "description": "规则",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChapterRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BookChapterRule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/chapter-rule/bind": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "为书籍绑定章节识别规则",
+                "parameters": [
+                    {
+                        "description": "绑定参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChapterRuleBindRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChapterRuleBindResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/chapter-rule/bind/{bookId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "获取书籍绑定的章节识别规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChapterRuleBindResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "解绑书籍的章节识别规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/chapter-rule/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "章节识别规则分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChapterRuleSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/chapter-rule/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "章节识别规则详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BookChapterRule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "更新章节识别规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "规则",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChapterRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BookChapterRule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-chapter-rule"
+                ],
+                "summary": "删除章节识别规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/chapter/list": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "章节列表",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChapterListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ChapterResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/chapter/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "章节分页列表",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChapterSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character"
+                ],
+                "summary": "创建角色",
+                "parameters": [
+                    {
+                        "description": "角色参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CharacterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CharacterResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/book/{bookId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character"
+                ],
+                "summary": "按书查询角色列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.CharacterResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character"
+                ],
+                "summary": "分页查询角色",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CharacterSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/rel": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character-rel"
+                ],
+                "summary": "创建角色关系",
+                "parameters": [
+                    {
+                        "description": "关系参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CharacterRelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CharacterRelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/rel/book/{bookId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character-rel"
+                ],
+                "summary": "查询某本书所有角色关系",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.CharacterRelResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/rel/character/{characterId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character-rel"
+                ],
+                "summary": "查询角色所有关系",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "characterId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.CharacterRelResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/rel/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character-rel"
+                ],
+                "summary": "获取角色关系详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "关系ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CharacterRelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character-rel"
+                ],
+                "summary": "删除角色关系",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "关系ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/character/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character"
+                ],
+                "summary": "获取角色详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CharacterResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character"
+                ],
+                "summary": "更新角色",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "角色参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CharacterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CharacterResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-character"
+                ],
+                "summary": "删除角色",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/comment": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-comment"
+                ],
+                "summary": "创建章节评论",
+                "parameters": [
+                    {
+                        "description": "评论参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CommentResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/comment/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-comment"
+                ],
+                "summary": "分页查询评论",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CommentSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/comment/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-comment"
+                ],
+                "summary": "获取评论详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CommentResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-comment"
+                ],
+                "summary": "删除章节评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/confirm-import": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "确认入库（匹配或创建书籍、写入章节索引）",
+                "parameters": [
+                    {
+                        "description": "确认入库参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConfirmImportRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ConfirmImportResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/file/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "文件记录分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.FileSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/filter-rule": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-filter-rule"
+                ],
+                "summary": "创建内容净化规则",
+                "parameters": [
+                    {
+                        "description": "规则",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.FilterRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BookContentFilterRule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/filter-rule/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-filter-rule"
+                ],
+                "summary": "内容净化规则分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.FilterRuleSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/filter-rule/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-filter-rule"
+                ],
+                "summary": "内容净化规则详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BookContentFilterRule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-filter-rule"
+                ],
+                "summary": "更新内容净化规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "规则",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.FilterRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BookContentFilterRule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-filter-rule"
+                ],
+                "summary": "删除内容净化规则",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/like/count/{targetType}/{targetId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "like"
+                ],
+                "summary": "查询点赞数",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "目标类型",
+                        "name": "targetType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "目标ID",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "integer",
+                                            "format": "int64"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/like/status": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "like"
+                ],
+                "summary": "批量查询点赞状态",
+                "parameters": [
+                    {
+                        "description": "查询参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LikeStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "boolean"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/like/toggle": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "like"
+                ],
+                "summary": "切换点赞",
+                "parameters": [
+                    {
+                        "description": "点赞参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LikeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LikeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/note": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-note"
+                ],
+                "summary": "创建笔记/划线",
+                "parameters": [
+                    {
+                        "description": "笔记参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.NoteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.NoteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/note/book/{bookId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-note"
+                ],
+                "summary": "获取某本书的公开笔记",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.NoteResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/note/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-note"
+                ],
+                "summary": "分页查询笔记",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.NoteSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/note/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-note"
+                ],
+                "summary": "获取笔记详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "笔记ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.NoteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-note"
+                ],
+                "summary": "更新笔记/划线",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "笔记ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "笔记参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.NoteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.NoteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-note"
+                ],
+                "summary": "删除笔记/划线",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "笔记ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "书籍分页列表",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/re-parse": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "重新识别章节（删除旧章节索引，重新解析并创建）",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReParseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReParseResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/read-stats/books": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-read-stats"
+                ],
+                "summary": "按书阅读统计",
+                "parameters": [
+                    {
+                        "description": "查询参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadStatsQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ReadEventBookResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/read-stats/daily": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-read-stats"
+                ],
+                "summary": "按日阅读统计",
+                "parameters": [
+                    {
+                        "description": "查询参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadStatsQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ReadEventDailyResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/read-stats/total": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-read-stats"
+                ],
+                "summary": "总阅读统计",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReadEventTotalResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/reader/progress/{bookId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-reader"
+                ],
+                "summary": "获取阅读进度",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReadProgressResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-reader"
+                ],
+                "summary": "上报阅读进度",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "进度参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadProgressRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReadProgressResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/reader/read-event": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-reader"
+                ],
+                "summary": "上报阅读事件",
+                "parameters": [
+                    {
+                        "description": "阅读事件参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/review": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-review"
+                ],
+                "summary": "创建书评",
+                "parameters": [
+                    {
+                        "description": "书评参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReviewResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/review/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-review"
+                ],
+                "summary": "分页查询书评",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/review/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-review"
+                ],
+                "summary": "获取书评详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书评ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReviewResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-review"
+                ],
+                "summary": "更新书评",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书评ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "书评参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ReviewResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-review"
+                ],
+                "summary": "删除书评",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书评ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/scan": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "扫描入库",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ScanAllResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/scan-path": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "扫描本地目录中的小说文件",
+                "parameters": [
+                    {
+                        "description": "扫描路径",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScanPathRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ScanPathResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/scan/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "扫描单个上传任务",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "上传记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ScanResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/shelf": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-bookshelf"
+                ],
+                "summary": "添加到书架",
+                "parameters": [
+                    {
+                        "description": "书架参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookshelfRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BookshelfResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/shelf/groups": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-bookshelf"
+                ],
+                "summary": "获取书架分组列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.BookshelfGroupItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/shelf/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-bookshelf"
+                ],
+                "summary": "书架分页列表",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookshelfSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BookshelfPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/shelf/{bookId}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-bookshelf"
+                ],
+                "summary": "更新书架",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookshelfUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BookshelfResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reader-bookshelf"
+                ],
+                "summary": "从书架移除",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "bookId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/tag": {
             "post": {
                 "security": [
                     {
@@ -480,7 +3436,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.TagRequest"
+                            "$ref": "#/definitions/dto.TagRequest"
                         }
                     }
                 ],
@@ -490,13 +3446,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.BookTag"
+                                            "$ref": "#/definitions/model.BookTag"
                                         }
                                     }
                                 }
@@ -506,7 +3462,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/book-tag/page": {
+        "/api/book/tag/page": {
             "post": {
                 "security": [
                     {
@@ -530,7 +3486,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.TagSearch"
+                            "$ref": "#/definitions/dto.TagSearch"
                         }
                     }
                 ],
@@ -540,13 +3496,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "$ref": "#/definitions/dto.PageResponse"
                                         }
                                     }
                                 }
@@ -556,7 +3512,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manage/book-tag/{id}": {
+        "/api/book/tag/{id}": {
             "get": {
                 "security": [
                     {
@@ -585,13 +3541,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.BookTag"
+                                            "$ref": "#/definitions/model.BookTag"
                                         }
                                     }
                                 }
@@ -630,7 +3586,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.TagRequest"
+                            "$ref": "#/definitions/dto.TagRequest"
                         }
                     }
                 ],
@@ -640,13 +3596,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.BookTag"
+                                            "$ref": "#/definitions/model.BookTag"
                                         }
                                     }
                                 }
@@ -681,7 +3637,333 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "上传小说文件",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "小说文件 (txt/epub/mobi/pdf)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.FileUploadResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/upload/page": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "上传记录分页",
+                "parameters": [
+                    {
+                        "description": "搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UploadSearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "书籍详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BookResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "编辑书籍",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "书籍",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BookResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "删除书籍",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/{id}/chapter/{chapterNo}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book-file"
+                ],
+                "summary": "读取章节内容",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "章节序号",
+                        "name": "chapterNo",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ChapterContentResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/book/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "book"
+                ],
+                "summary": "更新上架状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "书籍ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookUpdateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -711,7 +3993,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DeptRequest"
+                            "$ref": "#/definitions/dto.DeptRequest"
                         }
                     }
                 ],
@@ -721,13 +4003,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDept"
+                                            "$ref": "#/definitions/model.SysDept"
                                         }
                                     }
                                 }
@@ -761,7 +4043,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DeptSearch"
+                            "$ref": "#/definitions/dto.DeptSearch"
                         }
                     }
                 ],
@@ -771,7 +4053,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -779,7 +4061,7 @@ const docTemplate = `{
                                         "data": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                                    "$ref": "#/definitions/dto.PageResponse"
                                                 },
                                                 {
                                                     "type": "object",
@@ -787,7 +4069,7 @@ const docTemplate = `{
                                                         "records": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/boread_internal_dto.DeptNode"
+                                                                "$ref": "#/definitions/dto.DeptNode"
                                                             }
                                                         }
                                                     }
@@ -842,7 +4124,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -850,7 +4132,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_dto.DeptNode"
+                                                "$ref": "#/definitions/dto.DeptNode"
                                             }
                                         }
                                     }
@@ -890,13 +4172,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDept"
+                                            "$ref": "#/definitions/model.SysDept"
                                         }
                                     }
                                 }
@@ -935,7 +4217,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DeptRequest"
+                            "$ref": "#/definitions/dto.DeptRequest"
                         }
                     }
                 ],
@@ -945,13 +4227,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDept"
+                                            "$ref": "#/definitions/model.SysDept"
                                         }
                                     }
                                 }
@@ -986,7 +4268,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1016,7 +4298,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DictRequest"
+                            "$ref": "#/definitions/dto.DictRequest"
                         }
                     }
                 ],
@@ -1026,13 +4308,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDict"
+                                            "$ref": "#/definitions/model.SysDict"
                                         }
                                     }
                                 }
@@ -1071,7 +4353,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1079,7 +4361,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_model.SysDictItem"
+                                                "$ref": "#/definitions/model.SysDictItem"
                                             }
                                         }
                                     }
@@ -1114,7 +4396,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DictItemRequest"
+                            "$ref": "#/definitions/dto.DictItemRequest"
                         }
                     }
                 ],
@@ -1124,13 +4406,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDictItem"
+                                            "$ref": "#/definitions/model.SysDictItem"
                                         }
                                     }
                                 }
@@ -1171,7 +4453,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DictItemRequest"
+                            "$ref": "#/definitions/dto.DictItemRequest"
                         }
                     }
                 ],
@@ -1181,13 +4463,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDictItem"
+                                            "$ref": "#/definitions/model.SysDictItem"
                                         }
                                     }
                                 }
@@ -1222,7 +4504,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1257,7 +4539,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1265,7 +4547,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_model.SysDictItem"
+                                                "$ref": "#/definitions/model.SysDictItem"
                                             }
                                         }
                                     }
@@ -1300,7 +4582,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DictSearch"
+                            "$ref": "#/definitions/dto.DictSearch"
                         }
                     }
                 ],
@@ -1310,13 +4592,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "$ref": "#/definitions/dto.PageResponse"
                                         }
                                     }
                                 }
@@ -1355,13 +4637,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDict"
+                                            "$ref": "#/definitions/model.SysDict"
                                         }
                                     }
                                 }
@@ -1400,7 +4682,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.DictRequest"
+                            "$ref": "#/definitions/dto.DictRequest"
                         }
                     }
                 ],
@@ -1410,13 +4692,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysDict"
+                                            "$ref": "#/definitions/model.SysDict"
                                         }
                                     }
                                 }
@@ -1451,7 +4733,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1481,7 +4763,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.LoginLogSearch"
+                            "$ref": "#/definitions/dto.LoginLogSearch"
                         }
                     }
                 ],
@@ -1491,13 +4773,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "$ref": "#/definitions/dto.PageResponse"
                                         }
                                     }
                                 }
@@ -1531,7 +4813,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.OperationLogSearch"
+                            "$ref": "#/definitions/dto.OperationLogSearch"
                         }
                     }
                 ],
@@ -1541,13 +4823,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "$ref": "#/definitions/dto.PageResponse"
                                         }
                                     }
                                 }
@@ -1581,7 +4863,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.MenuRequest"
+                            "$ref": "#/definitions/dto.MenuRequest"
                         }
                     }
                 ],
@@ -1591,13 +4873,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysMenu"
+                                            "$ref": "#/definitions/model.SysMenu"
                                         }
                                     }
                                 }
@@ -1631,7 +4913,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.MenuButtonRequest"
+                            "$ref": "#/definitions/dto.MenuButtonRequest"
                         }
                     }
                 ],
@@ -1641,13 +4923,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysMenuButton"
+                                            "$ref": "#/definitions/model.SysMenuButton"
                                         }
                                     }
                                 }
@@ -1684,7 +4966,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1719,7 +5001,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1727,7 +5009,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_model.SysMenuButton"
+                                                "$ref": "#/definitions/model.SysMenuButton"
                                             }
                                         }
                                     }
@@ -1762,7 +5044,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.MenuSearch"
+                            "$ref": "#/definitions/dto.MenuSearch"
                         }
                     }
                 ],
@@ -1772,13 +5054,16 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.MenuNode"
+                                            }
                                         }
                                     }
                                 }
@@ -1808,7 +5093,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1816,7 +5101,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_dto.MenuNode"
+                                                "$ref": "#/definitions/dto.MenuNode"
                                             }
                                         }
                                     }
@@ -1856,13 +5141,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysMenu"
+                                            "$ref": "#/definitions/model.SysMenu"
                                         }
                                     }
                                 }
@@ -1901,7 +5186,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.MenuRequest"
+                            "$ref": "#/definitions/dto.MenuRequest"
                         }
                     }
                 ],
@@ -1911,13 +5196,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysMenu"
+                                            "$ref": "#/definitions/model.SysMenu"
                                         }
                                     }
                                 }
@@ -1952,7 +5237,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1982,7 +5267,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.RoleRequest"
+                            "$ref": "#/definitions/dto.RoleRequest"
                         }
                     }
                 ],
@@ -1992,13 +5277,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysRole"
+                                            "$ref": "#/definitions/model.SysRole"
                                         }
                                     }
                                 }
@@ -2028,7 +5313,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2036,7 +5321,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/boread_internal_dto.RoleBrief"
+                                                "$ref": "#/definitions/dto.RoleBrief"
                                             }
                                         }
                                     }
@@ -2071,7 +5356,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.RoleSearch"
+                            "$ref": "#/definitions/dto.RoleSearch"
                         }
                     }
                 ],
@@ -2081,13 +5366,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "$ref": "#/definitions/dto.PageResponse"
                                         }
                                     }
                                 }
@@ -2126,13 +5411,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysRole"
+                                            "$ref": "#/definitions/model.SysRole"
                                         }
                                     }
                                 }
@@ -2171,7 +5456,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.RoleRequest"
+                            "$ref": "#/definitions/dto.RoleRequest"
                         }
                     }
                 ],
@@ -2181,13 +5466,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysRole"
+                                            "$ref": "#/definitions/model.SysRole"
                                         }
                                     }
                                 }
@@ -2222,7 +5507,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2257,7 +5542,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2305,7 +5590,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.RoleButtonRequest"
+                            "$ref": "#/definitions/dto.RoleButtonRequest"
                         }
                     }
                 ],
@@ -2313,7 +5598,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2348,7 +5633,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2396,7 +5681,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.RoleMenuRequest"
+                            "$ref": "#/definitions/dto.RoleMenuRequest"
                         }
                     }
                 ],
@@ -2404,7 +5689,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2434,7 +5719,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.UserCreateRequest"
+                            "$ref": "#/definitions/dto.UserCreateRequest"
                         }
                     }
                 ],
@@ -2444,13 +5729,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysUser"
+                                            "$ref": "#/definitions/model.SysUser"
                                         }
                                     }
                                 }
@@ -2484,7 +5769,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.UserSearch"
+                            "$ref": "#/definitions/dto.UserSearch"
                         }
                     }
                 ],
@@ -2494,13 +5779,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_dto.PageResponse"
+                                            "$ref": "#/definitions/dto.PageResponse"
                                         }
                                     }
                                 }
@@ -2539,13 +5824,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysUser"
+                                            "$ref": "#/definitions/model.SysUser"
                                         }
                                     }
                                 }
@@ -2584,7 +5869,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.UserUpdateRequest"
+                            "$ref": "#/definitions/dto.UserUpdateRequest"
                         }
                     }
                 ],
@@ -2594,13 +5879,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/boread_pkg_response.Response"
+                                    "$ref": "#/definitions/response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/boread_internal_model.SysUser"
+                                            "$ref": "#/definitions/model.SysUser"
                                         }
                                     }
                                 }
@@ -2635,7 +5920,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2672,7 +5957,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/boread_internal_dto.UserResetPwdRequest"
+                            "$ref": "#/definitions/dto.UserResetPwdRequest"
                         }
                     }
                 ],
@@ -2680,7 +5965,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2699,7 +5984,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/boread_pkg_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2707,7 +5992,372 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "boread_internal_dto.CategoryNode": {
+        "dto.BookRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "author": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "intro": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string",
+                    "maxLength": 16
+                },
+                "serialStatus": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                },
+                "tagIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "visibility": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                }
+            }
+        },
+        "dto.BookResponse": {
+            "type": "object",
+            "properties": {
+                "aggregateStatus": {
+                    "$ref": "#/definitions/model.AggregateStatus"
+                },
+                "author": {
+                    "type": "string"
+                },
+                "avgRating": {
+                    "type": "number"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "categoryName": {
+                    "type": "string"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "deptId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "intro": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "latestChapterNo": {
+                    "type": "integer"
+                },
+                "latestChapterTitle": {
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "integer"
+                },
+                "primaryFileId": {
+                    "type": "integer"
+                },
+                "ratingCount": {
+                    "type": "integer"
+                },
+                "serialStatus": {
+                    "$ref": "#/definitions/model.SerialStatus"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.BookStatus"
+                },
+                "tagIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TagBrief"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "totalChapters": {
+                    "type": "integer"
+                },
+                "totalWords": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "visibility": {
+                    "$ref": "#/definitions/model.Visibility"
+                }
+            }
+        },
+        "dto.BookSearch": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "categoryIDs": {
+                    "description": "展开后的分类ID列表（含自身+子分类），由 service 层填充",
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "maxWords": {
+                    "description": "字数上限（万字）",
+                    "type": "integer"
+                },
+                "minWords": {
+                    "description": "字数下限（万字）",
+                    "type": "integer"
+                },
+                "serialStatus": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tagId": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updateTimeFrom": {
+                    "description": "更新时间起始",
+                    "type": "string"
+                },
+                "updateTimeTo": {
+                    "description": "更新时间截止",
+                    "type": "string"
+                },
+                "visibility": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BookUpdateStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    ]
+                }
+            }
+        },
+        "dto.BookshelfGroupItem": {
+            "type": "object",
+            "properties": {
+                "bookCount": {
+                    "type": "integer"
+                },
+                "groupName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BookshelfPageResponse": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BookshelfResponse"
+                    }
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.BookshelfRequest": {
+            "type": "object",
+            "required": [
+                "bookId"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "groupName": {
+                    "description": "可选，默认\"默认\"",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BookshelfResponse": {
+            "type": "object",
+            "properties": {
+                "addTime": {
+                    "type": "string"
+                },
+                "bookAuthor": {
+                    "type": "string"
+                },
+                "bookCover": {
+                    "type": "string"
+                },
+                "bookId": {
+                    "type": "integer"
+                },
+                "bookTitle": {
+                    "type": "string"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "chapterNo": {
+                    "type": "integer"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isTop": {
+                    "type": "boolean"
+                },
+                "lastReadTime": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "readDuration": {
+                    "type": "integer"
+                },
+                "readPercent": {
+                    "type": "number"
+                },
+                "readerId": {
+                    "type": "integer"
+                },
+                "totalChapters": {
+                    "type": "integer"
+                },
+                "totalWords": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BookshelfSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "groupName": {
+                    "description": "按分组筛选",
+                    "type": "string"
+                },
+                "keyword": {
+                    "description": "按书名关键词搜索",
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.BookshelfUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "groupName": {
+                    "description": "修改分组",
+                    "type": "string"
+                },
+                "isTop": {
+                    "description": "修改置顶状态",
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.CategoryNode": {
             "type": "object",
             "properties": {
                 "categoryCode": {
@@ -2719,11 +6369,17 @@ const docTemplate = `{
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_dto.CategoryNode"
+                        "$ref": "#/definitions/dto.CategoryNode"
                     }
+                },
+                "description": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "isHot": {
+                    "type": "boolean"
                 },
                 "parentId": {
                     "type": "integer"
@@ -2732,11 +6388,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.CategoryRequest": {
+        "dto.CategoryRequest": {
             "type": "object",
             "required": [
                 "categoryCode",
@@ -2751,6 +6407,12 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64
                 },
+                "description": {
+                    "type": "string"
+                },
+                "isHot": {
+                    "type": "boolean"
+                },
                 "parentId": {
                     "type": "integer"
                 },
@@ -2758,11 +6420,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.CategorySearch": {
+        "dto.CategorySearch": {
             "type": "object",
             "properties": {
                 "categoryCode": {
@@ -2774,24 +6436,614 @@ const docTemplate = `{
                 "current": {
                     "type": "integer"
                 },
+                "isHot": {
+                    "type": "boolean"
+                },
                 "keyword": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.EnableStatus"
+                }
+            }
+        },
+        "dto.ChapterContentResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "byteLength": {
+                    "type": "integer"
+                },
+                "byteOffset": {
+                    "type": "integer"
+                },
+                "chapterNo": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "fileId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isVip": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.ChapterStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "volumeNo": {
+                    "type": "integer"
+                },
+                "volumeTitle": {
+                    "type": "string"
+                },
+                "wordCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ChapterListRequest": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "description": "书籍ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ChapterResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "byteLength": {
+                    "type": "integer"
+                },
+                "byteOffset": {
+                    "type": "integer"
+                },
+                "chapterNo": {
+                    "type": "integer"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "fileId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isVip": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.ChapterStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "volumeNo": {
+                    "type": "integer"
+                },
+                "volumeTitle": {
+                    "type": "string"
+                },
+                "wordCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ChapterRuleBindRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "ruleId"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "ruleId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ChapterRuleBindResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "readerId": {
+                    "type": "integer"
+                },
+                "ruleId": {
+                    "type": "integer"
+                },
+                "ruleName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ChapterRuleRequest": {
+            "type": "object",
+            "required": [
+                "ruleName",
+                "ruleType",
+                "titlePattern"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "groupPattern": {
+                    "type": "string"
+                },
+                "maxChapterLen": {
+                    "type": "integer"
+                },
+                "minChapterLen": {
+                    "type": "integer"
+                },
+                "ruleName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "ruleType": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2"
+                    ]
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "titlePattern": {
+                    "type": "string",
+                    "maxLength": 512
+                }
+            }
+        },
+        "dto.ChapterRuleSearch": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "ruleType": {
                     "type": "string"
                 },
                 "size": {
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },
-        "boread_internal_dto.DeptNode": {
+        "dto.ChapterSearch": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterNo": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "fileId": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CharacterRelRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "characterAId",
+                "characterBId",
+                "relationType"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "characterAId": {
+                    "type": "integer"
+                },
+                "characterBId": {
+                    "type": "integer"
+                },
+                "relationDesc": {
+                    "type": "string"
+                },
+                "relationType": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "sortOrder": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CharacterRelResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "characterAId": {
+                    "type": "integer"
+                },
+                "characterAName": {
+                    "type": "string"
+                },
+                "characterBId": {
+                    "type": "integer"
+                },
+                "characterBName": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "relationDesc": {
+                    "type": "string"
+                },
+                "relationType": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CharacterRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "name",
+                "roleType"
+            ],
+            "properties": {
+                "alias": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "bookId": {
+                    "type": "integer"
+                },
+                "extra": {
+                    "type": "string"
+                },
+                "intro": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "roleType": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    ]
+                },
+                "sortOrder": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CharacterResponse": {
+            "type": "object",
+            "properties": {
+                "alias": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "bookId": {
+                    "type": "integer"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "extra": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "intro": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "roleType": {
+                    "type": "string"
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CharacterSearch": {
+            "type": "object",
+            "required": [
+                "bookId"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "roleType": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CommentRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "chapterId",
+                "content"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "replyToId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CommentResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "deptId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "likeCount": {
+                    "type": "integer"
+                },
+                "liked": {
+                    "type": "boolean"
+                },
+                "ownerId": {
+                    "type": "integer"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "readerId": {
+                    "type": "integer"
+                },
+                "readerName": {
+                    "type": "string"
+                },
+                "replies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CommentResponse"
+                    }
+                },
+                "replyToId": {
+                    "type": "integer"
+                },
+                "replyToName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CommentSearch": {
+            "type": "object",
+            "properties": {
+                "chapterId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ConfirmImportRequest": {
+            "type": "object",
+            "required": [
+                "title",
+                "uploadId"
+            ],
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uploadId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ConfirmImportResponse": {
+            "type": "object",
+            "properties": {
+                "bookAuthor": {
+                    "type": "string"
+                },
+                "bookId": {
+                    "type": "integer"
+                },
+                "bookTitle": {
+                    "type": "string"
+                },
+                "chapterCount": {
+                    "type": "integer"
+                },
+                "parseMessage": {
+                    "type": "string"
+                },
+                "parseStatus": {
+                    "type": "string"
+                },
+                "uploadId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.DeptNode": {
             "type": "object",
             "properties": {
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_dto.DeptNode"
+                        "$ref": "#/definitions/dto.DeptNode"
                     }
                 },
                 "deptCode": {
@@ -2813,11 +7065,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.DeptRequest": {
+        "dto.DeptRequest": {
             "type": "object",
             "required": [
                 "deptCode",
@@ -2842,11 +7094,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.DeptSearch": {
+        "dto.DeptSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -2865,11 +7117,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.DictItemRequest": {
+        "dto.DictItemRequest": {
             "type": "object",
             "required": [
                 "dictId",
@@ -2895,11 +7147,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.DictRequest": {
+        "dto.DictRequest": {
             "type": "object",
             "required": [
                 "dictCode",
@@ -2918,11 +7170,11 @@ const docTemplate = `{
                     "maxLength": 64
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.DictSearch": {
+        "dto.DictSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -2941,11 +7193,217 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.LoginLogSearch": {
+        "dto.FileSearch": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "fileStatus": {
+                    "type": "string"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sourceType": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.FileUploadResponse": {
+            "type": "object",
+            "properties": {
+                "fileSize": {
+                    "type": "integer"
+                },
+                "matchedBookId": {
+                    "type": "integer"
+                },
+                "matchedBookTitle": {
+                    "type": "string"
+                },
+                "originalName": {
+                    "type": "string"
+                },
+                "sourceFormat": {
+                    "type": "string"
+                },
+                "suggestedAuthor": {
+                    "type": "string"
+                },
+                "suggestedTitle": {
+                    "type": "string"
+                },
+                "uploadId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.FilterRuleRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "applyStage",
+                "matchType",
+                "pattern",
+                "ruleName"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                },
+                "applyStage": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2"
+                    ]
+                },
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "matchType": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2"
+                    ]
+                },
+                "pattern": {
+                    "type": "string",
+                    "maxLength": 512
+                },
+                "replacement": {
+                    "type": "string"
+                },
+                "ruleName": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.FilterRuleSearch": {
+            "type": "object",
+            "properties": {
+                "applyStage": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.HotCategoryItem": {
+            "type": "object",
+            "properties": {
+                "categoryCode": {
+                    "type": "string"
+                },
+                "categoryName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.LikeRequest": {
+            "type": "object",
+            "required": [
+                "targetId",
+                "targetType"
+            ],
+            "properties": {
+                "targetId": {
+                    "type": "integer"
+                },
+                "targetType": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                }
+            }
+        },
+        "dto.LikeResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "liked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.LikeStatusRequest": {
+            "type": "object",
+            "required": [
+                "targets"
+            ],
+            "properties": {
+                "targets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/dto.LikeTarget"
+                    }
+                }
+            }
+        },
+        "dto.LikeTarget": {
+            "type": "object",
+            "properties": {
+                "targetId": {
+                    "type": "integer"
+                },
+                "targetType": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginLogSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -2961,10 +7419,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "loginResult": {
-                    "$ref": "#/definitions/boread_internal_model.LoginResult"
+                    "$ref": "#/definitions/model.LoginResult"
                 },
                 "loginType": {
-                    "$ref": "#/definitions/boread_internal_model.LoginType"
+                    "$ref": "#/definitions/model.LoginType"
                 },
                 "size": {
                     "type": "integer"
@@ -2978,7 +7436,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.LoginRequest": {
+        "dto.LoginRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -2997,7 +7455,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.LoginResponse": {
+        "dto.LoginResponse": {
             "type": "object",
             "properties": {
                 "expiresAt": {
@@ -3014,7 +7472,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.MenuButtonItem": {
+        "dto.MenuButtonItem": {
             "type": "object",
             "properties": {
                 "buttonCode": {
@@ -3028,7 +7486,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.MenuButtonRequest": {
+        "dto.MenuButtonRequest": {
             "type": "object",
             "required": [
                 "buttonCode",
@@ -3047,7 +7505,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.MenuMeta": {
+        "dto.MenuMeta": {
             "type": "object",
             "properties": {
                 "activeMenu": {
@@ -3094,7 +7552,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.MenuNode": {
+        "dto.MenuNode": {
             "type": "object",
             "properties": {
                 "activeMenu": {
@@ -3103,13 +7561,13 @@ const docTemplate = `{
                 "buttons": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_model.SysMenuButton"
+                        "$ref": "#/definitions/model.SysMenuButton"
                     }
                 },
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_dto.MenuNode"
+                        "$ref": "#/definitions/dto.MenuNode"
                     }
                 },
                 "component": {
@@ -3140,7 +7598,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "iconType": {
-                    "$ref": "#/definitions/boread_internal_model.IconType"
+                    "$ref": "#/definitions/model.IconType"
                 },
                 "id": {
                     "type": "integer"
@@ -3155,7 +7613,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "menuType": {
-                    "$ref": "#/definitions/boread_internal_model.MenuType"
+                    "$ref": "#/definitions/model.MenuType"
                 },
                 "multiTab": {
                     "type": "boolean"
@@ -3167,7 +7625,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "query": {
-                    "$ref": "#/definitions/boread_internal_model.JSONMap"
+                    "$ref": "#/definitions/model.JSONMap"
                 },
                 "routeName": {
                     "type": "string"
@@ -3176,7 +7634,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3186,7 +7644,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.MenuRequest": {
+        "dto.MenuRequest": {
             "type": "object",
             "required": [
                 "menuName",
@@ -3201,7 +7659,7 @@ const docTemplate = `{
                 "buttons": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_dto.MenuButtonItem"
+                        "$ref": "#/definitions/dto.MenuButtonItem"
                     }
                 },
                 "component": {
@@ -3226,7 +7684,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "iconType": {
-                    "$ref": "#/definitions/boread_internal_model.IconType"
+                    "$ref": "#/definitions/model.IconType"
                 },
                 "keepAlive": {
                     "type": "boolean"
@@ -3242,7 +7700,7 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/boread_internal_model.MenuType"
+                            "$ref": "#/definitions/model.MenuType"
                         }
                     ]
                 },
@@ -3265,11 +7723,11 @@ const docTemplate = `{
                     "maxLength": 255
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.MenuResponse": {
+        "dto.MenuResponse": {
             "type": "object",
             "properties": {
                 "home": {
@@ -3278,25 +7736,25 @@ const docTemplate = `{
                 "routes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_dto.MenuRoute"
+                        "$ref": "#/definitions/dto.MenuRoute"
                     }
                 }
             }
         },
-        "boread_internal_dto.MenuRoute": {
+        "dto.MenuRoute": {
             "type": "object",
             "properties": {
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/boread_internal_dto.MenuRoute"
+                        "$ref": "#/definitions/dto.MenuRoute"
                     }
                 },
                 "component": {
                     "type": "string"
                 },
                 "meta": {
-                    "$ref": "#/definitions/boread_internal_dto.MenuMeta"
+                    "$ref": "#/definitions/dto.MenuMeta"
                 },
                 "name": {
                     "type": "string"
@@ -3309,7 +7767,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.MenuSearch": {
+        "dto.MenuSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -3325,11 +7783,144 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.OperationLogSearch": {
+        "dto.NoteRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "noteType"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "endOffset": {
+                    "type": "integer"
+                },
+                "highlightColor": {
+                    "type": "string"
+                },
+                "noteType": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                },
+                "selectedText": {
+                    "type": "string"
+                },
+                "startOffset": {
+                    "type": "integer"
+                },
+                "visibility": {
+                    "type": "string",
+                    "enum": [
+                        "1",
+                        "2"
+                    ]
+                }
+            }
+        },
+        "dto.NoteResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "bookTitle": {
+                    "type": "string"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "chapterTitle": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "endOffset": {
+                    "type": "integer"
+                },
+                "highlightColor": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "likeCount": {
+                    "type": "integer"
+                },
+                "liked": {
+                    "type": "boolean"
+                },
+                "noteType": {
+                    "type": "string"
+                },
+                "readerId": {
+                    "type": "integer"
+                },
+                "readerName": {
+                    "type": "string"
+                },
+                "selectedText": {
+                    "type": "string"
+                },
+                "startOffset": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "visibility": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.NoteSearch": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "noteType": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.OperationLogSearch": {
             "type": "object",
             "properties": {
                 "action": {
@@ -3361,7 +7952,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.PageResponse": {
+        "dto.PageResponse": {
             "type": "object",
             "properties": {
                 "current": {
@@ -3376,7 +7967,322 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.RoleBrief": {
+        "dto.ReParseRequest": {
+            "type": "object",
+            "required": [
+                "bookId"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReParseResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "bookTitle": {
+                    "type": "string"
+                },
+                "newCount": {
+                    "type": "integer"
+                },
+                "oldCount": {
+                    "type": "integer"
+                },
+                "totalWords": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReadEventBookResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "bookTitle": {
+                    "type": "string"
+                },
+                "chapterCount": {
+                    "type": "integer"
+                },
+                "durationSec": {
+                    "type": "integer"
+                },
+                "wordCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReadEventDailyResponse": {
+            "type": "object",
+            "properties": {
+                "bookCount": {
+                    "type": "integer"
+                },
+                "chapterCount": {
+                    "type": "integer"
+                },
+                "durationSec": {
+                    "type": "integer"
+                },
+                "sessionCount": {
+                    "type": "integer"
+                },
+                "statDate": {
+                    "type": "string"
+                },
+                "wordCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReadEventRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "chapterId",
+                "durationSec"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "deviceType": {
+                    "description": "默认 web",
+                    "type": "string"
+                },
+                "durationSec": {
+                    "description": "本次心跳区间阅读时长(秒)",
+                    "type": "integer"
+                },
+                "sessionId": {
+                    "description": "服务端生成 UUID, 客户端可传空",
+                    "type": "string"
+                },
+                "wordCount": {
+                    "description": "本次心跳区间滚动字数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReadEventTotalResponse": {
+            "type": "object",
+            "properties": {
+                "bookCount": {
+                    "type": "integer"
+                },
+                "durationSec": {
+                    "type": "integer"
+                },
+                "sessionCount": {
+                    "type": "integer"
+                },
+                "wordCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReadProgressRequest": {
+            "type": "object",
+            "required": [
+                "chapterId",
+                "chapterNo"
+            ],
+            "properties": {
+                "chapterId": {
+                    "type": "integer"
+                },
+                "chapterNo": {
+                    "type": "integer"
+                },
+                "fileId": {
+                    "description": "文件切换时传入",
+                    "type": "integer"
+                },
+                "percent": {
+                    "type": "number"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "readDuration": {
+                    "description": "本次增加的阅读时长(秒)",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReadProgressResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterId": {
+                    "type": "integer"
+                },
+                "chapterNo": {
+                    "type": "integer"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "fileId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastReadTime": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "number"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "readDuration": {
+                    "type": "integer"
+                },
+                "readerId": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReadStatsQuery": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "description": "指定书籍(可选), 用于查单书统计",
+                    "type": "integer"
+                },
+                "endDate": {
+                    "description": "结束日期 2006-01-02, 空表示不限",
+                    "type": "string"
+                },
+                "startDate": {
+                    "description": "起始日期 2006-01-02, 空表示不限",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReviewRequest": {
+            "type": "object",
+            "required": [
+                "bookId",
+                "content"
+            ],
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReviewResponse": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "bookTitle": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "deptId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "likeCount": {
+                    "type": "integer"
+                },
+                "liked": {
+                    "type": "boolean"
+                },
+                "ownerId": {
+                    "type": "integer"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "readerId": {
+                    "type": "integer"
+                },
+                "readerName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReviewSearch": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RoleBrief": {
             "type": "object",
             "properties": {
                 "id": {
@@ -3390,7 +8296,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.RoleButtonRequest": {
+        "dto.RoleButtonRequest": {
             "type": "object",
             "properties": {
                 "buttonIds": {
@@ -3401,7 +8307,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.RoleMenuRequest": {
+        "dto.RoleMenuRequest": {
             "type": "object",
             "properties": {
                 "menuIds": {
@@ -3412,7 +8318,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.RoleRequest": {
+        "dto.RoleRequest": {
             "type": "object",
             "required": [
                 "dataScope",
@@ -3430,7 +8336,7 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/boread_internal_model.DataScope"
+                            "$ref": "#/definitions/model.DataScope"
                         }
                     ]
                 },
@@ -3456,11 +8362,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.RoleSearch": {
+        "dto.RoleSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -3479,11 +8385,96 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 }
             }
         },
-        "boread_internal_dto.TagRequest": {
+        "dto.ScanAllResponse": {
+            "type": "object",
+            "properties": {
+                "failed": {
+                    "type": "integer"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ScanResult"
+                    }
+                },
+                "success": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ScanPathRequest": {
+            "type": "object",
+            "required": [
+                "path"
+            ],
+            "properties": {
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ScanPathResponse": {
+            "type": "object",
+            "properties": {
+                "failed": {
+                    "type": "integer"
+                },
+                "imported": {
+                    "type": "integer"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ScanResult"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ScanResult": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "chapterCount": {
+                    "type": "integer"
+                },
+                "fileSize": {
+                    "type": "integer"
+                },
+                "originalName": {
+                    "type": "string"
+                },
+                "parseMessage": {
+                    "type": "string"
+                },
+                "parseStatus": {
+                    "type": "string"
+                },
+                "uploadId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.TagBrief": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "tagName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.TagRequest": {
             "type": "object",
             "required": [
                 "tagName"
@@ -3498,7 +8489,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.TagSearch": {
+        "dto.TagSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -3515,7 +8506,30 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.UserCreateRequest": {
+        "dto.UploadSearch": {
+            "type": "object",
+            "properties": {
+                "bookId": {
+                    "type": "integer"
+                },
+                "current": {
+                    "type": "integer"
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "originalName": {
+                    "type": "string"
+                },
+                "parseStatus": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UserCreateRequest": {
             "type": "object",
             "required": [
                 "password",
@@ -3543,7 +8557,7 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "userEmail": {
                     "type": "string"
@@ -3565,7 +8579,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.UserInfoResponse": {
+        "dto.UserInfoResponse": {
             "type": "object",
             "properties": {
                 "buttons": {
@@ -3588,7 +8602,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.UserResetPwdRequest": {
+        "dto.UserResetPwdRequest": {
             "type": "object",
             "required": [
                 "password"
@@ -3601,7 +8615,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.UserSearch": {
+        "dto.UserSearch": {
             "type": "object",
             "properties": {
                 "current": {
@@ -3617,7 +8631,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "userEmail": {
                     "type": "string"
@@ -3633,7 +8647,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_dto.UserUpdateRequest": {
+        "dto.UserUpdateRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3652,7 +8666,7 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "userEmail": {
                     "type": "string"
@@ -3669,7 +8683,30 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.BookCategory": {
+        "model.AggregateStatus": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "x-enum-comments": {
+                "AggregateDone": "聚合完成",
+                "AggregateMerging": "多文件聚合中",
+                "AggregateSingle": "单文件(无需聚合)"
+            },
+            "x-enum-descriptions": [
+                "单文件(无需聚合)",
+                "多文件聚合中",
+                "聚合完成"
+            ],
+            "x-enum-varnames": [
+                "AggregateSingle",
+                "AggregateMerging",
+                "AggregateDone"
+            ]
+        },
+        "model.BookCategory": {
             "type": "object",
             "properties": {
                 "ancestors": {
@@ -3693,6 +8730,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "isHot": {
+                    "type": "boolean"
+                },
                 "parentId": {
                     "type": "integer"
                 },
@@ -3700,7 +8740,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3710,9 +8750,139 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.BookTag": {
+        "model.BookChapterRule": {
             "type": "object",
             "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "groupPattern": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "maxChapterLen": {
+                    "type": "integer"
+                },
+                "minChapterLen": {
+                    "type": "integer"
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "ruleType": {
+                    "$ref": "#/definitions/model.RuleType"
+                },
+                "sortOrder": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.EnableStatus"
+                },
+                "titlePattern": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.BookContentFilterRule": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/model.FilterAction"
+                },
+                "applyStage": {
+                    "$ref": "#/definitions/model.FilterApplyStage"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "matchType": {
+                    "$ref": "#/definitions/model.FilterMatchType"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "replacement": {
+                    "type": "string"
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/model.FilterSeverity"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.EnableStatus"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.BookStatus": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4"
+            ],
+            "x-enum-comments": {
+                "BookListed": "已上架",
+                "BookRejected": "审核拒绝",
+                "BookReviewing": "审核中",
+                "BookUnlisted": "下架"
+            },
+            "x-enum-descriptions": [
+                "已上架",
+                "下架",
+                "审核中",
+                "审核拒绝"
+            ],
+            "x-enum-varnames": [
+                "BookListed",
+                "BookUnlisted",
+                "BookReviewing",
+                "BookRejected"
+            ]
+        },
+        "model.BookTag": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
                 "createTime": {
                     "type": "string"
                 },
@@ -3725,12 +8895,41 @@ const docTemplate = `{
                 "tagName": {
                     "type": "string"
                 },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
                 "usageCount": {
                     "type": "integer"
                 }
             }
         },
-        "boread_internal_model.DataScope": {
+        "model.ChapterStatus": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "x-enum-comments": {
+                "ChapterDraft": "草稿",
+                "ChapterPublished": "发布",
+                "ChapterRemoved": "下架"
+            },
+            "x-enum-descriptions": [
+                "发布",
+                "草稿",
+                "下架"
+            ],
+            "x-enum-varnames": [
+                "ChapterPublished",
+                "ChapterDraft",
+                "ChapterRemoved"
+            ]
+        },
+        "model.DataScope": {
             "type": "string",
             "enum": [
                 "1",
@@ -3761,7 +8960,7 @@ const docTemplate = `{
                 "DataScopeSelf"
             ]
         },
-        "boread_internal_model.EnableStatus": {
+        "model.EnableStatus": {
             "type": "string",
             "enum": [
                 "1",
@@ -3772,7 +8971,81 @@ const docTemplate = `{
                 "StatusDisabled"
             ]
         },
-        "boread_internal_model.IconType": {
+        "model.FilterAction": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "x-enum-comments": {
+                "FilterBlock": "拦截整章",
+                "FilterMarkReview": "标记审核",
+                "FilterReplace": "替换"
+            },
+            "x-enum-descriptions": [
+                "替换",
+                "拦截整章",
+                "标记审核"
+            ],
+            "x-enum-varnames": [
+                "FilterReplace",
+                "FilterBlock",
+                "FilterMarkReview"
+            ]
+        },
+        "model.FilterApplyStage": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2"
+            ],
+            "x-enum-comments": {
+                "FilterStageInput": "入库时(解析阶段)",
+                "FilterStageOutput": "出库时(读章节时)"
+            },
+            "x-enum-descriptions": [
+                "入库时(解析阶段)",
+                "出库时(读章节时)"
+            ],
+            "x-enum-varnames": [
+                "FilterStageInput",
+                "FilterStageOutput"
+            ]
+        },
+        "model.FilterMatchType": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2"
+            ],
+            "x-enum-comments": {
+                "FilterKeyword": "关键词",
+                "FilterRegex": "正则"
+            },
+            "x-enum-descriptions": [
+                "关键词",
+                "正则"
+            ],
+            "x-enum-varnames": [
+                "FilterKeyword",
+                "FilterRegex"
+            ]
+        },
+        "model.FilterSeverity": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "x-enum-varnames": [
+                "FilterLow",
+                "FilterMedium",
+                "FilterHigh"
+            ]
+        },
+        "model.IconType": {
             "type": "string",
             "enum": [
                 "1",
@@ -3783,11 +9056,11 @@ const docTemplate = `{
                 "IconTypeLocal"
             ]
         },
-        "boread_internal_model.JSONMap": {
+        "model.JSONMap": {
             "type": "object",
             "additionalProperties": {}
         },
-        "boread_internal_model.LoginResult": {
+        "model.LoginResult": {
             "type": "string",
             "enum": [
                 "1",
@@ -3798,7 +9071,7 @@ const docTemplate = `{
                 "LoginResultFail"
             ]
         },
-        "boread_internal_model.LoginType": {
+        "model.LoginType": {
             "type": "string",
             "enum": [
                 "1",
@@ -3809,7 +9082,7 @@ const docTemplate = `{
                 "LoginTypeLogout"
             ]
         },
-        "boread_internal_model.MenuType": {
+        "model.MenuType": {
             "type": "string",
             "enum": [
                 "1",
@@ -3828,7 +9101,49 @@ const docTemplate = `{
                 "MenuTypeMenu"
             ]
         },
-        "boread_internal_model.SysDept": {
+        "model.RuleType": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2"
+            ],
+            "x-enum-comments": {
+                "RuleTypeCustom": "用户自定义规则",
+                "RuleTypeSystem": "系统默认规则"
+            },
+            "x-enum-descriptions": [
+                "系统默认规则",
+                "用户自定义规则"
+            ],
+            "x-enum-varnames": [
+                "RuleTypeSystem",
+                "RuleTypeCustom"
+            ]
+        },
+        "model.SerialStatus": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "x-enum-comments": {
+                "SerialFinished": "已完结",
+                "SerialOngoing": "连载中",
+                "SerialStopped": "断更"
+            },
+            "x-enum-descriptions": [
+                "连载中",
+                "已完结",
+                "断更"
+            ],
+            "x-enum-varnames": [
+                "SerialOngoing",
+                "SerialFinished",
+                "SerialStopped"
+            ]
+        },
+        "model.SysDept": {
             "type": "object",
             "properties": {
                 "ancestors": {
@@ -3859,7 +9174,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3869,7 +9184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.SysDict": {
+        "model.SysDict": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -3894,7 +9209,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3904,7 +9219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.SysDictItem": {
+        "model.SysDictItem": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -3932,7 +9247,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3942,7 +9257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.SysMenu": {
+        "model.SysMenu": {
             "type": "object",
             "properties": {
                 "activeMenu": {
@@ -3976,7 +9291,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "iconType": {
-                    "$ref": "#/definitions/boread_internal_model.IconType"
+                    "$ref": "#/definitions/model.IconType"
                 },
                 "id": {
                     "type": "integer"
@@ -3991,7 +9306,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "menuType": {
-                    "$ref": "#/definitions/boread_internal_model.MenuType"
+                    "$ref": "#/definitions/model.MenuType"
                 },
                 "multiTab": {
                     "type": "boolean"
@@ -4003,7 +9318,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "query": {
-                    "$ref": "#/definitions/boread_internal_model.JSONMap"
+                    "$ref": "#/definitions/model.JSONMap"
                 },
                 "routeName": {
                     "type": "string"
@@ -4012,7 +9327,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -4022,7 +9337,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.SysMenuButton": {
+        "model.SysMenuButton": {
             "type": "object",
             "properties": {
                 "buttonCode": {
@@ -4045,7 +9360,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.SysRole": {
+        "model.SysRole": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -4055,7 +9370,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "dataScope": {
-                    "$ref": "#/definitions/boread_internal_model.DataScope"
+                    "$ref": "#/definitions/model.DataScope"
                 },
                 "id": {
                     "type": "integer"
@@ -4076,7 +9391,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -4086,7 +9401,7 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_internal_model.SysUser": {
+        "model.SysUser": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -4120,7 +9435,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/boread_internal_model.EnableStatus"
+                    "$ref": "#/definitions/model.EnableStatus"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -4142,7 +9457,30 @@ const docTemplate = `{
                 }
             }
         },
-        "boread_pkg_response.Response": {
+        "model.Visibility": {
+            "type": "string",
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "x-enum-comments": {
+                "VisibilityDept": "部门内",
+                "VisibilityPrivate": "仅自己",
+                "VisibilityPublic": "公开"
+            },
+            "x-enum-descriptions": [
+                "公开",
+                "仅自己",
+                "部门内"
+            ],
+            "x-enum-varnames": [
+                "VisibilityPublic",
+                "VisibilityPrivate",
+                "VisibilityDept"
+            ]
+        },
+        "response.Response": {
             "type": "object",
             "properties": {
                 "code": {

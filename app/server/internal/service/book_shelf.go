@@ -14,12 +14,11 @@ import (
 
 var (
 	ErrBookshelfNotFound  = errors.New("书架记录不存在")
-	ErrBookNotExist       = errors.New("书籍不存在")
 	ErrAlreadyInBookshelf = errors.New("该书已在书架中")
-	ErrProgressNotFound   = errors.New("阅读进度不存在")
 )
 
-type ReaderService struct {
+// ReaderBookshelfService 读者书架服务
+type ReaderBookshelfService struct {
 	db            *gorm.DB
 	bookshelfRepo *repository.ReaderBookshelfRepository
 	progressRepo  *repository.ReaderReadProgressRepository
@@ -27,14 +26,14 @@ type ReaderService struct {
 	chapterRepo   *repository.BookChapterRepository
 }
 
-func NewReaderService(
+func NewReaderBookshelfService(
 	db *gorm.DB,
 	bookshelfRepo *repository.ReaderBookshelfRepository,
 	progressRepo *repository.ReaderReadProgressRepository,
 	bookRepo *repository.BookRepository,
 	chapterRepo *repository.BookChapterRepository,
-) *ReaderService {
-	return &ReaderService{
+) *ReaderBookshelfService {
+	return &ReaderBookshelfService{
 		db:            db,
 		bookshelfRepo: bookshelfRepo,
 		progressRepo:  progressRepo,
@@ -44,7 +43,7 @@ func NewReaderService(
 }
 
 // AddToBookshelf 添加到书架
-func (s *ReaderService) AddToBookshelf(ctx context.Context, userID uint64, req *dto.BookshelfRequest) (*dto.BookshelfResponse, error) {
+func (s *ReaderBookshelfService) AddToBookshelf(ctx context.Context, userID uint64, req *dto.BookshelfRequest) (*dto.BookshelfResponse, error) {
 	// 校验书籍存在
 	if _, err := s.bookRepo.GetByID(ctx, req.BookID); err != nil {
 		return nil, ErrBookNotExist
@@ -77,7 +76,7 @@ func (s *ReaderService) AddToBookshelf(ctx context.Context, userID uint64, req *
 }
 
 // RemoveFromBookshelf 从书架移除
-func (s *ReaderService) RemoveFromBookshelf(ctx context.Context, userID uint64, bookID uint64) error {
+func (s *ReaderBookshelfService) RemoveFromBookshelf(ctx context.Context, userID uint64, bookID uint64) error {
 	_, err := s.bookshelfRepo.GetByReaderAndBook(ctx, userID, bookID)
 	if err != nil {
 		return ErrBookshelfNotFound
@@ -86,7 +85,7 @@ func (s *ReaderService) RemoveFromBookshelf(ctx context.Context, userID uint64, 
 }
 
 // UpdateBookshelf 更新书架 (分组/置顶)
-func (s *ReaderService) UpdateBookshelf(ctx context.Context, userID uint64, bookID uint64, req *dto.BookshelfUpdateRequest) (*dto.BookshelfResponse, error) {
+func (s *ReaderBookshelfService) UpdateBookshelf(ctx context.Context, userID uint64, bookID uint64, req *dto.BookshelfUpdateRequest) (*dto.BookshelfResponse, error) {
 	m, err := s.bookshelfRepo.GetByReaderAndBook(ctx, userID, bookID)
 	if err != nil {
 		return nil, ErrBookshelfNotFound
@@ -106,7 +105,7 @@ func (s *ReaderService) UpdateBookshelf(ctx context.Context, userID uint64, book
 }
 
 // GetBookshelfPage 分页获取书架列表
-func (s *ReaderService) GetBookshelfPage(ctx context.Context, userID uint64, req *dto.BookshelfSearch) (*dto.BookshelfPageResponse, error) {
+func (s *ReaderBookshelfService) GetBookshelfPage(ctx context.Context, userID uint64, req *dto.BookshelfSearch) (*dto.BookshelfPageResponse, error) {
 	req.Normalize()
 
 	rows, total, err := s.bookshelfRepo.PageByReader(ctx, userID, req)
@@ -162,7 +161,7 @@ func (s *ReaderService) GetBookshelfPage(ctx context.Context, userID uint64, req
 }
 
 // ListGroups 获取分组列表
-func (s *ReaderService) ListGroups(ctx context.Context, userID uint64) ([]dto.BookshelfGroupItem, error) {
+func (s *ReaderBookshelfService) ListGroups(ctx context.Context, userID uint64) ([]dto.BookshelfGroupItem, error) {
 	groups, err := s.bookshelfRepo.ListGroupsByReader(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -176,65 +175,8 @@ func (s *ReaderService) ListGroups(ctx context.Context, userID uint64) ([]dto.Bo
 	return groups, nil
 }
 
-// ReportProgress 上报阅读进度
-func (s *ReaderService) ReportProgress(ctx context.Context, userID uint64, bookID uint64, req *dto.ReadProgressRequest) (*dto.ReadProgressResponse, error) {
-	// 校验书籍存在
-	if _, err := s.bookRepo.GetByID(ctx, bookID); err != nil {
-		return nil, ErrBookNotExist
-	}
-
-	m := &model.ReaderReadProgress{
-		ReaderID:     userID,
-		BookID:       bookID,
-		FileID:       req.FileID,
-		ChapterID:    req.ChapterID,
-		ChapterNo:    req.ChapterNo,
-		Position:     req.Position,
-		Percent:      req.Percent,
-		ReadDuration: req.ReadDuration,
-	}
-	m.CreateBy = &userID
-	m.UpdateBy = &userID
-
-	if err := s.progressRepo.UpsertProgress(ctx, m); err != nil {
-		return nil, err
-	}
-
-	// 更新书架的最后阅读时间
-	now := time.Now()
-	_ = s.bookshelfRepo.UpdateLastReadTime(ctx, userID, bookID, now)
-
-	// 如果不在书架中，自动加入
-	if _, err := s.bookshelfRepo.GetByReaderAndBook(ctx, userID, bookID); err != nil {
-		_ = s.bookshelfRepo.Create(ctx, &model.ReaderBookshelf{
-			ReaderID:     userID,
-			BookID:       bookID,
-			GroupName:    "默认",
-			IsTop:        false,
-			LastReadTime: &now,
-			AddTime:      now,
-		})
-	}
-
-	resp := &dto.ReadProgressResponse{}
-	// 重新查询获取最新数据
-	if p, err := s.progressRepo.GetByReaderAndBook(ctx, userID, bookID); err == nil {
-		resp.ReaderReadProgress = *p
-	}
-	return resp, nil
-}
-
-// GetProgress 获取阅读进度
-func (s *ReaderService) GetProgress(ctx context.Context, userID uint64, bookID uint64) (*dto.ReadProgressResponse, error) {
-	m, err := s.progressRepo.GetByReaderAndBook(ctx, userID, bookID)
-	if err != nil {
-		return nil, ErrProgressNotFound
-	}
-	return &dto.ReadProgressResponse{ReaderReadProgress: *m}, nil
-}
-
 // buildBookshelfResponse 构建书架响应（填充书籍基本信息）
-func (s *ReaderService) buildBookshelfResponse(ctx context.Context, m *model.ReaderBookshelf) (*dto.BookshelfResponse, error) {
+func (s *ReaderBookshelfService) buildBookshelfResponse(ctx context.Context, m *model.ReaderBookshelf) (*dto.BookshelfResponse, error) {
 	resp := &dto.BookshelfResponse{ReaderBookshelf: *m}
 
 	book, err := s.bookRepo.GetByID(ctx, m.BookID)

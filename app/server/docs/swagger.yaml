@@ -1,6 +1,253 @@
 basePath: /
 definitions:
-  boread_internal_dto.CategoryNode:
+  dto.BookRequest:
+    properties:
+      author:
+        maxLength: 128
+        type: string
+      categoryId:
+        type: integer
+      cover:
+        type: string
+      intro:
+        type: string
+      language:
+        maxLength: 16
+        type: string
+      serialStatus:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        type: string
+      tagIds:
+        items:
+          type: integer
+        type: array
+      title:
+        maxLength: 255
+        type: string
+      visibility:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        type: string
+    required:
+    - title
+    type: object
+  dto.BookResponse:
+    properties:
+      aggregateStatus:
+        $ref: '#/definitions/model.AggregateStatus'
+      author:
+        type: string
+      avgRating:
+        type: number
+      categoryId:
+        type: integer
+      categoryName:
+        type: string
+      cover:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      deptId:
+        type: integer
+      id:
+        type: integer
+      intro:
+        type: string
+      language:
+        type: string
+      latestChapterNo:
+        type: integer
+      latestChapterTitle:
+        type: string
+      ownerId:
+        type: integer
+      primaryFileId:
+        type: integer
+      ratingCount:
+        type: integer
+      serialStatus:
+        $ref: '#/definitions/model.SerialStatus'
+      status:
+        $ref: '#/definitions/model.BookStatus'
+      tagIds:
+        items:
+          type: integer
+        type: array
+      tags:
+        items:
+          $ref: '#/definitions/dto.TagBrief'
+        type: array
+      title:
+        type: string
+      totalChapters:
+        type: integer
+      totalWords:
+        type: integer
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+      visibility:
+        $ref: '#/definitions/model.Visibility'
+    type: object
+  dto.BookSearch:
+    properties:
+      author:
+        type: string
+      categoryIDs:
+        description: 展开后的分类ID列表（含自身+子分类），由 service 层填充
+        items:
+          format: int64
+          type: integer
+        type: array
+      categoryId:
+        type: integer
+      current:
+        type: integer
+      keyword:
+        type: string
+      maxWords:
+        description: 字数上限（万字）
+        type: integer
+      minWords:
+        description: 字数下限（万字）
+        type: integer
+      serialStatus:
+        type: string
+      size:
+        type: integer
+      status:
+        type: string
+      tagId:
+        type: integer
+      title:
+        type: string
+      updateTimeFrom:
+        description: 更新时间起始
+        type: string
+      updateTimeTo:
+        description: 更新时间截止
+        type: string
+      visibility:
+        type: string
+    type: object
+  dto.BookUpdateStatusRequest:
+    properties:
+      status:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        type: string
+    required:
+    - status
+    type: object
+  dto.BookshelfGroupItem:
+    properties:
+      bookCount:
+        type: integer
+      groupName:
+        type: string
+    type: object
+  dto.BookshelfPageResponse:
+    properties:
+      current:
+        type: integer
+      records:
+        items:
+          $ref: '#/definitions/dto.BookshelfResponse'
+        type: array
+      size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.BookshelfRequest:
+    properties:
+      bookId:
+        type: integer
+      groupName:
+        description: 可选，默认"默认"
+        type: string
+    required:
+    - bookId
+    type: object
+  dto.BookshelfResponse:
+    properties:
+      addTime:
+        type: string
+      bookAuthor:
+        type: string
+      bookCover:
+        type: string
+      bookId:
+        type: integer
+      bookTitle:
+        type: string
+      chapterId:
+        type: integer
+      chapterNo:
+        type: integer
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      groupName:
+        type: string
+      id:
+        type: integer
+      isTop:
+        type: boolean
+      lastReadTime:
+        type: string
+      position:
+        type: integer
+      readDuration:
+        type: integer
+      readPercent:
+        type: number
+      readerId:
+        type: integer
+      totalChapters:
+        type: integer
+      totalWords:
+        type: integer
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.BookshelfSearch:
+    properties:
+      current:
+        type: integer
+      groupName:
+        description: 按分组筛选
+        type: string
+      keyword:
+        description: 按书名关键词搜索
+        type: string
+      size:
+        type: integer
+    type: object
+  dto.BookshelfUpdateRequest:
+    properties:
+      groupName:
+        description: 修改分组
+        type: string
+      isTop:
+        description: 修改置顶状态
+        type: boolean
+    type: object
+  dto.CategoryNode:
     properties:
       categoryCode:
         type: string
@@ -8,18 +255,22 @@ definitions:
         type: string
       children:
         items:
-          $ref: '#/definitions/boread_internal_dto.CategoryNode'
+          $ref: '#/definitions/dto.CategoryNode'
         type: array
+      description:
+        type: string
       id:
         type: integer
+      isHot:
+        type: boolean
       parentId:
         type: integer
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     type: object
-  boread_internal_dto.CategoryRequest:
+  dto.CategoryRequest:
     properties:
       categoryCode:
         maxLength: 64
@@ -27,17 +278,21 @@ definitions:
       categoryName:
         maxLength: 64
         type: string
+      description:
+        type: string
+      isHot:
+        type: boolean
       parentId:
         type: integer
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     required:
     - categoryCode
     - categoryName
     type: object
-  boread_internal_dto.CategorySearch:
+  dto.CategorySearch:
     properties:
       categoryCode:
         type: string
@@ -45,18 +300,412 @@ definitions:
         type: string
       current:
         type: integer
+      isHot:
+        type: boolean
       keyword:
+        type: string
+      parentId:
+        type: integer
+      size:
+        type: integer
+      status:
+        $ref: '#/definitions/model.EnableStatus'
+    type: object
+  dto.ChapterContentResponse:
+    properties:
+      bookId:
+        type: integer
+      byteLength:
+        type: integer
+      byteOffset:
+        type: integer
+      chapterNo:
+        type: integer
+      content:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      fileId:
+        type: integer
+      id:
+        type: integer
+      isVip:
+        type: boolean
+      status:
+        $ref: '#/definitions/model.ChapterStatus'
+      title:
+        type: string
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+      volumeNo:
+        type: integer
+      volumeTitle:
+        type: string
+      wordCount:
+        type: integer
+    type: object
+  dto.ChapterListRequest:
+    properties:
+      bookId:
+        description: 书籍ID
+        type: integer
+    type: object
+  dto.ChapterResponse:
+    properties:
+      bookId:
+        type: integer
+      byteLength:
+        type: integer
+      byteOffset:
+        type: integer
+      chapterNo:
+        type: integer
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      fileId:
+        type: integer
+      id:
+        type: integer
+      isVip:
+        type: boolean
+      status:
+        $ref: '#/definitions/model.ChapterStatus'
+      title:
+        type: string
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+      volumeNo:
+        type: integer
+      volumeTitle:
+        type: string
+      wordCount:
+        type: integer
+    type: object
+  dto.ChapterRuleBindRequest:
+    properties:
+      bookId:
+        type: integer
+      ruleId:
+        type: integer
+    required:
+    - bookId
+    - ruleId
+    type: object
+  dto.ChapterRuleBindResponse:
+    properties:
+      bookId:
+        type: integer
+      createTime:
+        type: string
+      id:
+        type: integer
+      readerId:
+        type: integer
+      ruleId:
+        type: integer
+      ruleName:
+        type: string
+    type: object
+  dto.ChapterRuleRequest:
+    properties:
+      description:
+        type: string
+      groupPattern:
+        type: string
+      maxChapterLen:
+        type: integer
+      minChapterLen:
+        type: integer
+      ruleName:
+        maxLength: 64
+        type: string
+      ruleType:
+        enum:
+        - "1"
+        - "2"
+        type: string
+      sortOrder:
+        type: integer
+      status:
+        type: string
+      titlePattern:
+        maxLength: 512
+        type: string
+    required:
+    - ruleName
+    - ruleType
+    - titlePattern
+    type: object
+  dto.ChapterRuleSearch:
+    properties:
+      current:
+        type: integer
+      keyword:
+        type: string
+      ruleName:
+        type: string
+      ruleType:
         type: string
       size:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        type: string
+      userId:
+        type: integer
     type: object
-  boread_internal_dto.DeptNode:
+  dto.ChapterSearch:
+    properties:
+      bookId:
+        type: integer
+      chapterNo:
+        type: integer
+      current:
+        type: integer
+      fileId:
+        type: integer
+      keyword:
+        type: string
+      size:
+        type: integer
+    type: object
+  dto.CharacterRelRequest:
+    properties:
+      bookId:
+        type: integer
+      characterAId:
+        type: integer
+      characterBId:
+        type: integer
+      relationDesc:
+        type: string
+      relationType:
+        maxLength: 32
+        type: string
+      sortOrder:
+        type: integer
+    required:
+    - bookId
+    - characterAId
+    - characterBId
+    - relationType
+    type: object
+  dto.CharacterRelResponse:
+    properties:
+      bookId:
+        type: integer
+      characterAId:
+        type: integer
+      characterAName:
+        type: string
+      characterBId:
+        type: integer
+      characterBName:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      id:
+        type: integer
+      relationDesc:
+        type: string
+      relationType:
+        type: string
+      sortOrder:
+        type: integer
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.CharacterRequest:
+    properties:
+      alias:
+        type: string
+      avatar:
+        type: string
+      bookId:
+        type: integer
+      extra:
+        type: string
+      intro:
+        type: string
+      name:
+        maxLength: 128
+        type: string
+      roleType:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        type: string
+      sortOrder:
+        type: integer
+    required:
+    - bookId
+    - name
+    - roleType
+    type: object
+  dto.CharacterResponse:
+    properties:
+      alias:
+        type: string
+      avatar:
+        type: string
+      bookId:
+        type: integer
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      extra:
+        type: string
+      id:
+        type: integer
+      intro:
+        type: string
+      name:
+        type: string
+      roleType:
+        type: string
+      sortOrder:
+        type: integer
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.CharacterSearch:
+    properties:
+      bookId:
+        type: integer
+      current:
+        type: integer
+      keyword:
+        type: string
+      roleType:
+        type: string
+      size:
+        type: integer
+    required:
+    - bookId
+    type: object
+  dto.CommentRequest:
+    properties:
+      bookId:
+        type: integer
+      chapterId:
+        type: integer
+      content:
+        type: string
+      parentId:
+        type: integer
+      replyToId:
+        type: integer
+    required:
+    - bookId
+    - chapterId
+    - content
+    type: object
+  dto.CommentResponse:
+    properties:
+      bookId:
+        type: integer
+      chapterId:
+        type: integer
+      content:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      deptId:
+        type: integer
+      id:
+        type: integer
+      likeCount:
+        type: integer
+      liked:
+        type: boolean
+      ownerId:
+        type: integer
+      parentId:
+        type: integer
+      readerId:
+        type: integer
+      readerName:
+        type: string
+      replies:
+        items:
+          $ref: '#/definitions/dto.CommentResponse'
+        type: array
+      replyToId:
+        type: integer
+      replyToName:
+        type: string
+      status:
+        type: string
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.CommentSearch:
+    properties:
+      chapterId:
+        type: integer
+      current:
+        type: integer
+      keyword:
+        type: string
+      parentId:
+        type: integer
+      size:
+        type: integer
+    type: object
+  dto.ConfirmImportRequest:
+    properties:
+      author:
+        type: string
+      title:
+        type: string
+      uploadId:
+        type: integer
+    required:
+    - title
+    - uploadId
+    type: object
+  dto.ConfirmImportResponse:
+    properties:
+      bookAuthor:
+        type: string
+      bookId:
+        type: integer
+      bookTitle:
+        type: string
+      chapterCount:
+        type: integer
+      parseMessage:
+        type: string
+      parseStatus:
+        type: string
+      uploadId:
+        type: integer
+    type: object
+  dto.DeptNode:
     properties:
       children:
         items:
-          $ref: '#/definitions/boread_internal_dto.DeptNode'
+          $ref: '#/definitions/dto.DeptNode'
         type: array
       deptCode:
         type: string
@@ -71,9 +720,9 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     type: object
-  boread_internal_dto.DeptRequest:
+  dto.DeptRequest:
     properties:
       deptCode:
         maxLength: 64
@@ -88,12 +737,12 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     required:
     - deptCode
     - deptName
     type: object
-  boread_internal_dto.DeptSearch:
+  dto.DeptSearch:
     properties:
       current:
         type: integer
@@ -106,9 +755,9 @@ definitions:
       size:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     type: object
-  boread_internal_dto.DictItemRequest:
+  dto.DictItemRequest:
     properties:
       dictId:
         type: integer
@@ -123,13 +772,13 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     required:
     - dictId
     - itemLabel
     - itemValue
     type: object
-  boread_internal_dto.DictRequest:
+  dto.DictRequest:
     properties:
       dictCode:
         maxLength: 64
@@ -140,12 +789,12 @@ definitions:
         maxLength: 64
         type: string
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     required:
     - dictCode
     - dictName
     type: object
-  boread_internal_dto.DictSearch:
+  dto.DictSearch:
     properties:
       current:
         type: integer
@@ -158,9 +807,148 @@ definitions:
       size:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     type: object
-  boread_internal_dto.LoginLogSearch:
+  dto.FileSearch:
+    properties:
+      bookId:
+        type: integer
+      current:
+        type: integer
+      fileStatus:
+        type: string
+      keyword:
+        type: string
+      size:
+        type: integer
+      sourceType:
+        type: string
+    type: object
+  dto.FileUploadResponse:
+    properties:
+      fileSize:
+        type: integer
+      matchedBookId:
+        type: integer
+      matchedBookTitle:
+        type: string
+      originalName:
+        type: string
+      sourceFormat:
+        type: string
+      suggestedAuthor:
+        type: string
+      suggestedTitle:
+        type: string
+      uploadId:
+        type: integer
+    type: object
+  dto.FilterRuleRequest:
+    properties:
+      action:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        type: string
+      applyStage:
+        enum:
+        - "1"
+        - "2"
+        type: string
+      category:
+        type: string
+      description:
+        type: string
+      matchType:
+        enum:
+        - "1"
+        - "2"
+        type: string
+      pattern:
+        maxLength: 512
+        type: string
+      replacement:
+        type: string
+      ruleName:
+        maxLength: 64
+        type: string
+      severity:
+        type: string
+      status:
+        type: string
+    required:
+    - action
+    - applyStage
+    - matchType
+    - pattern
+    - ruleName
+    type: object
+  dto.FilterRuleSearch:
+    properties:
+      applyStage:
+        type: string
+      category:
+        type: string
+      current:
+        type: integer
+      keyword:
+        type: string
+      ruleName:
+        type: string
+      size:
+        type: integer
+      status:
+        type: string
+    type: object
+  dto.HotCategoryItem:
+    properties:
+      categoryCode:
+        type: string
+      categoryName:
+        type: string
+      id:
+        type: integer
+    type: object
+  dto.LikeRequest:
+    properties:
+      targetId:
+        type: integer
+      targetType:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        type: string
+    required:
+    - targetId
+    - targetType
+    type: object
+  dto.LikeResponse:
+    properties:
+      count:
+        type: integer
+      liked:
+        type: boolean
+    type: object
+  dto.LikeStatusRequest:
+    properties:
+      targets:
+        items:
+          $ref: '#/definitions/dto.LikeTarget'
+        minItems: 1
+        type: array
+    required:
+    - targets
+    type: object
+  dto.LikeTarget:
+    properties:
+      targetId:
+        type: integer
+      targetType:
+        type: string
+    type: object
+  dto.LoginLogSearch:
     properties:
       current:
         type: integer
@@ -171,9 +959,9 @@ definitions:
       loginIp:
         type: string
       loginResult:
-        $ref: '#/definitions/boread_internal_model.LoginResult'
+        $ref: '#/definitions/model.LoginResult'
       loginType:
-        $ref: '#/definitions/boread_internal_model.LoginType'
+        $ref: '#/definitions/model.LoginType'
       size:
         type: integer
       startTime:
@@ -182,7 +970,7 @@ definitions:
       userName:
         type: string
     type: object
-  boread_internal_dto.LoginRequest:
+  dto.LoginRequest:
     properties:
       password:
         maxLength: 128
@@ -196,7 +984,7 @@ definitions:
     - password
     - username
     type: object
-  boread_internal_dto.LoginResponse:
+  dto.LoginResponse:
     properties:
       expiresAt:
         type: integer
@@ -207,7 +995,7 @@ definitions:
       token:
         type: string
     type: object
-  boread_internal_dto.MenuButtonItem:
+  dto.MenuButtonItem:
     properties:
       buttonCode:
         type: string
@@ -216,7 +1004,7 @@ definitions:
       id:
         type: integer
     type: object
-  boread_internal_dto.MenuButtonRequest:
+  dto.MenuButtonRequest:
     properties:
       buttonCode:
         maxLength: 64
@@ -229,7 +1017,7 @@ definitions:
     - buttonCode
     - menuId
     type: object
-  boread_internal_dto.MenuMeta:
+  dto.MenuMeta:
     properties:
       activeMenu:
         type: string
@@ -260,17 +1048,17 @@ definitions:
       title:
         type: string
     type: object
-  boread_internal_dto.MenuNode:
+  dto.MenuNode:
     properties:
       activeMenu:
         type: string
       buttons:
         items:
-          $ref: '#/definitions/boread_internal_model.SysMenuButton'
+          $ref: '#/definitions/model.SysMenuButton'
         type: array
       children:
         items:
-          $ref: '#/definitions/boread_internal_dto.MenuNode'
+          $ref: '#/definitions/dto.MenuNode'
         type: array
       component:
         type: string
@@ -291,7 +1079,7 @@ definitions:
       icon:
         type: string
       iconType:
-        $ref: '#/definitions/boread_internal_model.IconType'
+        $ref: '#/definitions/model.IconType'
       id:
         type: integer
       isSystem:
@@ -301,7 +1089,7 @@ definitions:
       menuName:
         type: string
       menuType:
-        $ref: '#/definitions/boread_internal_model.MenuType'
+        $ref: '#/definitions/model.MenuType'
       multiTab:
         type: boolean
       order:
@@ -309,25 +1097,25 @@ definitions:
       parentId:
         type: integer
       query:
-        $ref: '#/definitions/boread_internal_model.JSONMap'
+        $ref: '#/definitions/model.JSONMap'
       routeName:
         type: string
       routePath:
         type: string
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_dto.MenuRequest:
+  dto.MenuRequest:
     properties:
       activeMenu:
         type: string
       buttons:
         items:
-          $ref: '#/definitions/boread_internal_dto.MenuButtonItem'
+          $ref: '#/definitions/dto.MenuButtonItem'
         type: array
       component:
         type: string
@@ -344,7 +1132,7 @@ definitions:
       icon:
         type: string
       iconType:
-        $ref: '#/definitions/boread_internal_model.IconType'
+        $ref: '#/definitions/model.IconType'
       keepAlive:
         type: boolean
       menuName:
@@ -352,7 +1140,7 @@ definitions:
         type: string
       menuType:
         allOf:
-        - $ref: '#/definitions/boread_internal_model.MenuType'
+        - $ref: '#/definitions/model.MenuType'
         enum:
         - "1"
         - "2"
@@ -370,32 +1158,32 @@ definitions:
         maxLength: 255
         type: string
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     required:
     - menuName
     - menuType
     - routeName
     - routePath
     type: object
-  boread_internal_dto.MenuResponse:
+  dto.MenuResponse:
     properties:
       home:
         type: string
       routes:
         items:
-          $ref: '#/definitions/boread_internal_dto.MenuRoute'
+          $ref: '#/definitions/dto.MenuRoute'
         type: array
     type: object
-  boread_internal_dto.MenuRoute:
+  dto.MenuRoute:
     properties:
       children:
         items:
-          $ref: '#/definitions/boread_internal_dto.MenuRoute'
+          $ref: '#/definitions/dto.MenuRoute'
         type: array
       component:
         type: string
       meta:
-        $ref: '#/definitions/boread_internal_dto.MenuMeta'
+        $ref: '#/definitions/dto.MenuMeta'
       name:
         type: string
       path:
@@ -403,7 +1191,7 @@ definitions:
       redirect:
         type: string
     type: object
-  boread_internal_dto.MenuSearch:
+  dto.MenuSearch:
     properties:
       current:
         type: integer
@@ -414,9 +1202,98 @@ definitions:
       size:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     type: object
-  boread_internal_dto.OperationLogSearch:
+  dto.NoteRequest:
+    properties:
+      bookId:
+        type: integer
+      chapterId:
+        type: integer
+      content:
+        type: string
+      endOffset:
+        type: integer
+      highlightColor:
+        type: string
+      noteType:
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        type: string
+      selectedText:
+        type: string
+      startOffset:
+        type: integer
+      visibility:
+        enum:
+        - "1"
+        - "2"
+        type: string
+    required:
+    - bookId
+    - noteType
+    type: object
+  dto.NoteResponse:
+    properties:
+      bookId:
+        type: integer
+      bookTitle:
+        type: string
+      chapterId:
+        type: integer
+      chapterTitle:
+        type: string
+      content:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      endOffset:
+        type: integer
+      highlightColor:
+        type: string
+      id:
+        type: integer
+      likeCount:
+        type: integer
+      liked:
+        type: boolean
+      noteType:
+        type: string
+      readerId:
+        type: integer
+      readerName:
+        type: string
+      selectedText:
+        type: string
+      startOffset:
+        type: integer
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+      visibility:
+        type: string
+    type: object
+  dto.NoteSearch:
+    properties:
+      bookId:
+        type: integer
+      chapterId:
+        type: integer
+      current:
+        type: integer
+      keyword:
+        type: string
+      noteType:
+        type: string
+      size:
+        type: integer
+    type: object
+  dto.OperationLogSearch:
     properties:
       action:
         type: string
@@ -437,7 +1314,7 @@ definitions:
       userName:
         type: string
     type: object
-  boread_internal_dto.PageResponse:
+  dto.PageResponse:
     properties:
       current:
         type: integer
@@ -447,7 +1324,218 @@ definitions:
       total:
         type: integer
     type: object
-  boread_internal_dto.RoleBrief:
+  dto.ReParseRequest:
+    properties:
+      bookId:
+        type: integer
+    required:
+    - bookId
+    type: object
+  dto.ReParseResponse:
+    properties:
+      bookId:
+        type: integer
+      bookTitle:
+        type: string
+      newCount:
+        type: integer
+      oldCount:
+        type: integer
+      totalWords:
+        type: integer
+    type: object
+  dto.ReadEventBookResponse:
+    properties:
+      bookId:
+        type: integer
+      bookTitle:
+        type: string
+      chapterCount:
+        type: integer
+      durationSec:
+        type: integer
+      wordCount:
+        type: integer
+    type: object
+  dto.ReadEventDailyResponse:
+    properties:
+      bookCount:
+        type: integer
+      chapterCount:
+        type: integer
+      durationSec:
+        type: integer
+      sessionCount:
+        type: integer
+      statDate:
+        type: string
+      wordCount:
+        type: integer
+    type: object
+  dto.ReadEventRequest:
+    properties:
+      bookId:
+        type: integer
+      chapterId:
+        type: integer
+      deviceType:
+        description: 默认 web
+        type: string
+      durationSec:
+        description: 本次心跳区间阅读时长(秒)
+        type: integer
+      sessionId:
+        description: 服务端生成 UUID, 客户端可传空
+        type: string
+      wordCount:
+        description: 本次心跳区间滚动字数
+        type: integer
+    required:
+    - bookId
+    - chapterId
+    - durationSec
+    type: object
+  dto.ReadEventTotalResponse:
+    properties:
+      bookCount:
+        type: integer
+      durationSec:
+        type: integer
+      sessionCount:
+        type: integer
+      wordCount:
+        type: integer
+    type: object
+  dto.ReadProgressRequest:
+    properties:
+      chapterId:
+        type: integer
+      chapterNo:
+        type: integer
+      fileId:
+        description: 文件切换时传入
+        type: integer
+      percent:
+        type: number
+      position:
+        type: integer
+      readDuration:
+        description: 本次增加的阅读时长(秒)
+        type: integer
+    required:
+    - chapterId
+    - chapterNo
+    type: object
+  dto.ReadProgressResponse:
+    properties:
+      bookId:
+        type: integer
+      chapterId:
+        type: integer
+      chapterNo:
+        type: integer
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      fileId:
+        type: integer
+      id:
+        type: integer
+      lastReadTime:
+        type: string
+      percent:
+        type: number
+      position:
+        type: integer
+      readDuration:
+        type: integer
+      readerId:
+        type: integer
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.ReadStatsQuery:
+    properties:
+      bookId:
+        description: 指定书籍(可选), 用于查单书统计
+        type: integer
+      endDate:
+        description: 结束日期 2006-01-02, 空表示不限
+        type: string
+      startDate:
+        description: 起始日期 2006-01-02, 空表示不限
+        type: string
+    type: object
+  dto.ReviewRequest:
+    properties:
+      bookId:
+        type: integer
+      content:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      title:
+        type: string
+    required:
+    - bookId
+    - content
+    type: object
+  dto.ReviewResponse:
+    properties:
+      bookId:
+        type: integer
+      bookTitle:
+        type: string
+      content:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      deptId:
+        type: integer
+      id:
+        type: integer
+      likeCount:
+        type: integer
+      liked:
+        type: boolean
+      ownerId:
+        type: integer
+      rating:
+        type: integer
+      readerId:
+        type: integer
+      readerName:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dto.ReviewSearch:
+    properties:
+      bookId:
+        type: integer
+      current:
+        type: integer
+      keyword:
+        type: string
+      size:
+        type: integer
+      status:
+        type: string
+    type: object
+  dto.RoleBrief:
     properties:
       id:
         type: integer
@@ -456,25 +1544,25 @@ definitions:
       roleName:
         type: string
     type: object
-  boread_internal_dto.RoleButtonRequest:
+  dto.RoleButtonRequest:
     properties:
       buttonIds:
         items:
           type: integer
         type: array
     type: object
-  boread_internal_dto.RoleMenuRequest:
+  dto.RoleMenuRequest:
     properties:
       menuIds:
         items:
           type: integer
         type: array
     type: object
-  boread_internal_dto.RoleRequest:
+  dto.RoleRequest:
     properties:
       dataScope:
         allOf:
-        - $ref: '#/definitions/boread_internal_model.DataScope'
+        - $ref: '#/definitions/model.DataScope'
         enum:
         - "1"
         - "2"
@@ -497,13 +1585,13 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     required:
     - dataScope
     - roleCode
     - roleName
     type: object
-  boread_internal_dto.RoleSearch:
+  dto.RoleSearch:
     properties:
       current:
         type: integer
@@ -516,9 +1604,64 @@ definitions:
       size:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
     type: object
-  boread_internal_dto.TagRequest:
+  dto.ScanAllResponse:
+    properties:
+      failed:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/dto.ScanResult'
+        type: array
+      success:
+        type: integer
+    type: object
+  dto.ScanPathRequest:
+    properties:
+      path:
+        type: string
+    required:
+    - path
+    type: object
+  dto.ScanPathResponse:
+    properties:
+      failed:
+        type: integer
+      imported:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/dto.ScanResult'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.ScanResult:
+    properties:
+      bookId:
+        type: integer
+      chapterCount:
+        type: integer
+      fileSize:
+        type: integer
+      originalName:
+        type: string
+      parseMessage:
+        type: string
+      parseStatus:
+        type: string
+      uploadId:
+        type: integer
+    type: object
+  dto.TagBrief:
+    properties:
+      id:
+        type: integer
+      tagName:
+        type: string
+    type: object
+  dto.TagRequest:
     properties:
       description:
         type: string
@@ -528,7 +1671,7 @@ definitions:
     required:
     - tagName
     type: object
-  boread_internal_dto.TagSearch:
+  dto.TagSearch:
     properties:
       current:
         type: integer
@@ -539,7 +1682,22 @@ definitions:
       tagName:
         type: string
     type: object
-  boread_internal_dto.UserCreateRequest:
+  dto.UploadSearch:
+    properties:
+      bookId:
+        type: integer
+      current:
+        type: integer
+      keyword:
+        type: string
+      originalName:
+        type: string
+      parseStatus:
+        type: string
+      size:
+        type: integer
+    type: object
+  dto.UserCreateRequest:
     properties:
       avatar:
         type: string
@@ -556,7 +1714,7 @@ definitions:
           type: integer
         type: array
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       userEmail:
         type: string
       userGender:
@@ -574,7 +1732,7 @@ definitions:
     - password
     - userName
     type: object
-  boread_internal_dto.UserInfoResponse:
+  dto.UserInfoResponse:
     properties:
       buttons:
         items:
@@ -589,7 +1747,7 @@ definitions:
       userName:
         type: string
     type: object
-  boread_internal_dto.UserResetPwdRequest:
+  dto.UserResetPwdRequest:
     properties:
       password:
         maxLength: 64
@@ -598,7 +1756,7 @@ definitions:
     required:
     - password
     type: object
-  boread_internal_dto.UserSearch:
+  dto.UserSearch:
     properties:
       current:
         type: integer
@@ -609,7 +1767,7 @@ definitions:
       size:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       userEmail:
         type: string
       userGender:
@@ -619,7 +1777,7 @@ definitions:
       userPhone:
         type: string
     type: object
-  boread_internal_dto.UserUpdateRequest:
+  dto.UserUpdateRequest:
     properties:
       avatar:
         type: string
@@ -632,7 +1790,7 @@ definitions:
           type: integer
         type: array
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       userEmail:
         type: string
       userGender:
@@ -643,7 +1801,25 @@ definitions:
       userPhone:
         type: string
     type: object
-  boread_internal_model.BookCategory:
+  model.AggregateStatus:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    type: string
+    x-enum-comments:
+      AggregateDone: 聚合完成
+      AggregateMerging: 多文件聚合中
+      AggregateSingle: 单文件(无需聚合)
+    x-enum-descriptions:
+    - 单文件(无需聚合)
+    - 多文件聚合中
+    - 聚合完成
+    x-enum-varnames:
+    - AggregateSingle
+    - AggregateMerging
+    - AggregateDone
+  model.BookCategory:
     properties:
       ancestors:
         type: string
@@ -659,19 +1835,111 @@ definitions:
         type: string
       id:
         type: integer
+      isHot:
+        type: boolean
       parentId:
         type: integer
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_model.BookTag:
+  model.BookChapterRule:
     properties:
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      description:
+        type: string
+      groupPattern:
+        type: string
+      id:
+        type: integer
+      maxChapterLen:
+        type: integer
+      minChapterLen:
+        type: integer
+      ruleName:
+        type: string
+      ruleType:
+        $ref: '#/definitions/model.RuleType'
+      sortOrder:
+        type: integer
+      status:
+        $ref: '#/definitions/model.EnableStatus'
+      titlePattern:
+        type: string
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+      userId:
+        type: integer
+    type: object
+  model.BookContentFilterRule:
+    properties:
+      action:
+        $ref: '#/definitions/model.FilterAction'
+      applyStage:
+        $ref: '#/definitions/model.FilterApplyStage'
+      category:
+        type: string
+      createBy:
+        type: integer
+      createTime:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      matchType:
+        $ref: '#/definitions/model.FilterMatchType'
+      pattern:
+        type: string
+      replacement:
+        type: string
+      ruleName:
+        type: string
+      severity:
+        $ref: '#/definitions/model.FilterSeverity'
+      status:
+        $ref: '#/definitions/model.EnableStatus'
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  model.BookStatus:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    type: string
+    x-enum-comments:
+      BookListed: 已上架
+      BookRejected: 审核拒绝
+      BookReviewing: 审核中
+      BookUnlisted: 下架
+    x-enum-descriptions:
+    - 已上架
+    - 下架
+    - 审核中
+    - 审核拒绝
+    x-enum-varnames:
+    - BookListed
+    - BookUnlisted
+    - BookReviewing
+    - BookRejected
+  model.BookTag:
+    properties:
+      createBy:
+        type: integer
       createTime:
         type: string
       description:
@@ -680,10 +1948,32 @@ definitions:
         type: integer
       tagName:
         type: string
+      updateBy:
+        type: integer
+      updateTime:
+        type: string
       usageCount:
         type: integer
     type: object
-  boread_internal_model.DataScope:
+  model.ChapterStatus:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    type: string
+    x-enum-comments:
+      ChapterDraft: 草稿
+      ChapterPublished: 发布
+      ChapterRemoved: 下架
+    x-enum-descriptions:
+    - 发布
+    - 草稿
+    - 下架
+    x-enum-varnames:
+    - ChapterPublished
+    - ChapterDraft
+    - ChapterRemoved
+  model.DataScope:
     enum:
     - "1"
     - "2"
@@ -709,7 +1999,7 @@ definitions:
     - DataScopeDept
     - DataScopeDeptAndSub
     - DataScopeSelf
-  boread_internal_model.EnableStatus:
+  model.EnableStatus:
     enum:
     - "1"
     - "2"
@@ -717,7 +2007,63 @@ definitions:
     x-enum-varnames:
     - StatusEnabled
     - StatusDisabled
-  boread_internal_model.IconType:
+  model.FilterAction:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    type: string
+    x-enum-comments:
+      FilterBlock: 拦截整章
+      FilterMarkReview: 标记审核
+      FilterReplace: 替换
+    x-enum-descriptions:
+    - 替换
+    - 拦截整章
+    - 标记审核
+    x-enum-varnames:
+    - FilterReplace
+    - FilterBlock
+    - FilterMarkReview
+  model.FilterApplyStage:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-comments:
+      FilterStageInput: 入库时(解析阶段)
+      FilterStageOutput: 出库时(读章节时)
+    x-enum-descriptions:
+    - 入库时(解析阶段)
+    - 出库时(读章节时)
+    x-enum-varnames:
+    - FilterStageInput
+    - FilterStageOutput
+  model.FilterMatchType:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-comments:
+      FilterKeyword: 关键词
+      FilterRegex: 正则
+    x-enum-descriptions:
+    - 关键词
+    - 正则
+    x-enum-varnames:
+    - FilterKeyword
+    - FilterRegex
+  model.FilterSeverity:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    type: string
+    x-enum-varnames:
+    - FilterLow
+    - FilterMedium
+    - FilterHigh
+  model.IconType:
     enum:
     - "1"
     - "2"
@@ -725,10 +2071,10 @@ definitions:
     x-enum-varnames:
     - IconTypeIconify
     - IconTypeLocal
-  boread_internal_model.JSONMap:
+  model.JSONMap:
     additionalProperties: {}
     type: object
-  boread_internal_model.LoginResult:
+  model.LoginResult:
     enum:
     - "1"
     - "2"
@@ -736,7 +2082,7 @@ definitions:
     x-enum-varnames:
     - LoginResultSuccess
     - LoginResultFail
-  boread_internal_model.LoginType:
+  model.LoginType:
     enum:
     - "1"
     - "2"
@@ -744,7 +2090,7 @@ definitions:
     x-enum-varnames:
     - LoginTypeLogin
     - LoginTypeLogout
-  boread_internal_model.MenuType:
+  model.MenuType:
     enum:
     - "1"
     - "2"
@@ -758,7 +2104,39 @@ definitions:
     x-enum-varnames:
     - MenuTypeDir
     - MenuTypeMenu
-  boread_internal_model.SysDept:
+  model.RuleType:
+    enum:
+    - "1"
+    - "2"
+    type: string
+    x-enum-comments:
+      RuleTypeCustom: 用户自定义规则
+      RuleTypeSystem: 系统默认规则
+    x-enum-descriptions:
+    - 系统默认规则
+    - 用户自定义规则
+    x-enum-varnames:
+    - RuleTypeSystem
+    - RuleTypeCustom
+  model.SerialStatus:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    type: string
+    x-enum-comments:
+      SerialFinished: 已完结
+      SerialOngoing: 连载中
+      SerialStopped: 断更
+    x-enum-descriptions:
+    - 连载中
+    - 已完结
+    - 断更
+    x-enum-varnames:
+    - SerialOngoing
+    - SerialFinished
+    - SerialStopped
+  model.SysDept:
     properties:
       ancestors:
         type: string
@@ -779,13 +2157,13 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_model.SysDict:
+  model.SysDict:
     properties:
       createBy:
         type: integer
@@ -802,13 +2180,13 @@ definitions:
       isSystem:
         type: boolean
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_model.SysDictItem:
+  model.SysDictItem:
     properties:
       createBy:
         type: integer
@@ -827,13 +2205,13 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_model.SysMenu:
+  model.SysMenu:
     properties:
       activeMenu:
         type: string
@@ -856,7 +2234,7 @@ definitions:
       icon:
         type: string
       iconType:
-        $ref: '#/definitions/boread_internal_model.IconType'
+        $ref: '#/definitions/model.IconType'
       id:
         type: integer
       isSystem:
@@ -866,7 +2244,7 @@ definitions:
       menuName:
         type: string
       menuType:
-        $ref: '#/definitions/boread_internal_model.MenuType'
+        $ref: '#/definitions/model.MenuType'
       multiTab:
         type: boolean
       order:
@@ -874,19 +2252,19 @@ definitions:
       parentId:
         type: integer
       query:
-        $ref: '#/definitions/boread_internal_model.JSONMap'
+        $ref: '#/definitions/model.JSONMap'
       routeName:
         type: string
       routePath:
         type: string
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_model.SysMenuButton:
+  model.SysMenuButton:
     properties:
       buttonCode:
         type: string
@@ -901,14 +2279,14 @@ definitions:
       updateTime:
         type: string
     type: object
-  boread_internal_model.SysRole:
+  model.SysRole:
     properties:
       createBy:
         type: integer
       createTime:
         type: string
       dataScope:
-        $ref: '#/definitions/boread_internal_model.DataScope'
+        $ref: '#/definitions/model.DataScope'
       id:
         type: integer
       isSystem:
@@ -922,13 +2300,13 @@ definitions:
       sortOrder:
         type: integer
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
         type: string
     type: object
-  boread_internal_model.SysUser:
+  model.SysUser:
     properties:
       avatar:
         type: string
@@ -951,7 +2329,7 @@ definitions:
       pwdUpdatedAt:
         type: string
       status:
-        $ref: '#/definitions/boread_internal_model.EnableStatus'
+        $ref: '#/definitions/model.EnableStatus'
       updateBy:
         type: integer
       updateTime:
@@ -965,7 +2343,25 @@ definitions:
       userPhone:
         type: string
     type: object
-  boread_pkg_response.Response:
+  model.Visibility:
+    enum:
+    - "1"
+    - "2"
+    - "3"
+    type: string
+    x-enum-comments:
+      VisibilityDept: 部门内
+      VisibilityPrivate: 仅自己
+      VisibilityPublic: 公开
+    x-enum-descriptions:
+    - 公开
+    - 仅自己
+    - 部门内
+    x-enum-varnames:
+    - VisibilityPublic
+    - VisibilityPrivate
+    - VisibilityDept
+  response.Response:
     properties:
       code:
         type: integer
@@ -989,7 +2385,7 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
@@ -1011,7 +2407,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.LoginRequest'
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
@@ -1019,10 +2415,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.LoginResponse'
+                  $ref: '#/definitions/dto.LoginResponse'
               type: object
       summary: 登录
       tags:
@@ -1036,10 +2432,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.MenuResponse'
+                  $ref: '#/definitions/dto.MenuResponse'
               type: object
       security:
       - BearerAuth: []
@@ -1055,17 +2451,179 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.UserInfoResponse'
+                  $ref: '#/definitions/dto.UserInfoResponse'
               type: object
       security:
       - BearerAuth: []
       summary: 当前用户信息
       tags:
       - auth
-  /api/manage/book-category:
+  /api/book:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书籍
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BookResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 新增书籍
+      tags:
+      - book
+  /api/book/{id}:
+    delete:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除书籍
+      tags:
+      - book
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BookResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 书籍详情
+      tags:
+      - book
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 书籍
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BookResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 编辑书籍
+      tags:
+      - book
+  /api/book/{id}/chapter/{chapterNo}:
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 章节序号
+        in: path
+        name: chapterNo
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChapterContentResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 读取章节内容
+      tags:
+      - book-file
+  /api/book/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookUpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新上架状态
+      tags:
+      - book
+  /api/book/category:
     post:
       consumes:
       - application/json
@@ -1075,7 +2633,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.CategoryRequest'
+          $ref: '#/definitions/dto.CategoryRequest'
       produces:
       - application/json
       responses:
@@ -1083,17 +2641,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.BookCategory'
+                  $ref: '#/definitions/model.BookCategory'
               type: object
       security:
       - BearerAuth: []
       summary: 新增分类
       tags:
       - book-category
-  /api/manage/book-category/{id}:
+  /api/book/category/{id}:
     delete:
       parameters:
       - description: 分类ID
@@ -1107,7 +2665,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除分类
@@ -1127,10 +2685,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.BookCategory'
+                  $ref: '#/definitions/model.BookCategory'
               type: object
       security:
       - BearerAuth: []
@@ -1151,7 +2709,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.CategoryRequest'
+          $ref: '#/definitions/dto.CategoryRequest'
       produces:
       - application/json
       responses:
@@ -1159,17 +2717,36 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.BookCategory'
+                  $ref: '#/definitions/model.BookCategory'
               type: object
       security:
       - BearerAuth: []
       summary: 编辑分类
       tags:
       - book-category
-  /api/manage/book-category/page:
+  /api/book/category/hot:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.HotCategoryItem'
+                  type: array
+              type: object
+      summary: 热门分类列表
+      tags:
+      - book-category
+  /api/book/category/page:
     post:
       consumes:
       - application/json
@@ -1179,7 +2756,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.CategorySearch'
+          $ref: '#/definitions/dto.CategorySearch'
       produces:
       - application/json
       responses:
@@ -1187,15 +2764,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   allOf:
-                  - $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  - $ref: '#/definitions/dto.PageResponse'
                   - properties:
                       records:
                         items:
-                          $ref: '#/definitions/boread_internal_dto.CategoryNode'
+                          $ref: '#/definitions/dto.CategoryNode'
                         type: array
                     type: object
               type: object
@@ -1204,7 +2781,7 @@ paths:
       summary: 分类分页列表 (树形)
       tags:
       - book-category
-  /api/manage/book-category/tree:
+  /api/book/category/tree:
     get:
       produces:
       - application/json
@@ -1213,11 +2790,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_dto.CategoryNode'
+                    $ref: '#/definitions/dto.CategoryNode'
                   type: array
               type: object
       security:
@@ -1225,7 +2802,1638 @@ paths:
       summary: 分类树
       tags:
       - book-category
-  /api/manage/book-tag:
+  /api/book/chapter-rule:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChapterRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BookChapterRule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建章节识别规则
+      tags:
+      - book-chapter-rule
+  /api/book/chapter-rule/{id}:
+    delete:
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除章节识别规则
+      tags:
+      - book-chapter-rule
+    get:
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BookChapterRule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 章节识别规则详情
+      tags:
+      - book-chapter-rule
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 规则
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChapterRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BookChapterRule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新章节识别规则
+      tags:
+      - book-chapter-rule
+  /api/book/chapter-rule/bind:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 绑定参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChapterRuleBindRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChapterRuleBindResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 为书籍绑定章节识别规则
+      tags:
+      - book-chapter-rule
+  /api/book/chapter-rule/bind/{bookId}:
+    delete:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 解绑书籍的章节识别规则
+      tags:
+      - book-chapter-rule
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ChapterRuleBindResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取书籍绑定的章节识别规则
+      tags:
+      - book-chapter-rule
+  /api/book/chapter-rule/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChapterRuleSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 章节识别规则分页
+      tags:
+      - book-chapter-rule
+  /api/book/chapter/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChapterListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ChapterResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 章节列表
+      tags:
+      - book-file
+  /api/book/chapter/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChapterSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 章节分页列表
+      tags:
+      - book-file
+  /api/book/character:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CharacterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CharacterResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建角色
+      tags:
+      - book-character
+  /api/book/character/{id}:
+    delete:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除角色
+      tags:
+      - book-character
+    get:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CharacterResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取角色详情
+      tags:
+      - book-character
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 角色参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CharacterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CharacterResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新角色
+      tags:
+      - book-character
+  /api/book/character/book/{bookId}:
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CharacterResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 按书查询角色列表
+      tags:
+      - book-character
+  /api/book/character/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CharacterSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分页查询角色
+      tags:
+      - book-character
+  /api/book/character/rel:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关系参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CharacterRelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CharacterRelResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建角色关系
+      tags:
+      - book-character-rel
+  /api/book/character/rel/{id}:
+    delete:
+      parameters:
+      - description: 关系ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除角色关系
+      tags:
+      - book-character-rel
+    get:
+      parameters:
+      - description: 关系ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CharacterRelResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取角色关系详情
+      tags:
+      - book-character-rel
+  /api/book/character/rel/book/{bookId}:
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CharacterRelResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询某本书所有角色关系
+      tags:
+      - book-character-rel
+  /api/book/character/rel/character/{characterId}:
+    get:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: characterId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CharacterRelResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询角色所有关系
+      tags:
+      - book-character-rel
+  /api/book/comment:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 评论参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CommentResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建章节评论
+      tags:
+      - book-comment
+  /api/book/comment/{id}:
+    delete:
+      parameters:
+      - description: 评论ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除章节评论
+      tags:
+      - book-comment
+    get:
+      parameters:
+      - description: 评论ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CommentResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取评论详情
+      tags:
+      - book-comment
+  /api/book/comment/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CommentSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分页查询评论
+      tags:
+      - book-comment
+  /api/book/confirm-import:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 确认入库参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConfirmImportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ConfirmImportResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 确认入库（匹配或创建书籍、写入章节索引）
+      tags:
+      - book-file
+  /api/book/file/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FileSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 文件记录分页
+      tags:
+      - book-file
+  /api/book/filter-rule:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilterRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BookContentFilterRule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建内容净化规则
+      tags:
+      - book-filter-rule
+  /api/book/filter-rule/{id}:
+    delete:
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除内容净化规则
+      tags:
+      - book-filter-rule
+    get:
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BookContentFilterRule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 内容净化规则详情
+      tags:
+      - book-filter-rule
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 规则
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilterRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BookContentFilterRule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新内容净化规则
+      tags:
+      - book-filter-rule
+  /api/book/filter-rule/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilterRuleSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 内容净化规则分页
+      tags:
+      - book-filter-rule
+  /api/book/like/count/{targetType}/{targetId}:
+    get:
+      parameters:
+      - description: 目标类型
+        in: path
+        name: targetType
+        required: true
+        type: string
+      - description: 目标ID
+        in: path
+        name: targetId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  format: int64
+                  type: integer
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询点赞数
+      tags:
+      - like
+  /api/book/like/status:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LikeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: boolean
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 批量查询点赞状态
+      tags:
+      - like
+  /api/book/like/toggle:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 点赞参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LikeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LikeResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 切换点赞
+      tags:
+      - like
+  /api/book/note:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 笔记参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.NoteResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建笔记/划线
+      tags:
+      - reader-note
+  /api/book/note/{id}:
+    delete:
+      parameters:
+      - description: 笔记ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除笔记/划线
+      tags:
+      - reader-note
+    get:
+      parameters:
+      - description: 笔记ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.NoteResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取笔记详情
+      tags:
+      - reader-note
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 笔记ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 笔记参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.NoteResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新笔记/划线
+      tags:
+      - reader-note
+  /api/book/note/book/{bookId}:
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.NoteResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取某本书的公开笔记
+      tags:
+      - reader-note
+  /api/book/note/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NoteSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分页查询笔记
+      tags:
+      - reader-note
+  /api/book/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 书籍分页列表
+      tags:
+      - book
+  /api/book/re-parse:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReParseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReParseResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 重新识别章节（删除旧章节索引，重新解析并创建）
+      tags:
+      - book-file
+  /api/book/read-stats/books:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReadStatsQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ReadEventBookResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 按书阅读统计
+      tags:
+      - book-read-stats
+  /api/book/read-stats/daily:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReadStatsQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ReadEventDailyResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 按日阅读统计
+      tags:
+      - book-read-stats
+  /api/book/read-stats/total:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReadEventTotalResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 总阅读统计
+      tags:
+      - book-read-stats
+  /api/book/reader/progress/{bookId}:
+    get:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReadProgressResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取阅读进度
+      tags:
+      - book-reader
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      - description: 进度参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReadProgressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReadProgressResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 上报阅读进度
+      tags:
+      - book-reader
+  /api/book/reader/read-event:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 阅读事件参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReadEventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 上报阅读事件
+      tags:
+      - book-reader
+  /api/book/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书评参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReviewResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建书评
+      tags:
+      - book-review
+  /api/book/review/{id}:
+    delete:
+      parameters:
+      - description: 书评ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除书评
+      tags:
+      - book-review
+    get:
+      parameters:
+      - description: 书评ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReviewResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取书评详情
+      tags:
+      - book-review
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书评ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 书评参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ReviewResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新书评
+      tags:
+      - book-review
+  /api/book/review/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 分页查询书评
+      tags:
+      - book-review
+  /api/book/scan:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScanAllResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 扫描入库
+      tags:
+      - book-file
+  /api/book/scan-path:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 扫描路径
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ScanPathRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScanPathResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 扫描本地目录中的小说文件
+      tags:
+      - book-file
+  /api/book/scan/{id}:
+    post:
+      parameters:
+      - description: 上传记录ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ScanResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 扫描单个上传任务
+      tags:
+      - book-file
+  /api/book/shelf:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书架参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookshelfRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BookshelfResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 添加到书架
+      tags:
+      - reader-bookshelf
+  /api/book/shelf/{bookId}:
+    delete:
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 从书架移除
+      tags:
+      - reader-bookshelf
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 书籍ID
+        in: path
+        name: bookId
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookshelfUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BookshelfResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新书架
+      tags:
+      - reader-bookshelf
+  /api/book/shelf/groups:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.BookshelfGroupItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取书架分组列表
+      tags:
+      - reader-bookshelf
+  /api/book/shelf/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookshelfSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BookshelfPageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 书架分页列表
+      tags:
+      - reader-bookshelf
+  /api/book/tag:
     post:
       consumes:
       - application/json
@@ -1235,7 +4443,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.TagRequest'
+          $ref: '#/definitions/dto.TagRequest'
       produces:
       - application/json
       responses:
@@ -1243,17 +4451,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.BookTag'
+                  $ref: '#/definitions/model.BookTag'
               type: object
       security:
       - BearerAuth: []
       summary: 新增标签
       tags:
       - book-tag
-  /api/manage/book-tag/{id}:
+  /api/book/tag/{id}:
     delete:
       parameters:
       - description: 标签ID
@@ -1267,7 +4475,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除标签
@@ -1287,10 +4495,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.BookTag'
+                  $ref: '#/definitions/model.BookTag'
               type: object
       security:
       - BearerAuth: []
@@ -1311,7 +4519,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.TagRequest'
+          $ref: '#/definitions/dto.TagRequest'
       produces:
       - application/json
       responses:
@@ -1319,17 +4527,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.BookTag'
+                  $ref: '#/definitions/model.BookTag'
               type: object
       security:
       - BearerAuth: []
       summary: 编辑标签
       tags:
       - book-tag
-  /api/manage/book-tag/page:
+  /api/book/tag/page:
     post:
       consumes:
       - application/json
@@ -1339,7 +4547,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.TagSearch'
+          $ref: '#/definitions/dto.TagSearch'
       produces:
       - application/json
       responses:
@@ -1347,16 +4555,71 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  $ref: '#/definitions/dto.PageResponse'
               type: object
       security:
       - BearerAuth: []
       summary: 标签分页
       tags:
       - book-tag
+  /api/book/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 小说文件 (txt/epub/mobi/pdf)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.FileUploadResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 上传小说文件
+      tags:
+      - book-file
+  /api/book/upload/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UploadSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PageResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 上传记录分页
+      tags:
+      - book-file
   /api/manage/dept:
     post:
       consumes:
@@ -1367,7 +4630,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DeptRequest'
+          $ref: '#/definitions/dto.DeptRequest'
       produces:
       - application/json
       responses:
@@ -1375,10 +4638,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDept'
+                  $ref: '#/definitions/model.SysDept'
               type: object
       security:
       - BearerAuth: []
@@ -1399,7 +4662,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除部门
@@ -1419,10 +4682,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDept'
+                  $ref: '#/definitions/model.SysDept'
               type: object
       security:
       - BearerAuth: []
@@ -1443,7 +4706,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DeptRequest'
+          $ref: '#/definitions/dto.DeptRequest'
       produces:
       - application/json
       responses:
@@ -1451,10 +4714,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDept'
+                  $ref: '#/definitions/model.SysDept'
               type: object
       security:
       - BearerAuth: []
@@ -1471,7 +4734,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DeptSearch'
+          $ref: '#/definitions/dto.DeptSearch'
       produces:
       - application/json
       responses:
@@ -1479,15 +4742,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   allOf:
-                  - $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  - $ref: '#/definitions/dto.PageResponse'
                   - properties:
                       records:
                         items:
-                          $ref: '#/definitions/boread_internal_dto.DeptNode'
+                          $ref: '#/definitions/dto.DeptNode'
                         type: array
                     type: object
               type: object
@@ -1518,11 +4781,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_dto.DeptNode'
+                    $ref: '#/definitions/dto.DeptNode'
                   type: array
               type: object
       security:
@@ -1540,7 +4803,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DictRequest'
+          $ref: '#/definitions/dto.DictRequest'
       produces:
       - application/json
       responses:
@@ -1548,10 +4811,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDict'
+                  $ref: '#/definitions/model.SysDict'
               type: object
       security:
       - BearerAuth: []
@@ -1572,7 +4835,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除字典
@@ -1592,10 +4855,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDict'
+                  $ref: '#/definitions/model.SysDict'
               type: object
       security:
       - BearerAuth: []
@@ -1616,7 +4879,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DictRequest'
+          $ref: '#/definitions/dto.DictRequest'
       produces:
       - application/json
       responses:
@@ -1624,10 +4887,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDict'
+                  $ref: '#/definitions/model.SysDict'
               type: object
       security:
       - BearerAuth: []
@@ -1649,11 +4912,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_model.SysDictItem'
+                    $ref: '#/definitions/model.SysDictItem'
                   type: array
               type: object
       security:
@@ -1671,7 +4934,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DictItemRequest'
+          $ref: '#/definitions/dto.DictItemRequest'
       produces:
       - application/json
       responses:
@@ -1679,10 +4942,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDictItem'
+                  $ref: '#/definitions/model.SysDictItem'
               type: object
       security:
       - BearerAuth: []
@@ -1703,7 +4966,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除字典项
@@ -1723,7 +4986,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DictItemRequest'
+          $ref: '#/definitions/dto.DictItemRequest'
       produces:
       - application/json
       responses:
@@ -1731,10 +4994,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysDictItem'
+                  $ref: '#/definitions/model.SysDictItem'
               type: object
       security:
       - BearerAuth: []
@@ -1756,11 +5019,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_model.SysDictItem'
+                    $ref: '#/definitions/model.SysDictItem'
                   type: array
               type: object
       security:
@@ -1778,7 +5041,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.DictSearch'
+          $ref: '#/definitions/dto.DictSearch'
       produces:
       - application/json
       responses:
@@ -1786,10 +5049,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  $ref: '#/definitions/dto.PageResponse'
               type: object
       security:
       - BearerAuth: []
@@ -1806,7 +5069,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.LoginLogSearch'
+          $ref: '#/definitions/dto.LoginLogSearch'
       produces:
       - application/json
       responses:
@@ -1814,10 +5077,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  $ref: '#/definitions/dto.PageResponse'
               type: object
       security:
       - BearerAuth: []
@@ -1834,7 +5097,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.OperationLogSearch'
+          $ref: '#/definitions/dto.OperationLogSearch'
       produces:
       - application/json
       responses:
@@ -1842,10 +5105,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  $ref: '#/definitions/dto.PageResponse'
               type: object
       security:
       - BearerAuth: []
@@ -1862,7 +5125,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.MenuRequest'
+          $ref: '#/definitions/dto.MenuRequest'
       produces:
       - application/json
       responses:
@@ -1870,10 +5133,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysMenu'
+                  $ref: '#/definitions/model.SysMenu'
               type: object
       security:
       - BearerAuth: []
@@ -1894,7 +5157,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除菜单
@@ -1914,10 +5177,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysMenu'
+                  $ref: '#/definitions/model.SysMenu'
               type: object
       security:
       - BearerAuth: []
@@ -1938,7 +5201,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.MenuRequest'
+          $ref: '#/definitions/dto.MenuRequest'
       produces:
       - application/json
       responses:
@@ -1946,10 +5209,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysMenu'
+                  $ref: '#/definitions/model.SysMenu'
               type: object
       security:
       - BearerAuth: []
@@ -1966,7 +5229,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.MenuButtonRequest'
+          $ref: '#/definitions/dto.MenuButtonRequest'
       produces:
       - application/json
       responses:
@@ -1974,10 +5237,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysMenuButton'
+                  $ref: '#/definitions/model.SysMenuButton'
               type: object
       security:
       - BearerAuth: []
@@ -1998,7 +5261,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除菜单按钮
@@ -2019,11 +5282,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_model.SysMenuButton'
+                    $ref: '#/definitions/model.SysMenuButton'
                   type: array
               type: object
       security:
@@ -2041,7 +5304,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.MenuSearch'
+          $ref: '#/definitions/dto.MenuSearch'
       produces:
       - application/json
       responses:
@@ -2049,10 +5312,12 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  items:
+                    $ref: '#/definitions/dto.MenuNode'
+                  type: array
               type: object
       security:
       - BearerAuth: []
@@ -2068,11 +5333,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_dto.MenuNode'
+                    $ref: '#/definitions/dto.MenuNode'
                   type: array
               type: object
       security:
@@ -2090,7 +5355,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.RoleRequest'
+          $ref: '#/definitions/dto.RoleRequest'
       produces:
       - application/json
       responses:
@@ -2098,10 +5363,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysRole'
+                  $ref: '#/definitions/model.SysRole'
               type: object
       security:
       - BearerAuth: []
@@ -2122,7 +5387,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除角色
@@ -2142,10 +5407,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysRole'
+                  $ref: '#/definitions/model.SysRole'
               type: object
       security:
       - BearerAuth: []
@@ -2166,7 +5431,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.RoleRequest'
+          $ref: '#/definitions/dto.RoleRequest'
       produces:
       - application/json
       responses:
@@ -2174,10 +5439,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysRole'
+                  $ref: '#/definitions/model.SysRole'
               type: object
       security:
       - BearerAuth: []
@@ -2199,7 +5464,7 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
@@ -2225,14 +5490,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.RoleButtonRequest'
+          $ref: '#/definitions/dto.RoleButtonRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 角色授权按钮
@@ -2253,7 +5518,7 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
@@ -2279,14 +5544,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.RoleMenuRequest'
+          $ref: '#/definitions/dto.RoleMenuRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 角色授权菜单
@@ -2301,11 +5566,11 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/boread_internal_dto.RoleBrief'
+                    $ref: '#/definitions/dto.RoleBrief'
                   type: array
               type: object
       security:
@@ -2323,7 +5588,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.RoleSearch'
+          $ref: '#/definitions/dto.RoleSearch'
       produces:
       - application/json
       responses:
@@ -2331,10 +5596,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  $ref: '#/definitions/dto.PageResponse'
               type: object
       security:
       - BearerAuth: []
@@ -2351,7 +5616,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.UserCreateRequest'
+          $ref: '#/definitions/dto.UserCreateRequest'
       produces:
       - application/json
       responses:
@@ -2359,10 +5624,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysUser'
+                  $ref: '#/definitions/model.SysUser'
               type: object
       security:
       - BearerAuth: []
@@ -2383,7 +5648,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 删除用户
@@ -2403,10 +5668,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysUser'
+                  $ref: '#/definitions/model.SysUser'
               type: object
       security:
       - BearerAuth: []
@@ -2427,7 +5692,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.UserUpdateRequest'
+          $ref: '#/definitions/dto.UserUpdateRequest'
       produces:
       - application/json
       responses:
@@ -2435,10 +5700,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_model.SysUser'
+                  $ref: '#/definitions/model.SysUser'
               type: object
       security:
       - BearerAuth: []
@@ -2460,14 +5725,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.UserResetPwdRequest'
+          $ref: '#/definitions/dto.UserResetPwdRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 重置密码
@@ -2483,7 +5748,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/boread_internal_dto.UserSearch'
+          $ref: '#/definitions/dto.UserSearch'
       produces:
       - application/json
       responses:
@@ -2491,10 +5756,10 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/boread_pkg_response.Response'
+            - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/boread_internal_dto.PageResponse'
+                  $ref: '#/definitions/dto.PageResponse'
               type: object
       security:
       - BearerAuth: []
@@ -2509,7 +5774,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/boread_pkg_response.Response'
+            $ref: '#/definitions/response.Response'
       summary: 健康检查
       tags:
       - system

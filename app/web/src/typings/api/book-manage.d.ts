@@ -425,5 +425,17 @@ declare namespace Api {
       readDuration: number;
       lastReadTime: string;
     }>;
+
+    // ==================== Reader Read Event ====================
+
+    /** 上报阅读事件请求 */
+    type ReadEventRequest = {
+      bookId: number;
+      chapterId: number;
+      sessionId?: string;
+      durationSec: number;
+      wordCount?: number;
+      deviceType?: string;
+    };
   }
 }

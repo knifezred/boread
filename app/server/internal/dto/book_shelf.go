@@ -45,23 +45,6 @@ type BookshelfGroupItem struct {
 	BookCount int64  `json:"bookCount"`
 }
 
-// ==================== 阅读进度 ====================
-
-// ReadProgressRequest 上报阅读进度请求
-type ReadProgressRequest struct {
-	FileID       *uint64 `json:"fileId"` // 文件切换时传入
-	ChapterID    uint64  `json:"chapterId" binding:"required"`
-	ChapterNo    uint32  `json:"chapterNo" binding:"required"`
-	Position     uint32  `json:"position"`
-	Percent      float64 `json:"percent"`
-	ReadDuration uint32  `json:"readDuration"` // 本次增加的阅读时长(秒)
-}
-
-// ReadProgressResponse 阅读进度响应
-type ReadProgressResponse struct {
-	model.ReaderReadProgress
-}
-
 // BookshelfPageResponse 书架分页响应
 type BookshelfPageResponse struct {
 	Records []BookshelfResponse `json:"records"`

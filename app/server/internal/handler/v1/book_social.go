@@ -27,7 +27,7 @@ func NewNoteHandler(svc *service.BookSocialService) *NoteHandler {
 // @Produce   json
 // @Param    body  body  dto.NoteRequest  true  "笔记参数"
 // @Success  200  {object}  response.Response{data=dto.NoteResponse}
-// @Router   /api/manage/reader/note [post]
+// @Router   /api/book/note [post]
 func (h *NoteHandler) CreateNote(c *gin.Context) {
 	var req dto.NoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -51,7 +51,7 @@ func (h *NoteHandler) CreateNote(c *gin.Context) {
 // @Param    id    path  int              true  "笔记ID"
 // @Param    body  body  dto.NoteRequest  true  "笔记参数"
 // @Success  200  {object}  response.Response{data=dto.NoteResponse}
-// @Router   /api/manage/reader/note/{id} [put]
+// @Router   /api/book/note/{id} [put]
 func (h *NoteHandler) UpdateNote(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -78,7 +78,7 @@ func (h *NoteHandler) UpdateNote(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "笔记ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/reader/note/{id} [delete]
+// @Router   /api/book/note/{id} [delete]
 func (h *NoteHandler) DeleteNote(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -99,7 +99,7 @@ func (h *NoteHandler) DeleteNote(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "笔记ID"
 // @Success  200  {object}  response.Response{data=dto.NoteResponse}
-// @Router   /api/manage/reader/note/{id} [get]
+// @Router   /api/book/note/{id} [get]
 func (h *NoteHandler) GetNote(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -122,7 +122,7 @@ func (h *NoteHandler) GetNote(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.NoteSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/reader/note/page [post]
+// @Router   /api/book/note/page [post]
 func (h *NoteHandler) PageNote(c *gin.Context) {
 	var req dto.NoteSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -144,7 +144,7 @@ func (h *NoteHandler) PageNote(c *gin.Context) {
 // @Produce   json
 // @Param    bookId  path  int  true  "书籍ID"
 // @Success  200  {object}  response.Response{data=[]dto.NoteResponse}
-// @Router   /api/manage/reader/note/book/{bookId} [get]
+// @Router   /api/book/note/book/{bookId} [get]
 func (h *NoteHandler) ListNotesByBook(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
@@ -194,7 +194,7 @@ func NewReviewHandler(svc *service.BookSocialService) *ReviewHandler {
 // @Produce   json
 // @Param    body  body  dto.ReviewRequest  true  "书评参数"
 // @Success  200  {object}  response.Response{data=dto.ReviewResponse}
-// @Router   /api/manage/book-review [post]
+// @Router   /api/book/review [post]
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	var req dto.ReviewRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -218,7 +218,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 // @Param    id    path  int               true  "书评ID"
 // @Param    body  body  dto.ReviewRequest  true  "书评参数"
 // @Success  200  {object}  response.Response{data=dto.ReviewResponse}
-// @Router   /api/manage/book-review/{id} [put]
+// @Router   /api/book/review/{id} [put]
 func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -245,7 +245,7 @@ func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "书评ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book-review/{id} [delete]
+// @Router   /api/book/review/{id} [delete]
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -266,7 +266,7 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "书评ID"
 // @Success  200  {object}  response.Response{data=dto.ReviewResponse}
-// @Router   /api/manage/book-review/{id} [get]
+// @Router   /api/book/review/{id} [get]
 func (h *ReviewHandler) GetReview(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -289,7 +289,7 @@ func (h *ReviewHandler) GetReview(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ReviewSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book-review/page [post]
+// @Router   /api/book/review/page [post]
 func (h *ReviewHandler) PageReview(c *gin.Context) {
 	var req dto.ReviewSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -335,7 +335,7 @@ func NewCommentHandler(svc *service.BookSocialService) *CommentHandler {
 // @Produce   json
 // @Param    body  body  dto.CommentRequest  true  "评论参数"
 // @Success  200  {object}  response.Response{data=dto.CommentResponse}
-// @Router   /api/manage/book/comment [post]
+// @Router   /api/book/comment [post]
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var req dto.CommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -357,7 +357,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "评论ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book/comment/{id} [delete]
+// @Router   /api/book/comment/{id} [delete]
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -378,7 +378,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "评论ID"
 // @Success  200  {object}  response.Response{data=dto.CommentResponse}
-// @Router   /api/manage/book/comment/{id} [get]
+// @Router   /api/book/comment/{id} [get]
 func (h *CommentHandler) GetComment(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -401,7 +401,7 @@ func (h *CommentHandler) GetComment(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.CommentSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/comment/page [post]
+// @Router   /api/book/comment/page [post]
 func (h *CommentHandler) PageComment(c *gin.Context) {
 	var req dto.CommentSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -449,7 +449,7 @@ func NewLikeHandler(svc *service.BookSocialService) *LikeHandler {
 // @Produce   json
 // @Param    body  body  dto.LikeRequest  true  "点赞参数"
 // @Success  200  {object}  response.Response{data=dto.LikeResponse}
-// @Router   /api/manage/like/toggle [post]
+// @Router   /api/book/like/toggle [post]
 func (h *LikeHandler) ToggleLike(c *gin.Context) {
 	var req dto.LikeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -472,7 +472,7 @@ func (h *LikeHandler) ToggleLike(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.LikeStatusRequest  true  "查询参数"
 // @Success  200  {object}  response.Response{data=map[string]bool}
-// @Router   /api/manage/like/status [post]
+// @Router   /api/book/like/status [post]
 func (h *LikeHandler) GetLikeStatus(c *gin.Context) {
 	var req dto.LikeStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -495,7 +495,7 @@ func (h *LikeHandler) GetLikeStatus(c *gin.Context) {
 // @Param    targetType  path  string  true  "目标类型"
 // @Param    targetId    path  int     true  "目标ID"
 // @Success  200  {object}  response.Response{data=int64}
-// @Router   /api/manage/like/count/{targetType}/{targetId} [get]
+// @Router   /api/book/like/count/{targetType}/{targetId} [get]
 func (h *LikeHandler) CountLikes(c *gin.Context) {
 	targetType := c.Param("targetType")
 	targetID, err := utils.ParseUint64Param(c, "targetId")

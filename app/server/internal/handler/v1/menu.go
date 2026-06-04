@@ -33,7 +33,7 @@ func NewMenuHandler(svc *service.MenuService) *MenuHandler {
 // @Accept    json
 // @Produce   json
 // @Param     body  body  dto.MenuSearch  true  "搜索参数"
-// @Success  200      {object}  response.Response{data=dto.PageResponse[dto.MenuNode]}
+// @Success  200      {object}  response.Response{data=[]dto.MenuNode}
 // @Router   /api/manage/menu/page [post]
 func (h *MenuHandler) Page(c *gin.Context) {
 	var req dto.MenuSearch

@@ -55,6 +55,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookReviewRepo := repository.NewBookReviewRepository(db)
 	bookCommentRepo := repository.NewBookChapterCommentRepository(db)
 	readerLikeRepo := repository.NewReaderLikeRepository(db)
+	bookCharacterRepo := repository.NewBookCharacterRepository(db)
+	bookCharacterRelRepo := repository.NewBookCharacterRelRepository(db)
+	readerReadEventRepo := repository.NewReaderReadEventRepository(db)
+	readerReadStatsRepo := repository.NewReaderReadStatsRepository(db)
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, bookChapterRuleRepo, db)
@@ -68,8 +72,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
 	bookSvc := service.NewBookService(db, bookRepo, bookTagRelRepo, bookCategoryRepo, bookTagRepo, bookChapterRepo)
 	bookFileSvc := service.NewBookFileService(db, bookRepo, bookFileRepo, bookUploadRepo, bookChapterRepo, bookChapterRuleRepo, bookChapterRuleRelRepo, bookFilterRuleRepo, bookCategoryRepo, bookTagRepo)
-	readerSvc := service.NewReaderService(db, readerBookshelfRepo, readerReadProgressRepo, bookRepo, bookChapterRepo)
+	bookReaderSvc := service.NewBookReaderService(db, readerBookshelfRepo, readerReadProgressRepo, readerReadEventRepo, bookRepo, bookChapterRepo)
+	bookReadStatsSvc := service.NewBookReadStatsService(readerReadStatsRepo, bookRepo)
 	bookSocialSvc := service.NewBookSocialService(db, readerNoteRepo, bookReviewRepo, bookCommentRepo, readerLikeRepo, bookRepo, bookChapterRepo, userRepo)
+	bookCharacterSvc := service.NewBookCharacterService(db, bookCharacterRepo, bookRepo)
+	bookCharacterRelSvc := service.NewBookCharacterRelService(db, bookCharacterRelRepo, bookCharacterRepo)
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
@@ -83,17 +90,22 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
 	bookHandler := v1.NewBookHandler(bookSvc)
 	bookFileHandler := v1.NewBookFileHandler(bookFileSvc)
-	readerHandler := v1.NewReaderHandler(readerSvc)
+	bookReaderHandler := v1.NewBookReaderHandler(bookReaderSvc)
+	bookReadStatsHandler := v1.NewBookReadStatsHandler(bookReadStatsSvc)
+	bookshelfSvc := service.NewReaderBookshelfService(db, readerBookshelfRepo, readerReadProgressRepo, bookRepo, bookChapterRepo)
+	bookshelfHandler := v1.NewBookshelfHandler(bookshelfSvc)
 	noteHandler := v1.NewNoteHandler(bookSocialSvc)
 	reviewHandler := v1.NewReviewHandler(bookSocialSvc)
 	commentHandler := v1.NewCommentHandler(bookSocialSvc)
 	likeHandler := v1.NewLikeHandler(bookSocialSvc)
+	characterHandler := v1.NewCharacterHandler(bookCharacterSvc)
+	characterRelHandler := v1.NewCharacterRelHandler(bookCharacterRelSvc)
 
 	api := r.Group("/api")
 	{
 		// 公开
 		api.POST("/auth/login", authHandler.Login)
-		api.GET("/book-category/hot", bookCategoryHandler.HotList)
+		api.GET("/book/category/hot", bookCategoryHandler.HotList)
 
 		// 登录态
 		authed := api.Group("")
@@ -164,96 +176,166 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.POST("/log/operation/page", logHandler.PageOperation)
 
 			// --- Book Category ---
-			manage.GET("/book-category/tree", bookCategoryHandler.Tree)
-			manage.GET("/book-category/:id", bookCategoryHandler.GetByID)
-			manage.POST("/book-category/page", bookCategoryHandler.Page)
-			manage.POST("/book-category", middleware.RequireButton(authSvc, "book-category:create"), bookCategoryHandler.Create)
-			manage.PUT("/book-category/:id", middleware.RequireButton(authSvc, "book-category:update"), bookCategoryHandler.Update)
-			manage.DELETE("/book-category/:id", middleware.RequireButton(authSvc, "book-category:delete"), bookCategoryHandler.Delete)
+			bookCategory := api.Group("/book/category")
+			bookCategory.Use(middleware.Auth())
+			{
+				bookCategory.GET("/tree", bookCategoryHandler.Tree)
+				bookCategory.GET("/:id", bookCategoryHandler.GetByID)
+				bookCategory.POST("/page", bookCategoryHandler.Page)
+				bookCategory.POST("", middleware.RequireButton(authSvc, "book-category:create"), bookCategoryHandler.Create)
+				bookCategory.PUT("/:id", middleware.RequireButton(authSvc, "book-category:update"), bookCategoryHandler.Update)
+				bookCategory.DELETE("/:id", middleware.RequireButton(authSvc, "book-category:delete"), bookCategoryHandler.Delete)
+			}
 
-			// --- Book Tag ---
-			manage.GET("/book-tag/:id", bookTagHandler.GetByID)
-			manage.POST("/book-tag/page", bookTagHandler.Page)
-			manage.POST("/book-tag", middleware.RequireButton(authSvc, "book-tag:create"), bookTagHandler.Create)
-			manage.PUT("/book-tag/:id", middleware.RequireButton(authSvc, "book-tag:update"), bookTagHandler.Update)
-			manage.DELETE("/book-tag/:id", middleware.RequireButton(authSvc, "book-tag:delete"), bookTagHandler.Delete)
+		}
 
-			// --- Book ---
-			manage.GET("/book/:id", bookHandler.GetByID)
-			manage.POST("/book/page", bookHandler.Page)
-			manage.POST("/book", middleware.RequireButton(authSvc, "book:create"), bookHandler.Create)
-			manage.PUT("/book/:id", middleware.RequireButton(authSvc, "book:update"), bookHandler.Update)
-			manage.PUT("/book/:id/status", middleware.RequireButton(authSvc, "book:update"), bookHandler.UpdateStatus)
-			manage.DELETE("/book/:id", middleware.RequireButton(authSvc, "book:delete"), bookHandler.Delete)
+		// ============== Book Modules (moved from manage) ==============
 
-			// --- Book File ---
-			manage.POST("/book/upload", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.Upload)
-			manage.POST("/book/confirm-import", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ConfirmImport)
-			manage.POST("/book/scan", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanAll)
-			manage.POST("/book/scan-path", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanPath)
-			manage.POST("/book/scan/:id", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanByID)
-			manage.GET("/book/:id/chapter/:chapterNo", bookFileHandler.GetChapterContent)
-			manage.POST("/book/upload/page", bookFileHandler.PageUpload)
-			manage.POST("/book/file/page", bookFileHandler.PageFile)
-			manage.POST("/book/chapter/page", bookFileHandler.PageChapter)
-			manage.POST("/book/chapter/list", bookFileHandler.ListChapter)
-			manage.POST("/book/re-parse", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.ReParseChapters)
+		// --- Book Tag ---
+		bookTagGroup := api.Group("/book/tag")
+		bookTagGroup.Use(middleware.Auth())
+		{
+			bookTagGroup.GET("/:id", bookTagHandler.GetByID)
+			bookTagGroup.POST("/page", bookTagHandler.Page)
+			bookTagGroup.POST("", middleware.RequireButton(authSvc, "book-tag:create"), bookTagHandler.Create)
+			bookTagGroup.PUT("/:id", middleware.RequireButton(authSvc, "book-tag:update"), bookTagHandler.Update)
+			bookTagGroup.DELETE("/:id", middleware.RequireButton(authSvc, "book-tag:delete"), bookTagHandler.Delete)
+		}
 
-			// --- Book Chapter Rule ---
-			manage.GET("/book/chapter-rule/:id", bookFileHandler.GetChapterRuleByID)
-			manage.POST("/book/chapter-rule/page", bookFileHandler.PageChapterRule)
-			manage.POST("/book/chapter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateChapterRule)
-			manage.PUT("/book/chapter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateChapterRule)
-			manage.DELETE("/book/chapter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteChapterRule)
+		// --- Book (CRUD + File + Chapter + Rules) ---
+		bookGroup := api.Group("/book")
+		bookGroup.Use(middleware.Auth())
+		{
+			// Book CRUD
+			bookGroup.GET("/:id", bookHandler.GetByID)
+			bookGroup.POST("/page", bookHandler.Page)
+			bookGroup.POST("", middleware.RequireButton(authSvc, "book:create"), bookHandler.Create)
+			bookGroup.PUT("/:id", middleware.RequireButton(authSvc, "book:update"), bookHandler.Update)
+			bookGroup.PUT("/:id/status", middleware.RequireButton(authSvc, "book:update"), bookHandler.UpdateStatus)
+			bookGroup.DELETE("/:id", middleware.RequireButton(authSvc, "book:delete"), bookHandler.Delete)
 
-			// --- Book Chapter Rule Rel ---
-			manage.POST("/book/chapter-rule/bind", bookFileHandler.BindChapterRule)
-			manage.DELETE("/book/chapter-rule/bind/:bookId", bookFileHandler.UnbindChapterRule)
-			manage.GET("/book/chapter-rule/bind/:bookId", bookFileHandler.GetBoundChapterRule)
+			// Book File
+			bookGroup.POST("/upload", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.Upload)
+			bookGroup.POST("/confirm-import", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ConfirmImport)
+			bookGroup.POST("/scan", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanAll)
+			bookGroup.POST("/scan-path", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanPath)
+			bookGroup.POST("/scan/:id", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.ScanByID)
+			bookGroup.GET("/:id/chapter/:chapterNo", bookFileHandler.GetChapterContent)
+			bookGroup.POST("/upload/page", bookFileHandler.PageUpload)
+			bookGroup.POST("/file/page", bookFileHandler.PageFile)
+			bookGroup.POST("/chapter/page", bookFileHandler.PageChapter)
+			bookGroup.POST("/chapter/list", bookFileHandler.ListChapter)
+			bookGroup.POST("/re-parse", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.ReParseChapters)
 
-			// --- Book Filter Rule ---
-			manage.GET("/book/filter-rule/:id", bookFileHandler.GetFilterRuleByID)
-			manage.POST("/book/filter-rule/page", bookFileHandler.PageFilterRule)
-			manage.POST("/book/filter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateFilterRule)
-			manage.PUT("/book/filter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateFilterRule)
-			manage.DELETE("/book/filter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteFilterRule)
+			// Chapter Rule
+			bookGroup.GET("/chapter-rule/:id", bookFileHandler.GetChapterRuleByID)
+			bookGroup.POST("/chapter-rule/page", bookFileHandler.PageChapterRule)
+			bookGroup.POST("/chapter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateChapterRule)
+			bookGroup.PUT("/chapter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateChapterRule)
+			bookGroup.DELETE("/chapter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteChapterRule)
 
-			// --- Reader Bookshelf ---
-			manage.POST("/bookshelf", readerHandler.AddToBookshelf)
-			manage.DELETE("/bookshelf/:bookId", readerHandler.RemoveFromBookshelf)
-			manage.PUT("/bookshelf/:bookId", readerHandler.UpdateBookshelf)
-			manage.POST("/bookshelf/page", readerHandler.GetBookshelfPage)
-			manage.GET("/bookshelf/groups", readerHandler.ListGroups)
+			// Chapter Rule Bind
+			bookGroup.POST("/chapter-rule/bind", bookFileHandler.BindChapterRule)
+			bookGroup.DELETE("/chapter-rule/bind/:bookId", bookFileHandler.UnbindChapterRule)
+			bookGroup.GET("/chapter-rule/bind/:bookId", bookFileHandler.GetBoundChapterRule)
 
-			// --- Reader Progress ---
-			manage.PUT("/reader/progress/:bookId", readerHandler.ReportProgress)
-			manage.GET("/reader/progress/:bookId", readerHandler.GetProgress)
+			// Filter Rule
+			bookGroup.GET("/filter-rule/:id", bookFileHandler.GetFilterRuleByID)
+			bookGroup.POST("/filter-rule/page", bookFileHandler.PageFilterRule)
+			bookGroup.POST("/filter-rule", middleware.RequireButton(authSvc, "book:create"), bookFileHandler.CreateFilterRule)
+			bookGroup.PUT("/filter-rule/:id", middleware.RequireButton(authSvc, "book:update"), bookFileHandler.UpdateFilterRule)
+			bookGroup.DELETE("/filter-rule/:id", middleware.RequireButton(authSvc, "book:delete"), bookFileHandler.DeleteFilterRule)
+		}
 
-			// --- Book Social: Reader Note ---
-			manage.POST("/reader/note", noteHandler.CreateNote)
-			manage.PUT("/reader/note/:id", noteHandler.UpdateNote)
-			manage.DELETE("/reader/note/:id", noteHandler.DeleteNote)
-			manage.GET("/reader/note/:id", noteHandler.GetNote)
-			manage.POST("/reader/note/page", noteHandler.PageNote)
-			manage.GET("/reader/note/book/:bookId", noteHandler.ListNotesByBook)
+		// --- Book Character ---
+		bookCharGroup := api.Group("/book/character")
+		bookCharGroup.Use(middleware.Auth())
+		{
+			bookCharGroup.POST("", characterHandler.CreateCharacter)
+			bookCharGroup.PUT("/:id", characterHandler.UpdateCharacter)
+			bookCharGroup.DELETE("/:id", characterHandler.DeleteCharacter)
+			bookCharGroup.GET("/:id", characterHandler.GetCharacter)
+			bookCharGroup.POST("/page", characterHandler.PageCharacter)
+			bookCharGroup.GET("/book/:bookId", characterHandler.ListByCharacterBook)
 
-			// --- Book Social: Book Review ---
-			manage.POST("/book-review", reviewHandler.CreateReview)
-			manage.PUT("/book-review/:id", reviewHandler.UpdateReview)
-			manage.DELETE("/book-review/:id", reviewHandler.DeleteReview)
-			manage.GET("/book-review/:id", reviewHandler.GetReview)
-			manage.POST("/book-review/page", reviewHandler.PageReview)
+			// Character Rel
+			bookCharGroup.POST("/rel", characterRelHandler.CreateRelation)
+			bookCharGroup.DELETE("/rel/:id", characterRelHandler.DeleteRelation)
+			bookCharGroup.GET("/rel/:id", characterRelHandler.GetRelation)
+			bookCharGroup.GET("/rel/character/:characterId", characterRelHandler.ListRelationsByCharacter)
+			bookCharGroup.GET("/rel/book/:bookId", characterRelHandler.ListRelationsByBook)
+		}
 
-			// --- Book Social: Chapter Comment ---
-			manage.POST("/book/comment", commentHandler.CreateComment)
-			manage.DELETE("/book/comment/:id", commentHandler.DeleteComment)
-			manage.GET("/book/comment/:id", commentHandler.GetComment)
-			manage.POST("/book/comment/page", commentHandler.PageComment)
+		// --- Book Social: Note ---
+		noteGroup := api.Group("/book/note")
+		noteGroup.Use(middleware.Auth())
+		{
+			noteGroup.POST("", noteHandler.CreateNote)
+			noteGroup.PUT("/:id", noteHandler.UpdateNote)
+			noteGroup.DELETE("/:id", noteHandler.DeleteNote)
+			noteGroup.GET("/:id", noteHandler.GetNote)
+			noteGroup.POST("/page", noteHandler.PageNote)
+			noteGroup.GET("/book/:bookId", noteHandler.ListNotesByBook)
+		}
 
-			// --- Book Social: Like ---
-			manage.POST("/like/toggle", likeHandler.ToggleLike)
-			manage.POST("/like/status", likeHandler.GetLikeStatus)
-			manage.GET("/like/count/:targetType/:targetId", likeHandler.CountLikes)
+		// --- Book Social: Review ---
+		reviewGroup := api.Group("/book/review")
+		reviewGroup.Use(middleware.Auth())
+		{
+			reviewGroup.POST("", reviewHandler.CreateReview)
+			reviewGroup.PUT("/:id", reviewHandler.UpdateReview)
+			reviewGroup.DELETE("/:id", reviewHandler.DeleteReview)
+			reviewGroup.GET("/:id", reviewHandler.GetReview)
+			reviewGroup.POST("/page", reviewHandler.PageReview)
+		}
+
+		// --- Book Social: Comment ---
+		commentGroup := api.Group("/book/comment")
+		commentGroup.Use(middleware.Auth())
+		{
+			commentGroup.POST("", commentHandler.CreateComment)
+			commentGroup.DELETE("/:id", commentHandler.DeleteComment)
+			commentGroup.GET("/:id", commentHandler.GetComment)
+			commentGroup.POST("/page", commentHandler.PageComment)
+		}
+
+		// --- Book Social: Like ---
+		likeGroup := api.Group("/book/like")
+		likeGroup.Use(middleware.Auth())
+		{
+			likeGroup.POST("/toggle", likeHandler.ToggleLike)
+			likeGroup.POST("/status", likeHandler.GetLikeStatus)
+			likeGroup.GET("/count/:targetType/:targetId", likeHandler.CountLikes)
+		}
+
+		// --- Book Shelf ---
+		bookShelfGroup := api.Group("/book/shelf")
+		bookShelfGroup.Use(middleware.Auth())
+		{
+			bookShelfGroup.POST("", bookshelfHandler.AddToBookshelf)
+			bookShelfGroup.DELETE("/:bookId", bookshelfHandler.RemoveFromBookshelf)
+			bookShelfGroup.PUT("/:bookId", bookshelfHandler.UpdateBookshelf)
+			bookShelfGroup.POST("/page", bookshelfHandler.GetBookshelfPage)
+			bookShelfGroup.GET("/groups", bookshelfHandler.ListGroups)
+		}
+
+		// --- Book Reader (阅读进度 + 阅读事件) ---
+		bookReaderGroup := api.Group("/book/reader")
+		bookReaderGroup.Use(middleware.Auth())
+		{
+			bookReaderGroup.PUT("/progress/:bookId", bookReaderHandler.ReportProgress)
+			bookReaderGroup.GET("/progress/:bookId", bookReaderHandler.GetProgress)
+
+			bookReaderGroup.POST("/read-event", bookReaderHandler.ReportEvent)
+		}
+
+		// --- Book Read Stats (阅读统计) ---
+		bookReadStatsGroup := api.Group("/book/read-stats")
+		bookReadStatsGroup.Use(middleware.Auth())
+		{
+			bookReadStatsGroup.POST("/daily", bookReadStatsHandler.GetDailyStats)
+			bookReadStatsGroup.POST("/books", bookReadStatsHandler.GetBookStats)
+			bookReadStatsGroup.GET("/total", bookReadStatsHandler.GetTotalStats)
 		}
 	}
 

@@ -1,8 +1,9 @@
-import { request } from "../request";
+import { request } from "../request"
 
 // =====================================================================
 // 后端: boread (Go + Gin)
-// 路径约定: /api 作为 baseURL, 此处只写 /manage/* 子路径
+// 路径约定: /api 作为 baseURL, 此处只写 /manage/* 子路径 (系统管理模块)
+// 书籍业务模块已迁移至 /book/* 直接路径
 // =====================================================================
 
 // -------- Book Category --------
@@ -10,7 +11,7 @@ import { request } from "../request";
 /** 分类树 */
 export function fetchGetCategoryTree() {
   return request<Api.BookManage.BookCategory[]>({
-    url: "/manage/book-category/tree",
+    url: "/book/category/tree",
     method: "get",
   });
 }
@@ -18,7 +19,7 @@ export function fetchGetCategoryTree() {
 /** 分类分页 */
 export function fetchGetCategoryList(params?: Api.BookManage.CategorySearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookCategory>>({
-    url: "/manage/book-category/page",
+    url: "/book/category/page",
     method: "post",
     data: params,
   });
@@ -27,7 +28,7 @@ export function fetchGetCategoryList(params?: Api.BookManage.CategorySearchParam
 /** 分类详情 */
 export function fetchGetCategory(id: string | number) {
   return request<Api.BookManage.BookCategory>({
-    url: `/manage/book-category/${id}`,
+    url: `/book/category/${id}`,
     method: "get",
   });
 }
@@ -35,7 +36,7 @@ export function fetchGetCategory(id: string | number) {
 /** 新增分类 */
 export function fetchCreateCategory(data: Record<string, any>) {
   return request<Api.BookManage.BookCategory>({
-    url: "/manage/book-category",
+    url: "/book/category",
     method: "post",
     data,
   });
@@ -44,7 +45,7 @@ export function fetchCreateCategory(data: Record<string, any>) {
 /** 编辑分类 */
 export function fetchUpdateCategory(id: string | number, data: Record<string, any>) {
   return request<Api.BookManage.BookCategory>({
-    url: `/manage/book-category/${id}`,
+    url: `/book/category/${id}`,
     method: "put",
     data,
   });
@@ -53,7 +54,7 @@ export function fetchUpdateCategory(id: string | number, data: Record<string, an
 /** 删除分类 */
 export function fetchDeleteCategory(id: string | number) {
   return request<null>({
-    url: `/manage/book-category/${id}`,
+    url: `/book/category/${id}`,
     method: "delete",
   });
 }
@@ -61,7 +62,7 @@ export function fetchDeleteCategory(id: string | number) {
 /** 热门分类列表（公开接口，无需登录） */
 export function fetchGetHotCategoryList() {
   return request<Api.BookManage.HotCategoryItem[]>({
-    url: "/book-category/hot",
+    url: "/book/category/hot",
     method: "get",
   });
 }
@@ -71,7 +72,7 @@ export function fetchGetHotCategoryList() {
 /** 标签分页 */
 export function fetchGetTagList(params?: Api.BookManage.TagSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookTag>>({
-    url: "/manage/book-tag/page",
+    url: "/book/tag/page",
     method: "post",
     data: params,
   });
@@ -80,7 +81,7 @@ export function fetchGetTagList(params?: Api.BookManage.TagSearchParams) {
 /** 标签详情 */
 export function fetchGetTag(id: string | number) {
   return request<Api.BookManage.BookTag>({
-    url: `/manage/book-tag/${id}`,
+    url: `/book/tag/${id}`,
     method: "get",
   });
 }
@@ -88,7 +89,7 @@ export function fetchGetTag(id: string | number) {
 /** 新增标签 */
 export function fetchCreateTag(data: Record<string, any>) {
   return request<Api.BookManage.BookTag>({
-    url: "/manage/book-tag",
+    url: "/book/tag",
     method: "post",
     data,
   });
@@ -97,7 +98,7 @@ export function fetchCreateTag(data: Record<string, any>) {
 /** 编辑标签 */
 export function fetchUpdateTag(id: string | number, data: Record<string, any>) {
   return request<Api.BookManage.BookTag>({
-    url: `/manage/book-tag/${id}`,
+    url: `/book/tag/${id}`,
     method: "put",
     data,
   });
@@ -106,7 +107,7 @@ export function fetchUpdateTag(id: string | number, data: Record<string, any>) {
 /** 删除标签 */
 export function fetchDeleteTag(id: string | number) {
   return request<null>({
-    url: `/manage/book-tag/${id}`,
+    url: `/book/tag/${id}`,
     method: "delete",
   });
 }
@@ -116,7 +117,7 @@ export function fetchDeleteTag(id: string | number) {
 /** 书籍分页 */
 export function fetchGetBookList(params?: Api.BookManage.BookSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.Book>>({
-    url: "/manage/book/page",
+    url: "/book/page",
     method: "post",
     data: params,
   });
@@ -125,7 +126,7 @@ export function fetchGetBookList(params?: Api.BookManage.BookSearchParams) {
 /** 书籍详情 */
 export function fetchGetBook(id: string | number) {
   return request<Api.BookManage.Book>({
-    url: `/manage/book/${id}`,
+    url: `/book/${id}`,
     method: "get",
   });
 }
@@ -133,7 +134,7 @@ export function fetchGetBook(id: string | number) {
 /** 新增书籍 */
 export function fetchCreateBook(data: Api.BookManage.BookRequest) {
   return request<Api.BookManage.Book>({
-    url: "/manage/book",
+    url: "/book",
     method: "post",
     data,
   });
@@ -142,7 +143,7 @@ export function fetchCreateBook(data: Api.BookManage.BookRequest) {
 /** 编辑书籍 */
 export function fetchUpdateBook(id: string | number, data: Api.BookManage.BookRequest) {
   return request<Api.BookManage.Book>({
-    url: `/manage/book/${id}`,
+    url: `/book/${id}`,
     method: "put",
     data,
   });
@@ -151,7 +152,7 @@ export function fetchUpdateBook(id: string | number, data: Api.BookManage.BookRe
 /** 删除书籍 */
 export function fetchDeleteBook(id: string | number) {
   return request<null>({
-    url: `/manage/book/${id}`,
+    url: `/book/${id}`,
     method: "delete",
   });
 }
@@ -159,7 +160,7 @@ export function fetchDeleteBook(id: string | number) {
 /** 更新书籍上架状态 */
 export function fetchUpdateBookStatus(id: string | number, data: Api.BookManage.BookUpdateStatusRequest) {
   return request<null>({
-    url: `/manage/book/${id}/status`,
+    url: `/book/${id}/status`,
     method: "put",
     data,
   });
@@ -172,7 +173,7 @@ export function fetchUploadBookFile(file: File, onUploadProgress?: (percent: num
   const formData = new FormData();
   formData.append("file", file);
   return request<Api.BookManage.FileUploadResponse>({
-    url: "/manage/book/upload",
+    url: "/book/upload",
     method: "post",
     data: formData,
     headers: { "Content-Type": "multipart/form-data" },
@@ -187,7 +188,7 @@ export function fetchUploadBookFile(file: File, onUploadProgress?: (percent: num
 /** 确认入库 */
 export function fetchConfirmImport(data: Api.BookManage.ConfirmImportRequest) {
   return request<Api.BookManage.ConfirmImportResponse>({
-    url: "/manage/book/confirm-import",
+    url: "/book/confirm-import",
     method: "post",
     data,
   });
@@ -196,7 +197,7 @@ export function fetchConfirmImport(data: Api.BookManage.ConfirmImportRequest) {
 /** 扫描本地目录 */
 export function fetchScanPath(path: string) {
   return request<Api.BookManage.ScanPathResponse>({
-    url: "/manage/book/scan-path",
+    url: "/book/scan-path",
     method: "post",
     data: { path },
   });
@@ -205,7 +206,7 @@ export function fetchScanPath(path: string) {
 /** 批量扫描入库 */
 export function fetchScanAll() {
   return request<Api.BookManage.ScanAllResponse>({
-    url: "/manage/book/scan",
+    url: "/book/scan",
     method: "post",
   });
 }
@@ -213,7 +214,7 @@ export function fetchScanAll() {
 /** 扫描单个上传任务 */
 export function fetchScanByID(id: string | number) {
   return request<Api.BookManage.ScanResult>({
-    url: `/manage/book/scan/${id}`,
+    url: `/book/scan/${id}`,
     method: "post",
   });
 }
@@ -221,7 +222,7 @@ export function fetchScanByID(id: string | number) {
 /** 上传记录分页 */
 export function fetchGetUploadList(params?: Api.BookManage.UploadSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookUpload>>({
-    url: "/manage/book/upload/page",
+    url: "/book/upload/page",
     method: "post",
     data: params,
   });
@@ -230,7 +231,7 @@ export function fetchGetUploadList(params?: Api.BookManage.UploadSearchParams) {
 /** 文件记录分页 */
 export function fetchGetFileList(params?: Api.BookManage.FileSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookFile>>({
-    url: "/manage/book/file/page",
+    url: "/book/file/page",
     method: "post",
     data: params,
   });
@@ -239,7 +240,7 @@ export function fetchGetFileList(params?: Api.BookManage.FileSearchParams) {
 /** 章节分页 */
 export function fetchGetChapterList(params?: Api.BookManage.ChapterSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookChapter>>({
-    url: "/manage/book/chapter/page",
+    url: "/book/chapter/page",
     method: "post",
     data: params,
   });
@@ -248,7 +249,7 @@ export function fetchGetChapterList(params?: Api.BookManage.ChapterSearchParams)
 /** 章节列表（不分页） */
 export function fetchChapterList(bookId: number) {
   return request<Api.BookManage.BookChapter[]>({
-    url: "/manage/book/chapter/list",
+    url: "/book/chapter/list",
     method: "post",
     data: { bookId },
   });
@@ -257,7 +258,7 @@ export function fetchChapterList(bookId: number) {
 /** 读取章节内容 */
 export function fetchGetChapterContent(bookId: string | number, chapterNo: string | number) {
   return request<Api.BookManage.ChapterContentResponse>({
-    url: `/manage/book/${bookId}/chapter/${chapterNo}`,
+    url: `/book/${bookId}/chapter/${chapterNo}`,
     method: "get",
   });
 }
@@ -282,7 +283,7 @@ export function fetchGetPublicChapterList(bookId: string | number) {
 /** 重新识别章节 */
 export function fetchReParseChapters(bookId: number, ruleId?: number) {
   return request<Api.BookManage.ReParseResponse>({
-    url: "/manage/book/re-parse",
+    url: "/book/re-parse",
     method: "post",
     data: ruleId ? { bookId, ruleId } : { bookId },
   });
@@ -293,7 +294,7 @@ export function fetchReParseChapters(bookId: number, ruleId?: number) {
 /** 章节识别规则分页 */
 export function fetchGetChapterRuleList(params?: Api.BookManage.ChapterRuleSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookChapterRule>>({
-    url: "/manage/book/chapter-rule/page",
+    url: "/book/chapter-rule/page",
     method: "post",
     data: params,
   });
@@ -302,7 +303,7 @@ export function fetchGetChapterRuleList(params?: Api.BookManage.ChapterRuleSearc
 /** 章节识别规则详情 */
 export function fetchGetChapterRule(id: string | number) {
   return request<Api.BookManage.BookChapterRule>({
-    url: `/manage/book/chapter-rule/${id}`,
+    url: `/book/chapter-rule/${id}`,
     method: "get",
   });
 }
@@ -310,7 +311,7 @@ export function fetchGetChapterRule(id: string | number) {
 /** 新增章节识别规则 */
 export function fetchCreateChapterRule(data: Api.BookManage.ChapterRuleRequest) {
   return request<Api.BookManage.BookChapterRule>({
-    url: "/manage/book/chapter-rule",
+    url: "/book/chapter-rule",
     method: "post",
     data,
   });
@@ -319,7 +320,7 @@ export function fetchCreateChapterRule(data: Api.BookManage.ChapterRuleRequest) 
 /** 编辑章节识别规则 */
 export function fetchUpdateChapterRule(id: string | number, data: Api.BookManage.ChapterRuleRequest) {
   return request<Api.BookManage.BookChapterRule>({
-    url: `/manage/book/chapter-rule/${id}`,
+    url: `/book/chapter-rule/${id}`,
     method: "put",
     data,
   });
@@ -328,7 +329,7 @@ export function fetchUpdateChapterRule(id: string | number, data: Api.BookManage
 /** 删除章节识别规则 */
 export function fetchDeleteChapterRule(id: string | number) {
   return request<null>({
-    url: `/manage/book/chapter-rule/${id}`,
+    url: `/book/chapter-rule/${id}`,
     method: "delete",
   });
 }
@@ -338,7 +339,7 @@ export function fetchDeleteChapterRule(id: string | number) {
 /** 为书籍绑定章节识别规则 */
 export function fetchBindChapterRule(data: Api.BookManage.ChapterRuleBindRequest) {
   return request<Api.BookManage.ChapterRuleBindResponse>({
-    url: "/manage/book/chapter-rule/bind",
+    url: "/book/chapter-rule/bind",
     method: "post",
     data,
   });
@@ -347,7 +348,7 @@ export function fetchBindChapterRule(data: Api.BookManage.ChapterRuleBindRequest
 /** 解绑书籍的章节识别规则 */
 export function fetchUnbindChapterRule(bookId: number) {
   return request<null>({
-    url: `/manage/book/chapter-rule/bind/${bookId}`,
+    url: `/book/chapter-rule/bind/${bookId}`,
     method: "delete",
   });
 }
@@ -355,7 +356,7 @@ export function fetchUnbindChapterRule(bookId: number) {
 /** 获取书籍绑定的章节识别规则 */
 export function fetchGetBoundChapterRule(bookId: number) {
   return request<Api.BookManage.ChapterRuleBindResponse | null>({
-    url: `/manage/book/chapter-rule/bind/${bookId}`,
+    url: `/book/chapter-rule/bind/${bookId}`,
     method: "get",
   });
 }
@@ -365,7 +366,7 @@ export function fetchGetBoundChapterRule(bookId: number) {
 /** 内容净化规则分页 */
 export function fetchGetFilterRuleList(params?: Api.BookManage.FilterRuleSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookContentFilterRule>>({
-    url: "/manage/book/filter-rule/page",
+    url: "/book/filter-rule/page",
     method: "post",
     data: params,
   });
@@ -374,7 +375,7 @@ export function fetchGetFilterRuleList(params?: Api.BookManage.FilterRuleSearchP
 /** 内容净化规则详情 */
 export function fetchGetFilterRule(id: string | number) {
   return request<Api.BookManage.BookContentFilterRule>({
-    url: `/manage/book/filter-rule/${id}`,
+    url: `/book/filter-rule/${id}`,
     method: "get",
   });
 }
@@ -382,7 +383,7 @@ export function fetchGetFilterRule(id: string | number) {
 /** 新增内容净化规则 */
 export function fetchCreateFilterRule(data: Api.BookManage.FilterRuleRequest) {
   return request<Api.BookManage.BookContentFilterRule>({
-    url: "/manage/book/filter-rule",
+    url: "/book/filter-rule",
     method: "post",
     data,
   });
@@ -391,7 +392,7 @@ export function fetchCreateFilterRule(data: Api.BookManage.FilterRuleRequest) {
 /** 编辑内容净化规则 */
 export function fetchUpdateFilterRule(id: string | number, data: Api.BookManage.FilterRuleRequest) {
   return request<Api.BookManage.BookContentFilterRule>({
-    url: `/manage/book/filter-rule/${id}`,
+    url: `/book/filter-rule/${id}`,
     method: "put",
     data,
   });
@@ -400,7 +401,7 @@ export function fetchUpdateFilterRule(id: string | number, data: Api.BookManage.
 /** 删除内容净化规则 */
 export function fetchDeleteFilterRule(id: string | number) {
   return request<null>({
-    url: `/manage/book/filter-rule/${id}`,
+    url: `/book/filter-rule/${id}`,
     method: "delete",
   });
 }
@@ -410,7 +411,7 @@ export function fetchDeleteFilterRule(id: string | number) {
 /** 书架分页列表 */
 export function fetchGetBookshelfPage(params?: Api.BookManage.BookshelfSearchParams) {
   return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookshelfItem>>({
-    url: "/manage/bookshelf/page",
+    url: "/book/shelf/page",
     method: "post",
     data: params,
   });
@@ -419,7 +420,7 @@ export function fetchGetBookshelfPage(params?: Api.BookManage.BookshelfSearchPar
 /** 添加到书架 */
 export function fetchAddToBookshelf(data: Api.BookManage.BookshelfRequest) {
   return request<Api.BookManage.BookshelfItem>({
-    url: "/manage/bookshelf",
+    url: "/book/shelf",
     method: "post",
     data,
   });
@@ -428,7 +429,7 @@ export function fetchAddToBookshelf(data: Api.BookManage.BookshelfRequest) {
 /** 从书架移除 */
 export function fetchRemoveFromBookshelf(bookId: string | number) {
   return request<null>({
-    url: `/manage/bookshelf/${bookId}`,
+    url: `/book/shelf/${bookId}`,
     method: "delete",
   });
 }
@@ -436,7 +437,7 @@ export function fetchRemoveFromBookshelf(bookId: string | number) {
 /** 更新书架 */
 export function fetchUpdateBookshelf(bookId: string | number, data: Api.BookManage.BookshelfUpdateRequest) {
   return request<Api.BookManage.BookshelfItem>({
-    url: `/manage/bookshelf/${bookId}`,
+    url: `/book/shelf/${bookId}`,
     method: "put",
     data,
   });
@@ -445,7 +446,7 @@ export function fetchUpdateBookshelf(bookId: string | number, data: Api.BookMana
 /** 获取书架分组列表 */
 export function fetchListBookshelfGroups() {
   return request<Api.BookManage.BookshelfGroupItem[]>({
-    url: "/manage/bookshelf/groups",
+    url: "/book/shelf/groups",
     method: "get",
   });
 }
@@ -455,7 +456,7 @@ export function fetchListBookshelfGroups() {
 /** 上报阅读进度 */
 export function fetchReportReadProgress(bookId: string | number, data: Api.BookManage.ReadProgressRequest) {
   return request<Api.BookManage.ReadProgressResponse>({
-    url: `/manage/reader/progress/${bookId}`,
+    url: `/book/reader/progress/${bookId}`,
     method: "put",
     data,
   });
@@ -464,7 +465,18 @@ export function fetchReportReadProgress(bookId: string | number, data: Api.BookM
 /** 获取阅读进度 */
 export function fetchGetReadProgress(bookId: string | number) {
   return request<Api.BookManage.ReadProgressResponse>({
-    url: `/manage/reader/progress/${bookId}`,
+    url: `/book/reader/progress/${bookId}`,
     method: "get",
+  });
+}
+
+// -------- Reader Read Event --------
+
+/** 上报阅读事件(心跳) */
+export function fetchReportReadEvent(data: Api.BookManage.ReadEventRequest) {
+  return request<null>({
+    url: "/book/reader/read-event",
+    method: "post",
+    data,
   });
 }

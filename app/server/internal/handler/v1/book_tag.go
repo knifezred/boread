@@ -28,7 +28,7 @@ func NewBookTagHandler(svc *service.BookTagService) *BookTagHandler {
 // @Produce   json
 // @Param    body  body  dto.TagSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book-tag/page [post]
+// @Router   /api/book/tag/page [post]
 func (h *BookTagHandler) Page(c *gin.Context) {
 	var req dto.TagSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,7 +50,7 @@ func (h *BookTagHandler) Page(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "标签ID"
 // @Success  200  {object}  response.Response{data=model.BookTag}
-// @Router   /api/manage/book-tag/{id} [get]
+// @Router   /api/book/tag/{id} [get]
 func (h *BookTagHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *BookTagHandler) GetByID(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.TagRequest  true  "标签"
 // @Success  200  {object}  response.Response{data=model.BookTag}
-// @Router   /api/manage/book-tag [post]
+// @Router   /api/book/tag [post]
 func (h *BookTagHandler) Create(c *gin.Context) {
 	var req dto.TagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -97,7 +97,7 @@ func (h *BookTagHandler) Create(c *gin.Context) {
 // @Param    id    path  int              true  "标签ID"
 // @Param    body  body  dto.TagRequest   true  "标签"
 // @Success  200  {object}  response.Response{data=model.BookTag}
-// @Router   /api/manage/book-tag/{id} [put]
+// @Router   /api/book/tag/{id} [put]
 func (h *BookTagHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -124,7 +124,7 @@ func (h *BookTagHandler) Update(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "标签ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book-tag/{id} [delete]
+// @Router   /api/book/tag/{id} [delete]
 func (h *BookTagHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {

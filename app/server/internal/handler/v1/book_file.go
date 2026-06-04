@@ -34,7 +34,7 @@ func NewBookFileHandler(svc *service.BookFileService) *BookFileHandler {
 // @Produce   json
 // @Param    file  formData  file    true  "小说文件 (txt/epub/mobi/pdf)"
 // @Success  200   {object}  response.Response{data=dto.FileUploadResponse}
-// @Router   /api/manage/book/upload [post]
+// @Router   /api/book/upload [post]
 func (h *BookFileHandler) Upload(c *gin.Context) {
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
@@ -59,7 +59,7 @@ func (h *BookFileHandler) Upload(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ConfirmImportRequest  true  "确认入库参数"
 // @Success  200  {object}  response.Response{data=dto.ConfirmImportResponse}
-// @Router   /api/manage/book/confirm-import [post]
+// @Router   /api/book/confirm-import [post]
 func (h *BookFileHandler) ConfirmImport(c *gin.Context) {
 	var req dto.ConfirmImportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -80,7 +80,7 @@ func (h *BookFileHandler) ConfirmImport(c *gin.Context) {
 // @Security  BearerAuth
 // @Produce   json
 // @Success  200  {object}  response.Response{data=dto.ScanAllResponse}
-// @Router   /api/manage/book/scan [post]
+// @Router   /api/book/scan [post]
 func (h *BookFileHandler) ScanAll(c *gin.Context) {
 	resp, err := h.svc.ScanPending(c.Request.Context())
 	if err != nil {
@@ -98,7 +98,7 @@ func (h *BookFileHandler) ScanAll(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ScanPathRequest  true  "扫描路径"
 // @Success  200  {object}  response.Response{data=dto.ScanPathResponse}
-// @Router   /api/manage/book/scan-path [post]
+// @Router   /api/book/scan-path [post]
 func (h *BookFileHandler) ScanPath(c *gin.Context) {
 	var req dto.ScanPathRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -120,7 +120,7 @@ func (h *BookFileHandler) ScanPath(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "上传记录ID"
 // @Success  200  {object}  response.Response{data=dto.ScanResult}
-// @Router   /api/manage/book/scan/{id} [post]
+// @Router   /api/book/scan/{id} [post]
 func (h *BookFileHandler) ScanByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -143,7 +143,7 @@ func (h *BookFileHandler) ScanByID(c *gin.Context) {
 // @Param    id     path  int  true  "书籍ID"
 // @Param    chapterNo  path  int  true  "章节序号"
 // @Success  200  {object}  response.Response{data=dto.ChapterContentResponse}
-// @Router   /api/manage/book/{id}/chapter/{chapterNo} [get]
+// @Router   /api/book/{id}/chapter/{chapterNo} [get]
 func (h *BookFileHandler) GetChapterContent(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -171,7 +171,7 @@ func (h *BookFileHandler) GetChapterContent(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ReParseRequest  true  "请求参数"
 // @Success  200  {object}  response.Response{data=dto.ReParseResponse}
-// @Router   /api/manage/book/re-parse [post]
+// @Router   /api/book/re-parse [post]
 func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
 	var req dto.ReParseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -196,7 +196,7 @@ func (h *BookFileHandler) ReParseChapters(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.UploadSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/upload/page [post]
+// @Router   /api/book/upload/page [post]
 func (h *BookFileHandler) PageUpload(c *gin.Context) {
 	var req dto.UploadSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -221,7 +221,7 @@ func (h *BookFileHandler) PageUpload(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.FileSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/file/page [post]
+// @Router   /api/book/file/page [post]
 func (h *BookFileHandler) PageFile(c *gin.Context) {
 	var req dto.FileSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -246,7 +246,7 @@ func (h *BookFileHandler) PageFile(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ChapterSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/chapter/page [post]
+// @Router   /api/book/chapter/page [post]
 func (h *BookFileHandler) PageChapter(c *gin.Context) {
 	var req dto.ChapterSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -269,7 +269,7 @@ func (h *BookFileHandler) PageChapter(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ChapterListRequest  true  "请求参数"
 // @Success  200  {object}  response.Response{data=[]dto.ChapterResponse}
-// @Router   /api/manage/book/chapter/list [post]
+// @Router   /api/book/chapter/list [post]
 func (h *BookFileHandler) ListChapter(c *gin.Context) {
 	var req dto.ChapterListRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -294,7 +294,7 @@ func (h *BookFileHandler) ListChapter(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ChapterRuleRequest  true  "规则"
 // @Success  200  {object}  response.Response{data=model.BookChapterRule}
-// @Router   /api/manage/book/chapter-rule [post]
+// @Router   /api/book/chapter-rule [post]
 func (h *BookFileHandler) CreateChapterRule(c *gin.Context) {
 	var req dto.ChapterRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -318,7 +318,7 @@ func (h *BookFileHandler) CreateChapterRule(c *gin.Context) {
 // @Param    id    path  int                    true  "规则ID"
 // @Param    body  body  dto.ChapterRuleRequest  true  "规则"
 // @Success  200  {object}  response.Response{data=model.BookChapterRule}
-// @Router   /api/manage/book/chapter-rule/{id} [put]
+// @Router   /api/book/chapter-rule/{id} [put]
 func (h *BookFileHandler) UpdateChapterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -345,7 +345,7 @@ func (h *BookFileHandler) UpdateChapterRule(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "规则ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book/chapter-rule/{id} [delete]
+// @Router   /api/book/chapter-rule/{id} [delete]
 func (h *BookFileHandler) DeleteChapterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -366,7 +366,7 @@ func (h *BookFileHandler) DeleteChapterRule(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "规则ID"
 // @Success  200  {object}  response.Response{data=model.BookChapterRule}
-// @Router   /api/manage/book/chapter-rule/{id} [get]
+// @Router   /api/book/chapter-rule/{id} [get]
 func (h *BookFileHandler) GetChapterRuleByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -389,7 +389,7 @@ func (h *BookFileHandler) GetChapterRuleByID(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ChapterRuleSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/chapter-rule/page [post]
+// @Router   /api/book/chapter-rule/page [post]
 func (h *BookFileHandler) PageChapterRule(c *gin.Context) {
 	var req dto.ChapterRuleSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -414,7 +414,7 @@ func (h *BookFileHandler) PageChapterRule(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.ChapterRuleBindRequest  true  "绑定参数"
 // @Success  200  {object}  response.Response{data=dto.ChapterRuleBindResponse}
-// @Router   /api/manage/book/chapter-rule/bind [post]
+// @Router   /api/book/chapter-rule/bind [post]
 func (h *BookFileHandler) BindChapterRule(c *gin.Context) {
 	var req dto.ChapterRuleBindRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -436,7 +436,7 @@ func (h *BookFileHandler) BindChapterRule(c *gin.Context) {
 // @Produce   json
 // @Param    bookId  path  int  true  "书籍ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book/chapter-rule/bind/{bookId} [delete]
+// @Router   /api/book/chapter-rule/bind/{bookId} [delete]
 func (h *BookFileHandler) UnbindChapterRule(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
@@ -457,7 +457,7 @@ func (h *BookFileHandler) UnbindChapterRule(c *gin.Context) {
 // @Produce   json
 // @Param    bookId  path  int  true  "书籍ID"
 // @Success  200  {object}  response.Response{data=dto.ChapterRuleBindResponse}
-// @Router   /api/manage/book/chapter-rule/bind/{bookId} [get]
+// @Router   /api/book/chapter-rule/bind/{bookId} [get]
 func (h *BookFileHandler) GetBoundChapterRule(c *gin.Context) {
 	bookID, err := utils.ParseUint64Param(c, "bookId")
 	if err != nil {
@@ -482,7 +482,7 @@ func (h *BookFileHandler) GetBoundChapterRule(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.FilterRuleRequest  true  "规则"
 // @Success  200  {object}  response.Response{data=model.BookContentFilterRule}
-// @Router   /api/manage/book/filter-rule [post]
+// @Router   /api/book/filter-rule [post]
 func (h *BookFileHandler) CreateFilterRule(c *gin.Context) {
 	var req dto.FilterRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -506,7 +506,7 @@ func (h *BookFileHandler) CreateFilterRule(c *gin.Context) {
 // @Param    id    path  int                   true  "规则ID"
 // @Param    body  body  dto.FilterRuleRequest  true  "规则"
 // @Success  200  {object}  response.Response{data=model.BookContentFilterRule}
-// @Router   /api/manage/book/filter-rule/{id} [put]
+// @Router   /api/book/filter-rule/{id} [put]
 func (h *BookFileHandler) UpdateFilterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -533,7 +533,7 @@ func (h *BookFileHandler) UpdateFilterRule(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "规则ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book/filter-rule/{id} [delete]
+// @Router   /api/book/filter-rule/{id} [delete]
 func (h *BookFileHandler) DeleteFilterRule(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -554,7 +554,7 @@ func (h *BookFileHandler) DeleteFilterRule(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "规则ID"
 // @Success  200  {object}  response.Response{data=model.BookContentFilterRule}
-// @Router   /api/manage/book/filter-rule/{id} [get]
+// @Router   /api/book/filter-rule/{id} [get]
 func (h *BookFileHandler) GetFilterRuleByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -577,7 +577,7 @@ func (h *BookFileHandler) GetFilterRuleByID(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.FilterRuleSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/filter-rule/page [post]
+// @Router   /api/book/filter-rule/page [post]
 func (h *BookFileHandler) PageFilterRule(c *gin.Context) {
 	var req dto.FilterRuleSearch
 	if err := c.ShouldBindJSON(&req); err != nil {

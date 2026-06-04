@@ -27,7 +27,7 @@ func NewBookHandler(svc *service.BookService) *BookHandler {
 // @Produce   json
 // @Param    id  path  int  true  "书籍ID"
 // @Success  200  {object}  response.Response{data=dto.BookResponse}
-// @Router   /api/manage/book/{id} [get]
+// @Router   /api/book/{id} [get]
 func (h *BookHandler) GetByID(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -50,7 +50,7 @@ func (h *BookHandler) GetByID(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.BookRequest  true  "书籍"
 // @Success  200  {object}  response.Response{data=dto.BookResponse}
-// @Router   /api/manage/book [post]
+// @Router   /api/book [post]
 func (h *BookHandler) Create(c *gin.Context) {
 	var req dto.BookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -74,7 +74,7 @@ func (h *BookHandler) Create(c *gin.Context) {
 // @Param    id    path  int            true  "书籍ID"
 // @Param    body  body  dto.BookRequest  true  "书籍"
 // @Success  200  {object}  response.Response{data=dto.BookResponse}
-// @Router   /api/manage/book/{id} [put]
+// @Router   /api/book/{id} [put]
 func (h *BookHandler) Update(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -101,7 +101,7 @@ func (h *BookHandler) Update(c *gin.Context) {
 // @Produce   json
 // @Param    id  path  int  true  "书籍ID"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book/{id} [delete]
+// @Router   /api/book/{id} [delete]
 func (h *BookHandler) Delete(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *BookHandler) Delete(c *gin.Context) {
 // @Produce   json
 // @Param    body  body  dto.BookSearch  true  "搜索参数"
 // @Success  200  {object}  response.Response{data=dto.PageResponse}
-// @Router   /api/manage/book/page [post]
+// @Router   /api/book/page [post]
 func (h *BookHandler) Page(c *gin.Context) {
 	var req dto.BookSearch
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -147,7 +147,7 @@ func (h *BookHandler) Page(c *gin.Context) {
 // @Param    id    path  int                         true  "书籍ID"
 // @Param    body  body  dto.BookUpdateStatusRequest  true  "状态"
 // @Success  200  {object}  response.Response
-// @Router   /api/manage/book/{id}/status [put]
+// @Router   /api/book/{id}/status [put]
 func (h *BookHandler) UpdateStatus(c *gin.Context) {
 	id, err := utils.ParseUint64Param(c, "id")
 	if err != nil {
