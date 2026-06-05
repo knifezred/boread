@@ -63,7 +63,8 @@ const (
 	SearchParamInvalid = 4001 // 搜索参数错误
 
 	// ========== 系统 ==========
-	ServerError = 5001 // 服务器内部错误
+	ServerError     = 5001 // 服务器内部错误
+	DBNotConfigured = 5002 // 数据库未配置
 )
 
 // ============================================================================
@@ -193,6 +194,7 @@ var errMsgMap = map[int]string{
 	CharacterRelNotFound:    "角色关系不存在",
 	SearchParamInvalid:      "搜索参数错误",
 	ServerError:             "服务器内部错误",
+	DBNotConfigured:         "数据库未配置",
 }
 
 // MapServiceError 将 sentinel error 映射为业务错误码

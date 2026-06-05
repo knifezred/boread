@@ -231,6 +231,7 @@ const local: App.I18n.Schema = {
   },
   route: {
     login: 'Login',
+    setup: 'System Setup',
     403: 'No Permission',
     404: 'Page Not Found',
     500: 'Server Error',
@@ -418,6 +419,21 @@ const local: App.I18n.Schema = {
       catalog: {
         title: 'Catalog'
       }
+    },
+    setup: {
+      title: 'Database Configuration',
+      description: 'Enter MySQL database connection info. The config will be saved and tested. Restart required after configuration.',
+      host: 'Host',
+      port: 'Port',
+      dbname: 'Database',
+      username: 'Username',
+      password: 'Password',
+      saveAndTest: 'Save & Test Connection',
+      saveSuccess: 'Database configuration saved successfully',
+      saveFailed: 'Failed to save database configuration',
+      successTitle: 'Configuration Complete',
+      successDescription: 'Database configuration saved. Please restart the service and login.',
+      goToLogin: 'Go to Login after Restart',
     },
     bookshelf: {
       title: "My Bookshelf",

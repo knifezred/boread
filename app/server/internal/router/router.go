@@ -29,6 +29,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	r.NoRoute(healthHandler.NoRoute)
 	r.NoMethod(healthHandler.NoMethod)
 
+	// Setup 路由（无需 DB 连接，始终可用）
+	setupHandler := v1.NewSetupHandler()
+	r.GET("/api/setup/status", setupHandler.Status)
+	r.POST("/api/setup/database", setupHandler.SaveConfig)
+
 	// Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -187,7 +187,8 @@ const routeMap: RouteMap = {
   "bookshelf": "/bookshelf",
   "home": "/home",
   "iframe-page": "/iframe-page/:url",
-  "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?"
+  "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?",
+  "setup": "/setup"
 };
 
 /**

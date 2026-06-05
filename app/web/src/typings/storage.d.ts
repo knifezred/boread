@@ -39,5 +39,7 @@ declare namespace StorageType {
     };
     /** The last login user id */
     lastLoginUserId: string;
+    /** 系统是否已完成数据库配置 */
+    setupDone: boolean;
   }
 }

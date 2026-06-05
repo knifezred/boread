@@ -671,6 +671,21 @@ declare namespace App {
             title: string
           }
         }
+        setup: {
+          title: string
+          description: string
+          host: string
+          port: string
+          dbname: string
+          username: string
+          password: string
+          saveAndTest: string
+          saveSuccess: string
+          saveFailed: string
+          successTitle: string
+          successDescription: string
+          goToLogin: string
+        }
         bookshelf: {
           title: string
           all: string

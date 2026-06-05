@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/modules/auth';
 import { useRouteStore } from '@/store/modules/route';
 import { localStg } from '@/utils/storage';
 import { getRouteName } from '@/router/elegant/transform';
+import { fetchGetSetupStatus } from '@/service/api';
 
 /**
  * create route guard
@@ -92,6 +93,28 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
       routeStore.onRouteSwitchWhenNotLoggedIn();
 
       return null;
+    }
+
+    // 检查系统是否已配置数据库，未配置则跳转到 setup 页面
+    const setupRoute: RouteKey = 'setup';
+    if (to.name !== setupRoute) {
+      const setupDone = localStg.get('setupDone');
+      if (setupDone === undefined || setupDone === null) {
+        try {
+          const { data } = await fetchGetSetupStatus();
+          const configured = data?.configured === true;
+          localStg.set('setupDone', configured);
+          if (!configured) {
+            return { name: setupRoute };
+          }
+        } catch {
+          // 请求失败（如网络错误），缓存为未配置以重试
+          localStg.set('setupDone', false);
+          return { name: setupRoute };
+        }
+      } else if (!setupDone) {
+        return { name: setupRoute };
+      }
     }
 
     // if the user is not logged in, then switch to the login page

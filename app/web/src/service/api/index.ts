@@ -3,3 +3,4 @@ export * from './route';
 export * from './system-manage';
 export * from './book-manage';
 export * from './chapter-manage';
+export * from './setup';

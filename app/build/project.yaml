@@ -3,12 +3,11 @@ app_id: com.knifezred.boread
 version: 0.1.0
 support_arch:
   - amd64
-  - arm64
 supports:
   - app
   - pc
 is_docker_app: false
-start_cmd: bin/boread_server --port=26523
+start_cmd: bin/boread --port=26523
 port: 26523
 proxy_path: api
 open_type: inner

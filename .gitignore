@@ -1,10 +1,9 @@
 # Build outputs
 node_modules/
 /dist/
-/build_dir/
-/bin/
-/logs/
-logs/
+build_dir/
+bin/
+www/
 *.log
 *.upk
 *.tar.gz

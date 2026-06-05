@@ -1,7 +1,7 @@
 .PHONY: run build build-local test clean lint tidy swag seed
 
 APP_NAME    := boread
-BUILD_DIR   := bin
+BUILD_DIR   := ../build/rootfs_amd64/bin
 CMD_DIR     := ./cmd/api
 
 GOOS        := linux

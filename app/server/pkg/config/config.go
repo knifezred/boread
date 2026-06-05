@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -63,4 +64,23 @@ func Load(path string) error {
 
 	Cfg = &Config{}
 	return yaml.Unmarshal(data, Cfg)
+}
+
+// Exists 检查配置文件是否存在
+func Exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+// Save 将当前配置序列化写入文件，自动创建父目录
+func Save(path string) error {
+	data, err := yaml.Marshal(Cfg)
+	if err != nil {
+		return err
+	}
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
 }

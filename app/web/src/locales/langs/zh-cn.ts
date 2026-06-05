@@ -232,6 +232,7 @@ const local: App.I18n.Schema = {
   },
   route: {
     login: "登录",
+    setup: "系统初始化",
     403: "无权限",
     404: "页面不存在",
     500: "服务器错误",
@@ -419,6 +420,21 @@ const local: App.I18n.Schema = {
       catalog: {
         title: "目录",
       },
+    },
+    setup: {
+      title: "数据库配置",
+      description: "请填写 MySQL 数据库连接信息，系统将保存配置并测试连接。配置完成后需重启服务。",
+      host: "主机地址",
+      port: "端口",
+      dbname: "数据库名",
+      username: "用户名",
+      password: "密码",
+      saveAndTest: "保存并测试连接",
+      saveSuccess: "数据库配置保存成功",
+      saveFailed: "数据库配置保存失败",
+      successTitle: "配置完成",
+      successDescription: "数据库配置已保存，请重启服务后登录系统。",
+      goToLogin: "重启后进入登录",
     },
     bookshelf: {
       title: "我的书架",

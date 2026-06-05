@@ -20,6 +20,7 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   500: () => import("@/views/_builtin/500/index.vue"),
   "iframe-page": () => import("@/views/_builtin/iframe-page/[url].vue"),
   login: () => import("@/views/_builtin/login/index.vue"),
+  setup: () => import("@/views/_builtin/setup/index.vue"),
   admin_dashboard: () => import("@/views/admin/dashboard/index.vue"),
   "admin_library_book-category": () => import("@/views/admin/library/book-category/index.vue"),
   "admin_library_book-chapter-rule": () => import("@/views/admin/library/book-chapter-rule/index.vue"),
