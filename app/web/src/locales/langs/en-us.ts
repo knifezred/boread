@@ -373,6 +373,7 @@ const local: App.I18n.Schema = {
         chapters: 'chapters',
         rating: 'Rating',
         readNow: 'Read Now',
+        continueRead: 'Continue Reading',
         addToShelf: 'Add to Shelf',
         addShelfSuccess: 'Added to shelf',
         addShelfFailed: 'Failed to add to shelf',

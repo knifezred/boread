@@ -625,6 +625,7 @@ declare namespace App {
             chapters: string
             rating: string
             readNow: string
+            continueRead: string
             addToShelf: string
             addShelfSuccess: string
             addShelfFailed: string

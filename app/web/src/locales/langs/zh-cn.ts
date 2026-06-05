@@ -374,6 +374,7 @@ const local: App.I18n.Schema = {
         chapters: "章节",
         rating: "评分",
         readNow: "立即阅读",
+        continueRead: "继续阅读",
         addToShelf: "加入书架",
         addShelfSuccess: "已加入书架",
         addShelfFailed: "加入书架失败",

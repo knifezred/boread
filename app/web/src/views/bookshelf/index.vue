@@ -2,23 +2,23 @@
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import {
-  NButton,
-  NEmpty,
-  NPagination,
-  NSpin,
-  NInput,
-  NModal,
-  NForm,
-  NFormItem,
-  NDropdown,
-  useMessage,
+    NButton,
+    NEmpty,
+    NPagination,
+    NSpin,
+    NInput,
+    NModal,
+    NForm,
+    NFormItem,
+    NDropdown,
+    useMessage,
 } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
 import {
-  fetchGetBookshelfPage,
-  fetchRemoveFromBookshelf,
-  fetchUpdateBookshelf,
-  fetchListBookshelfGroups,
+    fetchGetBookshelfPage,
+    fetchRemoveFromBookshelf,
+    fetchUpdateBookshelf,
+    fetchListBookshelfGroups,
 } from "@/service/api"
 import { $t } from "@/locales"
 
@@ -149,9 +149,13 @@ async function handleUpdateGroup() {
   }
 }
 
-/** 点击进入书籍详情 */
+/** 点击进入书籍详情或继续阅读 */
 function handleBookClick(item: Api.BookManage.BookshelfItem) {
-  router.push({ name: "book-detail", params: { id: item.bookId } });
+  if (item.readPercent > 0 && item.chapterNo) {
+    router.push({ name: "book-reader", query: { id: item.bookId, chapterNo: String(item.chapterNo) } });
+  } else {
+    router.push({ name: "book-detail", params: { id: item.bookId } });
+  }
 }
 
 /** 分页变化 */

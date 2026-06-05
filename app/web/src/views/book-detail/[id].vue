@@ -8,6 +8,7 @@ import {
   fetchGetChapterList,
   fetchReParseChapters,
   fetchAddToBookshelf,
+  fetchGetReadProgress,
 } from "@/service/api"
 import { $t } from "@/locales"
 import { formatWordCount, formatTime } from "@/utils/book"
@@ -44,6 +45,10 @@ const bookInfo = ref<Api.BookManage.Book>({
 
 const loading = ref(false);
 
+/** 是否有阅读进度（"继续阅读"vs"立即阅读"） */
+const hasReadProgress = ref(false);
+const lastReadChapterNo = ref(1);
+
 const relatedBooks = ref<Api.BookManage.Book[]>([]);
 const chapters = ref<Api.BookManage.BookChapter[]>([]);
 const chapterTotal = ref(0);
@@ -76,10 +81,11 @@ function toggleSort() {
   sortAsc.value = !sortAsc.value;
 }
 
-function goToReader(chapterNo = 1) {
+function goToReader(chapterNo?: number) {
+  const target = chapterNo ?? lastReadChapterNo.value;
   router.push({
     name: "book-reader",
-    query: { id: bookInfo.value.id, chapterNo: String(chapterNo) },
+    query: { id: bookInfo.value.id, chapterNo: String(target) },
   });
 }
 
@@ -155,6 +161,12 @@ onMounted(async () => {
     if (bookData) {
       bookInfo.value = bookData;
       await loadChapters(1);
+    }
+    // 查询阅读进度
+    const { data: progressData } = await fetchGetReadProgress(bookId);
+    if (progressData?.chapterNo) {
+      hasReadProgress.value = true;
+      lastReadChapterNo.value = progressData.chapterNo;
     }
   } catch (err) {
     console.error("加载书籍详情失败:", err);
@@ -260,9 +272,9 @@ onMounted(async () => {
                       size="large"
                       ghost
                       type="primary"
-                      @click="goToReader(1)"
+                      @click="goToReader()"
                     >
-                      {{ $t("page.book.detail.readNow") }}
+                      {{ hasReadProgress ? $t("page.book.detail.continueRead") : $t("page.book.detail.readNow") }}
                     </NButton>
                     <NButton size="large" ghost type="primary" @click="handleAddToShelf">
                       {{ $t("page.book.detail.addToShelf") }}

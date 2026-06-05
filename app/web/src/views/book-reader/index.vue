@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { NButton, NSpin } from "naive-ui";
-import { fetchGetBook, fetchGetChapterContent, fetchReportReadEvent } from "@/service/api";
-import { useBoolean } from "@sa/hooks";
-import { $t } from "@/locales";
-import { formatWordCount } from "@/utils/book";
-import CatalogModal from "./modules/catalog-modal.vue";
+import { ref, computed, onMounted, nextTick, onBeforeUnmount, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { NButton, NSpin } from "naive-ui"
+import { fetchGetBook, fetchGetChapterContent, fetchReportReadEvent, fetchGetReadProgress, fetchReportReadProgress } from "@/service/api"
+import { useBoolean } from "@sa/hooks"
+import { $t } from "@/locales"
+import { formatWordCount } from "@/utils/book"
+import CatalogModal from "./modules/catalog-modal.vue"
 
 defineOptions({ name: "BookReader" });
 
@@ -189,6 +189,32 @@ function handleOpenCatalog() {
   openModel();
 }
 
+/** 保存阅读进度 - 用当前中心章节信息 */
+async function saveCurrentProgress() {
+  if (!bookId || !bookInfo.value) return;
+  const ch = sortedChapters.value[1] || sortedChapters.value[0];
+  if (!ch?.id) return;
+  fetchReportReadProgress(bookId, {
+    chapterId: ch.id,
+    chapterNo: ch.chapterNo,
+    position: 0,
+    percent: bookInfo.value.totalChapters > 0
+      ? Number(((ch.chapterNo - 1) / bookInfo.value.totalChapters * 100).toFixed(2))
+      : 0,
+    readDuration: 0,
+  }).catch(() => {});
+}
+
+/** 监听中心章节变化，自动保存进度 */
+watch(
+  () => sortedChapters.value[1]?.chapterNo,
+  (newNo, oldNo) => {
+    if (newNo && newNo !== oldNo) {
+      saveCurrentProgress();
+    }
+  },
+);
+
 onMounted(async () => {
   if (!bookId) return;
   bookLoading.value = true;
@@ -204,12 +230,26 @@ onMounted(async () => {
   }
 
   const startChapter = Number(route.query.chapterNo) || 1;
+  // 如果 URL 没有指定 chapterNo，尝试从保存的进度恢复
+  if (!route.query.chapterNo) {
+    try {
+      const { data: progressData } = await fetchGetReadProgress(bookId);
+      if (progressData?.chapterNo) {
+        await initWindow(progressData.chapterNo);
+        await nextTick();
+        scrollToChapter(progressData.chapterNo);
+        startHeartbeat();
+        return;
+      }
+    } catch { /* 忽略查询失败，使用默认值 */ }
+  }
   await initWindow(startChapter);
   startHeartbeat();
 });
 
 onBeforeUnmount(() => {
   sentinelObserver?.disconnect();
+  saveCurrentProgress();
   stopHeartbeat();
 });
 
@@ -285,6 +325,7 @@ function handleVisibilityChange() {
     if (chId && durationSec > 0) {
       reportReadBeat(chId, durationSec);
     }
+    saveCurrentProgress();
     if (heartbeatTimer) {
       clearInterval(heartbeatTimer);
       heartbeatTimer = null;
