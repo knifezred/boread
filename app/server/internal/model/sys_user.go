@@ -16,6 +16,7 @@ type SysUser struct {
 	UserPhone     *string      `gorm:"column:user_phone;size:20;index" json:"userPhone"`
 	UserEmail     *string      `gorm:"column:user_email;size:128;index" json:"userEmail"`
 	Avatar        *string      `gorm:"column:avatar;size:255" json:"avatar"`
+	UgreenUserID  *string      `gorm:"column:ugreen_user_id;size:64;index" json:"ugreenUserId"`
 	LastLoginTime *time.Time   `gorm:"column:last_login_time" json:"lastLoginTime"`
 	LastLoginIP   *string      `gorm:"column:last_login_ip;size:64" json:"lastLoginIp"`
 	Status        EnableStatus `gorm:"column:status;type:char(1);default:'1'" json:"status"`

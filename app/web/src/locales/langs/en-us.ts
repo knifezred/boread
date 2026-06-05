@@ -55,6 +55,9 @@ const local: App.I18n.Schema = {
       yes: 'Yes',
       no: 'No'
     },
+    ugreenAuthorizing: 'UGREEN authorization in progress...',
+    ugreenSwitchToPwd: 'Switch to password login',
+    ugreenConfirmLogin: 'Confirm Login',
   },
   request: {
     logout: 'Logout user after request failed',
@@ -304,6 +307,9 @@ const local: App.I18n.Schema = {
       },
       bindWeChat: {
         title: 'Bind WeChat'
+      },
+      ugreenLogin: {
+        title: 'UGREEN Authorization'
       }
     },
     home: {

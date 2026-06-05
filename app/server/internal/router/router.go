@@ -67,6 +67,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	// === Service 层 ===
 	authSvc := service.NewAuthService(userRepo, bookChapterRuleRepo, db)
+	ugreenAuthSvc := service.NewUgreenAuthService(userRepo, roleRepo, db)
 	deptSvc := service.NewDeptService(deptRepo)
 	roleSvc := service.NewRoleService(roleRepo)
 	userSvc := service.NewUserService(userRepo)
@@ -88,6 +89,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	// === Handler 层 ===
 	authHandler := v1.NewAuthHandler(authSvc)
+	ugreenHandler := v1.NewUgreenHandler(ugreenAuthSvc)
 	deptHandler := v1.NewDeptHandler(deptSvc)
 	roleHandler := v1.NewRoleHandler(roleSvc)
 	userHandler := v1.NewUserHandler(userSvc)
@@ -116,11 +118,13 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	{
 		// 公开
 		api.POST("/auth/login", authHandler.Login)
+		api.POST("/auth/ugreen-login", ugreenHandler.Login)
+		api.GET("/auth/ugreen-profile", ugreenHandler.Profile)
 		api.GET("/book/category/hot", bookCategoryHandler.HotList)
 
 		// 登录态
 		authed := api.Group("")
-		authed.Use(middleware.Auth())
+		authed.Use(middleware.FlexAuth(userRepo, db))
 		{
 			authed.GET("/auth/userInfo", authHandler.GetUserInfo)
 			authed.GET("/auth/menu", authHandler.GetUserMenu)
@@ -129,7 +133,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// 受保护管理接口
 		manage := api.Group("/manage")
-		manage.Use(middleware.Auth())
+		manage.Use(middleware.FlexAuth(userRepo, db))
 		{
 			// --- Dept ---
 			manage.GET("/dept/tree", deptHandler.Tree)
@@ -188,7 +192,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 			// --- Book Category ---
 			bookCategory := api.Group("/book/category")
-			bookCategory.Use(middleware.Auth())
+			bookCategory.Use(middleware.FlexAuth(userRepo, db))
 			{
 				bookCategory.GET("/tree", bookCategoryHandler.Tree)
 				bookCategory.GET("/:id", bookCategoryHandler.GetByID)
@@ -204,7 +208,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Tag ---
 		bookTagGroup := api.Group("/book/tag")
-		bookTagGroup.Use(middleware.Auth())
+		bookTagGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			bookTagGroup.GET("/:id", bookTagHandler.GetByID)
 			bookTagGroup.POST("/page", bookTagHandler.Page)
@@ -215,7 +219,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book (CRUD + File + Chapter + Rules) ---
 		bookGroup := api.Group("/book")
-		bookGroup.Use(middleware.Auth())
+		bookGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			// Book CRUD
 			bookGroup.GET("/:id", bookHandler.GetByID)
@@ -259,7 +263,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Chapter ---
 		bookChapterGroup := api.Group("/book/chapter")
-		bookChapterGroup.Use(middleware.Auth())
+		bookChapterGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			bookChapterGroup.POST("/page", bookChapterHandler.PageChapter)
 			bookChapterGroup.POST("/list", bookChapterHandler.ListChapter)
@@ -276,7 +280,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Character ---
 		bookCharGroup := api.Group("/book/character")
-		bookCharGroup.Use(middleware.Auth())
+		bookCharGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			bookCharGroup.POST("", characterHandler.CreateCharacter)
 			bookCharGroup.PUT("/:id", characterHandler.UpdateCharacter)
@@ -295,7 +299,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Social: Note ---
 		noteGroup := api.Group("/book/note")
-		noteGroup.Use(middleware.Auth())
+		noteGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			noteGroup.POST("", noteHandler.CreateNote)
 			noteGroup.PUT("/:id", noteHandler.UpdateNote)
@@ -307,7 +311,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Social: Review ---
 		reviewGroup := api.Group("/book/review")
-		reviewGroup.Use(middleware.Auth())
+		reviewGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			reviewGroup.POST("", reviewHandler.CreateReview)
 			reviewGroup.PUT("/:id", reviewHandler.UpdateReview)
@@ -318,7 +322,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Social: Comment ---
 		commentGroup := api.Group("/book/comment")
-		commentGroup.Use(middleware.Auth())
+		commentGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			commentGroup.POST("", commentHandler.CreateComment)
 			commentGroup.DELETE("/:id", commentHandler.DeleteComment)
@@ -328,7 +332,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Social: Like ---
 		likeGroup := api.Group("/book/like")
-		likeGroup.Use(middleware.Auth())
+		likeGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			likeGroup.POST("/toggle", likeHandler.ToggleLike)
 			likeGroup.POST("/status", likeHandler.GetLikeStatus)
@@ -337,7 +341,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Shelf ---
 		bookShelfGroup := api.Group("/book/shelf")
-		bookShelfGroup.Use(middleware.Auth())
+		bookShelfGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			bookShelfGroup.POST("", bookshelfHandler.AddToBookshelf)
 			bookShelfGroup.DELETE("/:bookId", bookshelfHandler.RemoveFromBookshelf)
@@ -348,7 +352,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Reader (阅读进度 + 阅读事件) ---
 		bookReaderGroup := api.Group("/book/reader")
-		bookReaderGroup.Use(middleware.Auth())
+		bookReaderGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			bookReaderGroup.PUT("/progress/:bookId", bookReaderHandler.ReportProgress)
 			bookReaderGroup.GET("/progress/:bookId", bookReaderHandler.GetProgress)
@@ -358,7 +362,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// --- Book Read Stats (阅读统计) ---
 		bookReadStatsGroup := api.Group("/book/read-stats")
-		bookReadStatsGroup.Use(middleware.Auth())
+		bookReadStatsGroup.Use(middleware.FlexAuth(userRepo, db))
 		{
 			bookReadStatsGroup.POST("/daily", bookReadStatsHandler.GetDailyStats)
 			bookReadStatsGroup.POST("/books", bookReadStatsHandler.GetBookStats)

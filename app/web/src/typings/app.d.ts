@@ -383,6 +383,9 @@ declare namespace App {
           yes: string
           no: string
         }
+        ugreenAuthorizing: string
+        ugreenSwitchToPwd: string
+        ugreenConfirmLogin: string
       }
       request: {
         logout: string
@@ -555,6 +558,9 @@ declare namespace App {
             title: string
           }
           bindWeChat: {
+            title: string
+          }
+          ugreenLogin: {
             title: string
           }
         }

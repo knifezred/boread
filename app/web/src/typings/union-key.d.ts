@@ -9,10 +9,10 @@ declare namespace UnionKey {
    * - reset-pwd: reset password
    * - bind-wechat: bind wechat
    */
-  type LoginModule = 'pwd-login' | 'code-login' | 'register' | 'reset-pwd' | 'bind-wechat';
+  type LoginModule = 'pwd-login' | 'code-login' | 'register' | 'reset-pwd' | 'bind-wechat' | 'ugreen-login'
 
   /** Theme scheme */
-  type ThemeScheme = 'light' | 'dark' | 'auto';
+  type ThemeScheme = 'light' | 'dark' | 'auto'
 
   /**
    * The layout mode
@@ -29,7 +29,7 @@ declare namespace UnionKey {
     | 'vertical-mix'
     | 'vertical-hybrid-header-first'
     | 'top-hybrid-sidebar-first'
-    | 'top-hybrid-header-first';
+    | 'top-hybrid-header-first'
 
   /**
    * The scroll mode when content overflow
@@ -37,10 +37,10 @@ declare namespace UnionKey {
    * - wrapper: the wrapper component's root element overflow
    * - content: the content component overflow
    */
-  type ThemeScrollMode = import('@sa/materials').LayoutScrollMode;
+  type ThemeScrollMode = import('@sa/materials').LayoutScrollMode
 
   /** Page animate mode */
-  type ThemePageAnimateMode = 'fade' | 'fade-slide' | 'fade-bottom' | 'fade-scale' | 'zoom-fade' | 'zoom-out' | 'none';
+  type ThemePageAnimateMode = 'fade' | 'fade-slide' | 'fade-bottom' | 'fade-scale' | 'zoom-fade' | 'zoom-out' | 'none'
 
   /**
    * Tab mode
@@ -48,7 +48,7 @@ declare namespace UnionKey {
    * - chrome: chrome style
    * - button: button style
    */
-  type ThemeTabMode = import('@sa/materials').PageTabMode;
+  type ThemeTabMode = import('@sa/materials').PageTabMode
 
   /** Unocss animate key */
   type UnoCssAnimateKey =
@@ -152,5 +152,5 @@ declare namespace UnionKey {
     | 'back-out-up'
     | 'back-out-down'
     | 'back-out-right'
-    | 'back-out-left';
+    | 'back-out-left'
 }

@@ -41,5 +41,7 @@ declare namespace StorageType {
     lastLoginUserId: string;
     /** 系统是否已完成数据库配置 */
     setupDone: boolean;
+    /** 用户是否手动切换到账号密码登录 */
+    disableUgreen: boolean;
   }
 }

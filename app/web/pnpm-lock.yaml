@@ -29,6 +29,9 @@ importers:
       '@sa/utils':
         specifier: workspace:*
         version: link:packages/utils
+      '@ugreen-nas/core':
+        specifier: ^1.7.1
+        version: 1.7.1
       '@vueuse/core':
         specifier: 14.3.0
         version: 14.3.0(vue@3.5.34(typescript@6.0.3))
@@ -1456,6 +1459,10 @@ packages:
   '@typescript-eslint/visitor-keys@8.59.3':
     resolution: {integrity: sha512-f1UQF7ggd42YiwI5wGrRaPsa+P0CINBlrkLPmGfpq/u/I/oVtecoEIfFR9ag/oa1sLOsRNZ6xehf6qMZhQGBDg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@ugreen-nas/core@1.7.1':
+    resolution: {integrity: sha512-YlBPAhBw2lQFcFNEe2nQ2HJ7R96M5jVZk/NH/hyosX0BxCD+safJoIAhLdN/HWKxkqETsfOsYpgf+RNoXZGOJg==, tarball: https://registry.npmjs.org/@ugreen-nas/core/-/core-1.7.1.tgz}
+    engines: {node: '>=14'}
 
   '@unocss/cli@66.6.8':
     resolution: {integrity: sha512-dJ4AmrhCtQwEDJtpFG7AgJ4Qi4GWnNgWWlLWq4DhKBOCcvldr9k98mscdhs3MOwph25DIxU5MdLRAg/OS1JryQ==}
@@ -5147,6 +5154,8 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.59.3
       eslint-visitor-keys: 5.0.1
+
+  '@ugreen-nas/core@1.7.1': {}
 
   '@unocss/cli@66.6.8':
     dependencies:

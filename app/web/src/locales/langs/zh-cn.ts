@@ -55,6 +55,9 @@ const local: App.I18n.Schema = {
       yes: "是",
       no: "否",
     },
+    ugreenAuthorizing: "正在进行绿联授权登录...",
+    ugreenSwitchToPwd: "切换到账号密码登录",
+    ugreenConfirmLogin: "确认登录",
   },
   request: {
     logout: "请求失败后登出用户",
@@ -306,6 +309,9 @@ const local: App.I18n.Schema = {
       bindWeChat: {
         title: "绑定微信",
       },
+      ugreenLogin: {
+        title: "绿联授权登录",
+      },
     },
     home: {
       branchDesc:
@@ -423,7 +429,7 @@ const local: App.I18n.Schema = {
     },
     setup: {
       title: "数据库配置",
-      description: "请填写 MySQL 数据库连接信息，系统将保存配置并测试连接。配置完成后需重启服务。",
+      description: "请填写 MySQL 数据库连接信息，系统将保存配置并测试连接。",
       host: "主机地址",
       port: "端口",
       dbname: "数据库名",

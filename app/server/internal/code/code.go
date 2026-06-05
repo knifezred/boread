@@ -22,6 +22,7 @@ const (
 	UserDisabled     = 2003 // 账号已禁用
 	UserLocked       = 2004 // 账号已锁定
 	PermissionDenied = 2005 // 权限不足
+	UgreenAuthFailed = 2006 // 绿联认证失败
 
 	// ========== 业务 - 通用资源 ==========
 	ResourceConflict  = 3001 // 资源不存在/已存在/业务冲突
@@ -155,6 +156,9 @@ var (
 
 	// ---- user ----
 	ErrUserExists = errors.New("用户名已存在")
+
+	// ---- ugreen ----
+	ErrUgreenAuthFailed = errors.New("ugreen auth failed")
 )
 
 // Text 根据错误码返回中文消息
@@ -174,6 +178,7 @@ var errMsgMap = map[int]string{
 	UserDisabled:            "账号已禁用",
 	UserLocked:              "账号已锁定",
 	PermissionDenied:        "权限不足",
+	UgreenAuthFailed:        "绿联认证失败",
 	ResourceConflict:        "资源冲突或不存在",
 	ResourceProtected:       "系统内置资源不可操作",
 	HasBoundRef:             "仍有绑定关系不可删除",
@@ -204,6 +209,8 @@ func MapServiceError(err error) int {
 	case errors.Is(err, ErrUserNotFound),
 		errors.Is(err, ErrInvalidPassword):
 		return AuthFailed
+	case errors.Is(err, ErrUgreenAuthFailed):
+		return UgreenAuthFailed
 	case errors.Is(err, ErrUserDisabled):
 		return UserDisabled
 	case errors.Is(err, ErrUserLocked):

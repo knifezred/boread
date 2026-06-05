@@ -1,10 +1,10 @@
-import type { LocationQueryRaw, RouteLocationNormalized, RouteLocationRaw, Router } from 'vue-router';
-import type { RouteKey, RoutePath } from '@elegant-router/types';
-import { useAuthStore } from '@/store/modules/auth';
-import { useRouteStore } from '@/store/modules/route';
-import { localStg } from '@/utils/storage';
-import { getRouteName } from '@/router/elegant/transform';
-import { fetchGetSetupStatus } from '@/service/api';
+import type { LocationQueryRaw, RouteLocationNormalized, RouteLocationRaw, Router } from 'vue-router'
+import type { RouteKey, RoutePath } from '@elegant-router/types'
+import { useAuthStore } from '@/store/modules/auth'
+import { useRouteStore } from '@/store/modules/route'
+import { localStg } from '@/utils/storage'
+import { getRouteName } from '@/router/elegant/transform'
+import { fetchGetSetupStatus } from '@/service/api'
 
 /**
  * create route guard
@@ -95,25 +95,26 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
       return null;
     }
 
-    // 检查系统是否已配置数据库，未配置则跳转到 setup 页面
+    // 检查系统是否已配置数据库，始终以后端接口为准
     const setupRoute: RouteKey = 'setup';
     if (to.name !== setupRoute) {
       const setupDone = localStg.get('setupDone');
-      if (setupDone === undefined || setupDone === null) {
+      // 缓存为 true 则跳过重复请求
+      if (setupDone === true) {
+        // continue to login redirect below
+      } else {
         try {
           const { data } = await fetchGetSetupStatus();
           const configured = data?.configured === true;
-          localStg.set('setupDone', configured);
-          if (!configured) {
+          if (configured) {
+            localStg.set('setupDone', true);
+          } else {
             return { name: setupRoute };
           }
         } catch {
-          // 请求失败（如网络错误），缓存为未配置以重试
-          localStg.set('setupDone', false);
+          // 请求失败时不缓存，下次重试
           return { name: setupRoute };
         }
-      } else if (!setupDone) {
-        return { name: setupRoute };
       }
     }
 

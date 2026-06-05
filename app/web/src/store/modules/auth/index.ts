@@ -1,15 +1,17 @@
-import { computed, reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { defineStore } from 'pinia';
-import { useLoading } from '@sa/hooks';
-import { fetchGetUserInfo, fetchLogin } from '@/service/api';
-import { useRouterPush } from '@/hooks/common/router';
-import { localStg } from '@/utils/storage';
-import { SetupStoreId } from '@/enum';
-import { $t } from '@/locales';
-import { useRouteStore } from '../route';
-import { useTabStore } from '../tab';
-import { clearAuthStorage, getToken } from './shared';
+import { computed, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { defineStore } from 'pinia'
+import { useLoading } from '@sa/hooks'
+import { fetchGetUserInfo, fetchLogin } from '@/service/api'
+import { fetchUgreenLogin } from '@/service/api/ugreen'
+import { getUgreenToken } from '@/hooks/business/ugreen'
+import { useRouterPush } from '@/hooks/common/router'
+import { localStg } from '@/utils/storage'
+import { SetupStoreId } from '@/enum'
+import { $t } from '@/locales'
+import { useRouteStore } from '../route'
+import { useTabStore } from '../tab'
+import { clearAuthStorage, getToken } from './shared'
 
 export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
   const route = useRoute();
@@ -168,6 +170,36 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
       if (!pass) {
         resetStore();
       }
+      return;
+    }
+
+    // 无本地 token 时尝试绿联NAS自动登录
+    await loginByUgreen(false);
+  }
+
+  /** 绿联NAS登录 (在 UGOS 环境下自动获取 token 完成认证) */
+  async function loginByUgreen(redirect = true) {
+    try {
+      const ugToken = await getUgreenToken();
+      if (!ugToken) return;
+
+      const { data: loginToken, error } = await fetchUgreenLogin();
+
+      if (!error && loginToken) {
+        const pass = await loginByToken(loginToken);
+
+        if (pass) {
+          const isClear = checkTabClear();
+          let needRedirect = redirect;
+
+          if (isClear) {
+            needRedirect = false;
+          }
+          await redirectFromLogin(needRedirect);
+        }
+      }
+    } catch {
+      // 非 UGOS 环境或认证失败，静默降级到普通登录页
     }
   }
 
@@ -179,6 +211,7 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     loginLoading,
     resetStore,
     login,
+    loginByUgreen,
     initUserInfo
   };
 });

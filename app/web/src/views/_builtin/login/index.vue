@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import type { Component } from 'vue';
-import { getPaletteColorByNumber, mixColor } from '@sa/color';
-import { loginModuleRecord } from '@/constants/app';
-import { useAppStore } from '@/store/modules/app';
-import { useThemeStore } from '@/store/modules/theme';
-import { $t } from '@/locales';
-import PwdLogin from './modules/pwd-login.vue';
-import CodeLogin from './modules/code-login.vue';
-import Register from './modules/register.vue';
-import ResetPwd from './modules/reset-pwd.vue';
-import BindWechat from './modules/bind-wechat.vue';
+import { computed, onMounted, provide, ref } from 'vue'
+import type { Component } from 'vue'
+import { getPaletteColorByNumber, mixColor } from '@sa/color'
+import { loginModuleRecord } from '@/constants/app'
+import { useAppStore } from '@/store/modules/app'
+import { useThemeStore } from '@/store/modules/theme'
+import { useUgreenEnv } from '@/hooks/business/ugreen'
+import { $t } from '@/locales'
+import { localStg } from '@/utils/storage'
+import PwdLogin from './modules/pwd-login.vue'
+import CodeLogin from './modules/code-login.vue'
+import Register from './modules/register.vue'
+import ResetPwd from './modules/reset-pwd.vue'
+import BindWechat from './modules/bind-wechat.vue'
+import UgreenLogin from './modules/ugreen-login.vue'
 
 interface Props {
   /** The login module */
@@ -21,6 +24,16 @@ const props = defineProps<Props>();
 
 const appStore = useAppStore();
 const themeStore = useThemeStore();
+const { checkUgreenEnv } = useUgreenEnv();
+
+const isUgreenEnv = ref(false);
+const envChecked = ref(false);
+const disableUgreen = ref(localStg.get('disableUgreen') ?? false);
+
+provide('disableUgreen', () => {
+  disableUgreen.value = true;
+  localStg.set('disableUgreen', true);
+});
 
 interface LoginModule {
   label: App.I18n.I18nKey;
@@ -32,10 +45,24 @@ const moduleMap: Record<UnionKey.LoginModule, LoginModule> = {
   'code-login': { label: loginModuleRecord['code-login'], component: CodeLogin },
   register: { label: loginModuleRecord.register, component: Register },
   'reset-pwd': { label: loginModuleRecord['reset-pwd'], component: ResetPwd },
-  'bind-wechat': { label: loginModuleRecord['bind-wechat'], component: BindWechat }
+  'bind-wechat': { label: loginModuleRecord['bind-wechat'], component: BindWechat },
+  'ugreen-login': { label: loginModuleRecord['ugreen-login'], component: UgreenLogin }
 };
 
-const activeModule = computed(() => moduleMap[props.module || 'pwd-login']);
+const activeModuleName = computed(() => {
+  if (!disableUgreen.value && envChecked.value && isUgreenEnv.value) {
+    return 'ugreen-login';
+  }
+  return props.module || 'pwd-login';
+});
+
+const activeModule = computed(() => moduleMap[activeModuleName.value]);
+
+onMounted(async () => {
+  const detected = await checkUgreenEnv();
+  isUgreenEnv.value = detected;
+  envChecked.value = true;
+});
 
 const bgThemeColor = computed(() =>
   themeStore.darkMode ? getPaletteColorByNumber(themeStore.themeColor, 600) : themeStore.themeColor
@@ -75,7 +102,7 @@ const bgColor = computed(() => {
           </div>
         </header>
         <main class="pt-24px">
-          <h3 class="text-18px text-primary font-medium">{{ $t(activeModule.label) }}</h3>
+          <!-- <h3 class="text-18px text-primary font-medium">{{ $t(activeModule.label) }}</h3> -->
           <div class="pt-24px">
             <Transition :name="themeStore.page.animateMode" mode="out-in" appear>
               <component :is="activeModule.component" />
