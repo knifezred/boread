@@ -15,6 +15,7 @@ tag_types:
   - media
 depend_fw_version: 1.13.0.0000
 depend_docker_version: ""
+allow_add_access_path: true
 i18n:
   en-US:
     name: boread
@@ -23,6 +24,6 @@ i18n:
     official: https://www.omgx.cn
   zh-CN:
     name: 不爱阅读
-    description: 小说管理阅读工具
+    description: 专为绿联 NAS 设计的智能txt小说管理阅读工具
     author: 不爱思考
     official: https://www.omgx.cn
