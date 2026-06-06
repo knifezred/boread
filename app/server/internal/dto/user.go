@@ -44,6 +44,11 @@ type UserResetPwdRequest struct {
 	Password string `json:"password" binding:"required,min=6,max=64"`
 }
 
+// UserBatchDeleteRequest 批量删除用户
+type UserBatchDeleteRequest struct {
+	IDs []uint64 `json:"ids" binding:"required,min=1"`
+}
+
 // UserVO 用户输出 (含 roleIds, 对齐前端 Api.SystemManage.User)
 type UserVO struct {
 	ID         uint64             `json:"id"`

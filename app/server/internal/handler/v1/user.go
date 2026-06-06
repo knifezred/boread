@@ -168,6 +168,28 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	response.Success(c, nil)
 }
 
+// BatchDelete 批量删除用户
+// @Summary   批量删除用户
+// @Tags      user
+// @Security  BearerAuth
+// @Accept    json
+// @Produce   json
+// @Param    body  body  dto.UserBatchDeleteRequest  true  "用户ID列表"
+// @Success  200  {object}  response.Response
+// @Router   /api/manage/user/batch-delete [post]
+func (h *UserHandler) BatchDelete(c *gin.Context) {
+	var req dto.UserBatchDeleteRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, code.ParamInvalid, err.Error())
+		return
+	}
+	if err := h.svc.BatchDelete(c.Request.Context(), req.IDs); err != nil {
+		response.Error(c, code.ServerError, err.Error())
+		return
+	}
+	response.Success(c, nil)
+}
+
 func mapUserErr(err error) int {
 	return code.MapServiceError(err)
 }

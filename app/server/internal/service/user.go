@@ -100,6 +100,10 @@ func (s *UserService) Delete(ctx context.Context, id uint64) error {
 	return s.repo.Delete(ctx, id)
 }
 
+func (s *UserService) BatchDelete(ctx context.Context, ids []uint64) error {
+	return s.repo.BatchDelete(ctx, ids)
+}
+
 func (s *UserService) GetByID(ctx context.Context, id uint64) (*model.SysUser, error) {
 	return s.repo.GetByID(ctx, id)
 }

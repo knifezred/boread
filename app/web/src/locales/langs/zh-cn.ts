@@ -500,6 +500,7 @@ const local: App.I18n.Schema = {
           userEmail: "邮箱",
           userStatus: "用户状态",
           userRole: "用户角色",
+          password: "密码",
           form: {
             userName: "请输入用户名",
             userGender: "请选择性别",
@@ -508,6 +509,7 @@ const local: App.I18n.Schema = {
             userEmail: "请输入邮箱",
             userStatus: "请选择用户状态",
             userRole: "请选择用户角色",
+            password: "请输入密码（6-64位）",
           },
           addUser: "新增用户",
           editUser: "编辑用户",

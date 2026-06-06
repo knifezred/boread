@@ -164,6 +164,15 @@ export function fetchDeleteUser(id: string | number) {
   });
 }
 
+/** 批量删除用户 */
+export function fetchBatchDeleteUser(ids: (string | number)[]) {
+  return request<null>({
+    url: "/manage/user/batch-delete",
+    method: "post",
+    data: { ids },
+  });
+}
+
 /** 重置密码 */
 export function fetchResetUserPassword(id: string | number, password: string) {
   return request<null>({

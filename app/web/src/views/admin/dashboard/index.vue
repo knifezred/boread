@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useAppStore } from '@/store/modules/app';
-import HeaderBanner from './modules/header-banner.vue';
-import CardData from './modules/card-data.vue';
-import LineChart from './modules/line-chart.vue';
-import PieChart from './modules/pie-chart.vue';
-import ProjectNews from './modules/project-news.vue';
-import CreativityBanner from './modules/creativity-banner.vue';
+import { computed } from 'vue'
+import { useAppStore } from '@/store/modules/app'
+import HeaderBanner from './modules/header-banner.vue'
+import CardData from './modules/card-data.vue'
+import LineChart from './modules/line-chart.vue'
+import PieChart from './modules/pie-chart.vue'
+import ProjectNews from './modules/project-news.vue'
+import CreativityBanner from './modules/creativity-banner.vue'
 
 const appStore = useAppStore();
 
@@ -15,9 +15,6 @@ const gap = computed(() => (appStore.isMobile ? 0 : 16));
 
 <template>
   <NSpace vertical :size="16">
-    <NAlert :title="$t('common.tip')" type="warning">
-      {{ $t('page.home.branchDesc') }}
-    </NAlert>
     <HeaderBanner />
     <CardData />
     <NGrid :x-gap="gap" :y-gap="16" responsive="screen" item-responsive>

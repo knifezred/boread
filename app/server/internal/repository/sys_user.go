@@ -147,6 +147,13 @@ func (r *SysUserRepository) Delete(ctx context.Context, id uint64) error {
 	return r.db.WithContext(ctx).Delete(&model.SysUser{}, id).Error
 }
 
+func (r *SysUserRepository) BatchDelete(ctx context.Context, ids []uint64) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	return r.db.WithContext(ctx).Delete(&model.SysUser{}, "id IN ?", ids).Error
+}
+
 func (r *SysUserRepository) Page(ctx context.Context, s *dto.UserSearch) ([]model.SysUser, int64, error) {
 	tx := r.db.WithContext(ctx).Model(&model.SysUser{})
 	if s.UserName != "" {

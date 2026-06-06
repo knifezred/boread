@@ -161,6 +161,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			manage.POST("/user", middleware.RequireButton(authSvc, "user:create"), userHandler.Create)
 			manage.PUT("/user/:id", middleware.RequireButton(authSvc, "user:update"), userHandler.Update)
 			manage.DELETE("/user/:id", middleware.RequireButton(authSvc, "user:delete"), userHandler.Delete)
+			manage.POST("/user/batch-delete", middleware.RequireButton(authSvc, "user:delete"), userHandler.BatchDelete)
 			manage.PUT("/user/:id/reset-password", middleware.RequireButton(authSvc, "user:reset_pwd"), userHandler.ResetPassword)
 
 			// --- Menu ---
