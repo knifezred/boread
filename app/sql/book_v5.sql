@@ -12,3 +12,4 @@ ALTER TABLE sys_user
     ADD COLUMN ugreen_user_id VARCHAR(64) DEFAULT NULL COMMENT '绿联NAS用户ID' AFTER avatar;
 
 CREATE INDEX idx_sys_user_ugreen_user_id ON sys_user(ugreen_user_id);
+

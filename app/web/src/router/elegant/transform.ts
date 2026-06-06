@@ -174,6 +174,7 @@ const routeMap: RouteMap = {
   "admin_library_book-chapter-rule": "/admin/library/book-chapter-rule",
   "admin_library_book-filter-rule": "/admin/library/book-filter-rule",
   "admin_library_book-tag": "/admin/library/book-tag",
+  "admin_setting": "/admin/setting",
   "admin_system": "/admin/system",
   "admin_system_dept": "/admin/system/dept",
   "admin_system_dict": "/admin/system/dict",

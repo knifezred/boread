@@ -463,3 +463,89 @@ export function fetchGetOperationLogList(params?: Api.SystemManage.OperationLogS
     data: params,
   });
 }
+
+// -------- Setting --------
+
+/** 系统配置分页 */
+export function fetchGetSettingList(params?: Api.SystemManage.SettingSearchParams) {
+  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Setting>>({
+    url: "/manage/setting/page",
+    method: "post",
+    data: params,
+  });
+}
+
+/** 配置详情 */
+export function fetchGetSettingById(id: string | number) {
+  return request<Api.SystemManage.Setting>({
+    url: `/manage/setting/${id}`,
+    method: "get",
+  });
+}
+
+/** 新增配置 */
+export function fetchCreateSetting(data: {
+  category: string;
+  key: string;
+  value: string;
+  valueType: string;
+  description?: string;
+  editable?: boolean;
+  status?: string;
+}) {
+  return request<Api.SystemManage.Setting>({
+    url: "/manage/setting",
+    method: "post",
+    data,
+  });
+}
+
+/** 编辑配置 */
+export function fetchUpdateSetting(
+  id: string | number,
+  data: {
+    value: string;
+    valueType: string;
+    description?: string;
+    status?: string;
+  },
+) {
+  return request<Api.SystemManage.Setting>({
+    url: `/manage/setting/${id}`,
+    method: "put",
+    data,
+  });
+}
+
+/** 删除配置 */
+export function fetchDeleteSetting(id: string | number) {
+  return request<null>({
+    url: `/manage/setting/${id}`,
+    method: "delete",
+  });
+}
+
+/** 获取配置分类列表 */
+export function fetchGetSettingCategories() {
+  return request<string[]>({
+    url: "/manage/setting/categories",
+    method: "get",
+  });
+}
+
+/** 按分类获取所有配置 */
+export function fetchGetSettingsByCategory(category: string) {
+  return request<Api.SystemManage.SettingCategoryMap>({
+    url: `/manage/setting/by-category/${encodeURIComponent(category)}`,
+    method: "get",
+  });
+}
+
+/** 批量保存配置 (upsert) */
+export function fetchBatchSaveSettings(data: Api.SystemManage.SettingBatchSaveRequest) {
+  return request<Api.SystemManage.SettingBatchSaveResult>({
+    url: "/manage/setting/batch-save",
+    method: "post",
+    data,
+  });
+}

@@ -2,12 +2,14 @@ package v1
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	"boread/internal/code"
+	"boread/internal/model"
 	"boread/pkg/appsignal"
 	"boread/pkg/config"
 	"boread/pkg/response"
@@ -80,6 +82,9 @@ func (h *SetupHandler) SaveConfig(c *gin.Context) {
 		response.Error(c, code.DBNotConfigured, "数据库连接失败: "+err.Error())
 		return
 	}
+
+	// 将数据库配置同步写入 sys_setting 表（upsert）
+	setupDBSettings(db, req)
 	sqlDB.Close()
 
 	// 构建配置
@@ -122,4 +127,47 @@ func (h *SetupHandler) SaveConfig(c *gin.Context) {
 
 	// 配置保存成功后触发服务自动重启
 	appsignal.RequestRestart()
+}
+
+// setupDBSettings 将数据库连接配置 upsert 到 sys_setting 表
+// category = "database"，keys: host / port / username / password / dbname
+func setupDBSettings(db *gorm.DB, req SaveDatabaseConfigRequest) {
+	items := []struct{ key, value, valueType string }{
+		{"host", req.Host, "string"},
+		{"port", strconv.Itoa(req.Port), "number"},
+		{"username", req.Username, "string"},
+		{"password", req.Password, "string"},
+		{"dbname", req.DBName, "string"},
+	}
+	const category = "database"
+	for _, item := range items {
+		upsertSetupSetting(db, category, item.key, item.value, item.valueType)
+	}
+}
+
+// upsertSetupSetting 按 category+key upsert sys_setting 记录
+// 存在则更新 value/value_type，不存在则插入新行
+func upsertSetupSetting(db *gorm.DB, category, key, value, valueType string) {
+	var m model.SysSetting
+	err := db.Where("category = ? AND `key` = ?", category, key).First(&m).Error
+	if err == nil {
+		// 已存在 → 更新
+		db.Model(&m).Updates(map[string]any{
+			"value":      value,
+			"value_type": valueType,
+		})
+		return
+	}
+	// 不存在 → 创建
+	desc := "setup 初始化写入"
+	db.Create(&model.SysSetting{
+		Category:    category,
+		Key:         key,
+		Value:       value,
+		ValueType:   valueType,
+		Description: &desc,
+		Editable:    true,
+		IsSystem:    true,
+		Status:      model.StatusEnabled,
+	})
 }

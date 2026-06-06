@@ -264,5 +264,46 @@ declare namespace Api {
           endTime?: string;
         }
     >;
+
+    /** setting */
+    type Setting = Common.CommonRecord<{
+      category: string;
+      key: string;
+      value: string;
+      valueType: string;
+      description: string | null;
+      editable: boolean;
+      isSystem: boolean;
+    }>;
+
+    /** setting search params */
+    type SettingSearchParams = CommonType.RecordNullable<
+      {
+        category: string;
+        keyword: string;
+      } & CommonSearchParams
+    >;
+
+    /** setting category map (key→SettingVO) */
+    type SettingCategoryMap = Record<string, Setting>;
+
+    /** batch save item */
+    type SettingBatchSaveItem = {
+      key: string;
+      value: string;
+      valueType: string;
+    };
+
+    /** batch save request */
+    type SettingBatchSaveRequest = {
+      category: string;
+      items: SettingBatchSaveItem[];
+    };
+
+    /** batch save result */
+    type SettingBatchSaveResult = {
+      created: number;
+      updated: number;
+    };
   }
 }

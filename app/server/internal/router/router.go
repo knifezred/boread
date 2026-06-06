@@ -43,6 +43,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	roleRepo := repository.NewSysRoleRepository(db)
 	menuRepo := repository.NewSysMenuRepository(db)
 	dictRepo := repository.NewSysDictRepository(db)
+	settingRepo := repository.NewSysSettingRepository(db)
 	logRepo := repository.NewSysLogRepository(db)
 	bookCategoryRepo := repository.NewBookCategoryRepository(db)
 	bookTagRepo := repository.NewBookTagRepository(db)
@@ -73,6 +74,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	userSvc := service.NewUserService(userRepo)
 	menuSvc := service.NewMenuService(menuRepo)
 	dictSvc := service.NewDictService(dictRepo)
+	settingSvc := service.NewSettingService(settingRepo)
 	logSvc := service.NewLogService(logRepo)
 	bookCategorySvc := service.NewBookCategoryService(bookCategoryRepo)
 	bookTagSvc := service.NewBookTagService(bookTagRepo)
@@ -95,6 +97,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	userHandler := v1.NewUserHandler(userSvc)
 	menuHandler := v1.NewMenuHandler(menuSvc)
 	dictHandler := v1.NewDictHandler(dictSvc)
+	settingHandler := v1.NewSettingHandler(settingSvc)
 	logHandler := v1.NewLogHandler(logSvc)
 	bookCategoryHandler := v1.NewBookCategoryHandler(bookCategorySvc)
 	bookTagHandler := v1.NewBookTagHandler(bookTagSvc)
@@ -190,6 +193,16 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			// --- Log ---
 			manage.POST("/log/login/page", logHandler.PageLogin)
 			manage.POST("/log/operation/page", logHandler.PageOperation)
+
+			// --- Setting ---
+			manage.GET("/setting/categories", settingHandler.Categories)
+			manage.GET("/setting/by-category/:category", settingHandler.GetByCategory)
+			manage.POST("/setting/batch-save", middleware.RequireButton(authSvc, "setting:update"), settingHandler.BatchSave)
+			manage.GET("/setting/:id", settingHandler.GetByID)
+			manage.POST("/setting/page", settingHandler.Page)
+			manage.POST("/setting", middleware.RequireButton(authSvc, "setting:create"), settingHandler.Create)
+			manage.PUT("/setting/:id", middleware.RequireButton(authSvc, "setting:update"), settingHandler.Update)
+			manage.DELETE("/setting/:id", middleware.RequireButton(authSvc, "setting:delete"), settingHandler.Delete)
 
 			// --- Book Category ---
 			bookCategory := api.Group("/book/category")

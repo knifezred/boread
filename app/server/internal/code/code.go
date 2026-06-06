@@ -157,6 +157,11 @@ var (
 	// ---- user ----
 	ErrUserExists = errors.New("用户名已存在")
 
+	// ---- setting ----
+	ErrSettingKeyExists   = errors.New("配置键已存在")
+	ErrSettingNotEditable = errors.New("该配置项不可编辑")
+	ErrSettingSystem      = errors.New("系统内置配置不可删除")
+
 	// ---- ugreen ----
 	ErrUgreenAuthFailed = errors.New("ugreen auth failed")
 )
@@ -326,6 +331,13 @@ func MapServiceError(err error) int {
 	// user
 	case errors.Is(err, ErrUserExists):
 		return ResourceConflict
+
+	// setting
+	case errors.Is(err, ErrSettingKeyExists):
+		return ResourceConflict
+	case errors.Is(err, ErrSettingNotEditable),
+		errors.Is(err, ErrSettingSystem):
+		return ResourceProtected
 
 	default:
 		return ServerError

@@ -28,6 +28,7 @@ declare module "@elegant-router/types" {
     "admin_library_book-chapter-rule": "/admin/library/book-chapter-rule";
     "admin_library_book-filter-rule": "/admin/library/book-filter-rule";
     "admin_library_book-tag": "/admin/library/book-tag";
+    "admin_setting": "/admin/setting";
     "admin_system": "/admin/system";
     "admin_system_dept": "/admin/system/dept";
     "admin_system_dict": "/admin/system/dict";
@@ -113,6 +114,7 @@ declare module "@elegant-router/types" {
     | "admin_library_book-filter-rule"
     | "admin_library_book-tag"
     | "admin_library_book"
+    | "admin_setting"
     | "admin_system_dept"
     | "admin_system_dict"
     | "admin_system_log"

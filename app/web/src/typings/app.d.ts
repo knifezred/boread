@@ -338,6 +338,7 @@ declare namespace App {
         action: string
         add: string
         addSuccess: string
+        all: string
         backToHome: string
         batchDelete: string
         cancel: string
@@ -912,6 +913,64 @@ declare namespace App {
                 clientIp: string
                 startTime: string
                 endTime: string
+              }
+            }
+            setting: {
+              title: string
+              save: string
+              saveSuccess: string
+              saveFailed: string
+              tab: {
+                database: string
+                scanDir: string
+                outputDir: string
+                recognitionRule: string
+                tagRule: string
+                titleFormat: string
+              }
+              database: {
+                host: string
+                port: string
+                username: string
+                password: string
+                dbname: string
+                hostPlaceholder: string
+                portPlaceholder: string
+                usernamePlaceholder: string
+                passwordPlaceholder: string
+                dbnamePlaceholder: string
+              }
+              scanDir: {
+                title: string
+                path: string
+                addPath: string
+                pathPlaceholder: string
+              }
+              outputDir: {
+                title: string
+                path: string
+                pathPlaceholder: string
+              }
+              recognitionRule: {
+                title: string
+                titlePattern: string
+                authorPattern: string
+                titlePatternPlaceholder: string
+                authorPatternPlaceholder: string
+              }
+              tagRule: {
+                title: string
+                name: string
+                pattern: string
+                addRule: string
+                namePlaceholder: string
+                patternPlaceholder: string
+              }
+              titleFormat: {
+                title: string
+                template: string
+                preview: string
+                templatePlaceholder: string
               }
             }
           }

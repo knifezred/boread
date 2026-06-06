@@ -10,6 +10,7 @@ const local: App.I18n.Schema = {
     action: 'Action',
     add: 'Add',
     addSuccess: 'Add Success',
+    all: 'All',
     backToHome: 'Back to home',
     batchDelete: 'Batch Delete',
     cancel: 'Cancel',
@@ -248,6 +249,7 @@ const local: App.I18n.Schema = {
     admin_system_menu: 'Menu Management',
     admin_system_role: 'Role Management',
     admin_system_dept: 'Department Management',
+    admin_setting: 'System Settings',
     admin_system_user: 'User Management',
     "admin_system_user-detail": 'User Detail',
     admin_library: 'Book Management',
@@ -662,7 +664,65 @@ const local: App.I18n.Schema = {
             startTime: 'Please enter start time',
             endTime: 'Please enter end time'
           }
-        }
+        },
+        setting: {
+          title: 'System Settings',
+          save: 'Save',
+          saveSuccess: 'Settings saved successfully',
+          saveFailed: 'Failed to save settings',
+          tab: {
+            database: 'Database',
+            scanDir: 'Scan Directories',
+            outputDir: 'Output Directory',
+            recognitionRule: 'Title/Author Rules',
+            tagRule: 'Tag Rules',
+            titleFormat: 'Title Format',
+          },
+          database: {
+            host: 'Host',
+            port: 'Port',
+            username: 'Username',
+            password: 'Password',
+            dbname: 'Database',
+            hostPlaceholder: 'e.g. localhost',
+            portPlaceholder: 'e.g. 3306',
+            usernamePlaceholder: 'Enter username',
+            passwordPlaceholder: 'Enter password',
+            dbnamePlaceholder: 'Enter database name',
+          },
+          scanDir: {
+            title: 'Scan Directory Config',
+            path: 'Directory Path',
+            addPath: 'Add Directory',
+            pathPlaceholder: 'Enter scan directory path',
+          },
+          outputDir: {
+            title: 'Output Directory Config',
+            path: 'Output Path',
+            pathPlaceholder: 'Enter output directory path',
+          },
+          recognitionRule: {
+            title: 'Title & Author Recognition Rules',
+            titlePattern: 'Title Pattern',
+            authorPattern: 'Author Pattern',
+            titlePatternPlaceholder: 'Regex to match chapter titles',
+            authorPatternPlaceholder: 'Regex to match author info',
+          },
+          tagRule: {
+            title: 'Tag Extraction Rules',
+            name: 'Rule Name',
+            pattern: 'Pattern',
+            addRule: 'Add Rule',
+            namePlaceholder: 'Enter rule name',
+            patternPlaceholder: 'Enter regex pattern',
+          },
+          titleFormat: {
+            title: 'Title Formatting Rules',
+            template: 'Template',
+            preview: 'Preview',
+            templatePlaceholder: 'e.g. Chapter {n} (n = chapter number)',
+          },
+        },
       },
       library: {
         bookCategory: {

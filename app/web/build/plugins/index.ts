@@ -30,7 +30,7 @@ export function setupVitePlugins(viteEnv: Env.ImportMeta, buildTime: string) {
     progress(),
     setupHtmlPlugin(buildTime),
     vueRootValidator(),
-    builder.pluginEntry()
+    // builder.pluginEntry()
   ]
 
   return plugins
