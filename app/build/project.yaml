@@ -15,6 +15,9 @@ tag_types:
   - media
 depend_fw_version: 1.13.0.0000
 depend_docker_version: ""
+# 支持迁移
+support_migration: true
+# 允许用户授权访问个人文件夹和共享文件夹
 allow_add_access_path: true
 i18n:
   en-US:
