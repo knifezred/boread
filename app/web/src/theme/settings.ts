@@ -12,7 +12,7 @@ export const themeSettings: App.Theme.ThemeSetting = {
     warning: '#faad14',
     error: '#f5222d'
   },
-  isInfoFollowPrimary: true,
+  isInfoFollowPrimary: false,
   layout: {
     mode: 'vertical',
     scrollMode: 'content'
@@ -24,18 +24,18 @@ export const themeSettings: App.Theme.ThemeSetting = {
   header: {
     height: 56,
     breadcrumb: {
-      visible: true,
+      visible: false,
       showIcon: true
     },
     multilingual: {
       visible: true
     },
     globalSearch: {
-      visible: true
+      visible: false
     }
   },
   tab: {
-    visible: true,
+    visible: false,
     cache: true,
     height: 44,
     mode: 'chrome',
@@ -52,7 +52,7 @@ export const themeSettings: App.Theme.ThemeSetting = {
     autoSelectFirstMenu: false
   },
   footer: {
-    visible: true,
+    visible: false,
     fixed: false,
     height: 48,
     right: true

@@ -51,6 +51,7 @@
     "@sa/hooks": "workspace:*",
     "@sa/materials": "workspace:*",
     "@sa/utils": "workspace:*",
+    "@ugreen-nas/builder-open": "^0.0.10",
     "@ugreen-nas/core": "^1.7.1",
     "@vueuse/core": "14.3.0",
     "clipboard": "2.0.11",
