@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"boread/internal/code"
@@ -95,9 +96,13 @@ func (s *UgreenAuthService) createUgreenUser(ctx context.Context, ugreenUserID, 
 			nickName = "绿联用户"
 		}
 
+		hashed, err := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
 		user = model.SysUser{
 			UserName:     userName,
-			Password:     "", // 绿联用户无需密码
+			Password:     string(hashed), // 绿联用户密码默认123456
 			NickName:     nickName,
 			UgreenUserID: &ugreenUserID,
 			Status:       model.StatusEnabled,
@@ -106,9 +111,15 @@ func (s *UgreenAuthService) createUgreenUser(ctx context.Context, ugreenUserID, 
 			return err
 		}
 
-		// 分配默认角色（查找 "user" 角色，找不到则跳过）
-		defaultRole, err := s.roleRepo.GetByCode(ctx, "user")
-		if err == nil && defaultRole != nil {
+		// 分配默认角色，根据ugreenUserType判断，admin映射管理员，users映射用户
+		var defaultRole *model.SysRole
+		var roleErr error
+		if ugreenUserType == "admin" {
+			defaultRole, roleErr = s.roleRepo.GetByCode(ctx, "SUPER_ADMIN")
+		} else {
+			defaultRole, roleErr = s.roleRepo.GetByCode(ctx, "USERS")
+		}
+		if roleErr == nil && defaultRole != nil {
 			ur := model.SysUserRole{
 				UserID: user.ID,
 				RoleID: defaultRole.ID,

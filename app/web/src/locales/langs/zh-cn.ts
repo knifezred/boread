@@ -57,7 +57,7 @@ const local: App.I18n.Schema = {
     },
     ugreenAuthorizing: "正在进行绿联授权登录...",
     ugreenSwitchToPwd: "切换到账号密码登录",
-    ugreenConfirmLogin: "确认登录",
+    ugreenConfirmLogin: "确认授权",
   },
   request: {
     logout: "请求失败后登出用户",

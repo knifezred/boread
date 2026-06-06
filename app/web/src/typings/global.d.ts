@@ -1,3 +1,5 @@
+import UGOSCore from '@ugreen-nas/core'
+
 export {};
 
 declare global {
@@ -12,6 +14,8 @@ declare global {
     $message?: import('naive-ui').MessageProviderInst;
     /** Notification instance */
     $notification?: import('naive-ui').NotificationProviderInst;
+    /** UGOSCore instance */
+    UGOSCore?: typeof UGOSCore;
   }
 
   /** Build time of the project */

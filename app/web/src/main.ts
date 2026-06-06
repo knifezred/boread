@@ -1,36 +1,41 @@
-import { createApp } from 'vue';
-import './plugins/assets';
-import { setupVueRootValidator } from 'vite-plugin-vue-transition-root-validator/client';
-import { setupAppVersionNotification, setupDayjs, setupIconifyOffline, setupLoading, setupNProgress } from './plugins';
-import { setupStore } from './store';
-import { setupRouter } from './router';
-import { getLocale, setupI18n } from './locales';
-import App from './App.vue';
+import { createApp } from 'vue'
+import './plugins/assets'
+import { setupVueRootValidator } from 'vite-plugin-vue-transition-root-validator/client'
+import { setupAppVersionNotification, setupDayjs, setupIconifyOffline, setupLoading, setupNProgress, setupUGOSCore } from './plugins'
+import { setupStore } from './store'
+import { setupRouter } from './router'
+import { getLocale, setupI18n } from './locales'
+import App from './App.vue'
 
 async function setupApp() {
-  setupLoading();
 
-  setupNProgress();
+  setupLoading()
 
-  setupIconifyOffline();
+  setupNProgress()
 
-  setupDayjs();
+  setupIconifyOffline()
 
-  const app = createApp(App);
+  setupDayjs()
 
-  setupStore(app);
 
-  await setupRouter(app);
+  const app = createApp(App)
 
-  setupI18n(app);
+  setupStore(app)
 
-  setupAppVersionNotification();
+  // 先初始化绿联网关（获取 ugreenToken），路由守卫中所有请求需要携带 Ugreen-Ttk
+  await setupUGOSCore()
+
+  await setupRouter(app)
+
+  setupI18n(app)
+
+  setupAppVersionNotification()
 
   setupVueRootValidator(app, {
     lang: getLocale() === 'zh-CN' ? 'zh' : 'en'
-  });
+  })
 
-  app.mount('#app');
+  app.mount('#app')
 }
 
-setupApp();
+setupApp()

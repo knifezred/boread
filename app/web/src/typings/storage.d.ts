@@ -43,5 +43,9 @@ declare namespace StorageType {
     setupDone: boolean;
     /** 用户是否手动切换到账号密码登录 */
     disableUgreen: boolean;
+    /** 是否为绿联环境 */
+    isUgreenEnv: boolean;
+    /** 绿联授权令牌 */
+    ugreenToken: string;
   }
 }

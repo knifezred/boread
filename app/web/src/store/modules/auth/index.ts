@@ -4,7 +4,6 @@ import { defineStore } from 'pinia'
 import { useLoading } from '@sa/hooks'
 import { fetchGetUserInfo, fetchLogin } from '@/service/api'
 import { fetchUgreenLogin } from '@/service/api/ugreen'
-import { getUgreenToken } from '@/hooks/business/ugreen'
 import { useRouterPush } from '@/hooks/common/router'
 import { localStg } from '@/utils/storage'
 import { SetupStoreId } from '@/enum'
@@ -167,22 +166,22 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
       token.value = maybeToken;
       const pass = await getUserInfo();
 
-      if (!pass) {
-        resetStore();
-      }
-      return;
+      if (pass) return;
+      resetStore();
     }
 
-    // 无本地 token 时尝试绿联NAS自动登录
+    // 无有效 token，尝试绿联NAS自动登录
     await loginByUgreen(false);
   }
 
   /** 绿联NAS登录 (在 UGOS 环境下自动获取 token 完成认证) */
   async function loginByUgreen(redirect = true) {
-    try {
-      const ugToken = await getUgreenToken();
-      if (!ugToken) return;
+    // setupUGOSCore 已在 main.ts 中提前运行并将 token 存入 localStorage,
+    // 这里直接从缓存读取，避免动态 import cloudWindow 在有些环境下失败
+    const ugToken = localStg.get('ugreenToken') as string | null;
+    if (!ugToken) return;
 
+    try {
       const { data: loginToken, error } = await fetchUgreenLogin();
 
       if (!error && loginToken) {
@@ -198,7 +197,9 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
           await redirectFromLogin(needRedirect);
         }
       }
-    } catch {
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      window.$message?.error(`绿联账户认证失败: ${errMsg}`);
       // 非 UGOS 环境或认证失败，静默降级到普通登录页
     }
   }
