@@ -1,6 +1,6 @@
 declare module '@ugreen-nas/core' {
   const UGOSCore: {
-    init(): void;
+    init(appInstance?: unknown, router?: unknown): Promise<string>;
   };
   export default UGOSCore;
 }
