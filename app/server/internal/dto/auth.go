@@ -18,6 +18,7 @@ type LoginResponse struct {
 type UserInfoResponse struct {
 	UserID   string   `json:"userId"`
 	UserName string   `json:"userName"`
+	NickName string   `json:"nickName"`
 	Roles    []string `json:"roles"`
 	Buttons  []string `json:"buttons"`
 }

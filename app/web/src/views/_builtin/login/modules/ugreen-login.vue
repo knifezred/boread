@@ -28,19 +28,35 @@ async function handleConfirm() {
   await authStore.loginByUgreen();
 }
 
-onMounted(async () => {
-  try {
-    const { data, error } = await fetchUgreenProfile();
-    if (error || !data) {
-      window.$message?.error("获取用户信息失败" + error.message);
-      return;
-    }
+/** 获取绿联用户信息，失败时延迟重试一次（网关首次可能未就绪） */
+async function loadProfile() {
+  loading.value = true;
+  errorMsg.value = "";
+
+  const { data, error } = await fetchUgreenProfile();
+  if (!error && data) {
     profile.value = data;
-  } catch {
-    window.$message?.error("获取用户信息失败");
-  } finally {
     loading.value = false;
+    return;
   }
+
+  // 首次失败 → 等待 1.5s 后重试
+  await new Promise((r) => setTimeout(r, 1500));
+  const retry = await fetchUgreenProfile();
+  if (!retry.error && retry.data) {
+    profile.value = retry.data;
+    loading.value = false;
+    return;
+  }
+
+  // 重试仍失败
+  const err = retry.error ?? error;
+  errorMsg.value = "获取用户信息失败: " + (err?.message ?? "请检查网络后重试");
+  loading.value = false;
+}
+
+onMounted(() => {
+  loadProfile();
 });
 </script>
 
@@ -59,9 +75,17 @@ onMounted(async () => {
     <!-- 加载失败 -->
     <template v-else-if="errorMsg">
       <NResult status="error" :title="errorMsg" size="small" />
-      <div class="flex-y-center justify-between gap-12px">
+      <div class="flex-col-center gap-12px w-full">
         <NButton
-          class="flex-1"
+          type="primary"
+          round
+          block
+          :loading="loading"
+          @click="loadProfile"
+        >
+          重试
+        </NButton>
+        <NButton
           round
           block
           type="success"

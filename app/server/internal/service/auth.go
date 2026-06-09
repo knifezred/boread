@@ -117,6 +117,7 @@ func (s *AuthService) GetUserInfo(ctx context.Context, userID uint64) (*dto.User
 	return &dto.UserInfoResponse{
 		UserID:   strconv.FormatUint(user.ID, 10),
 		UserName: user.UserName,
+		NickName: user.NickName,
 		Roles:    roles,
 		Buttons:  buttons,
 	}, nil

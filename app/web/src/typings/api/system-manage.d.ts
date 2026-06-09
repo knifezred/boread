@@ -69,6 +69,8 @@ declare namespace Api {
       userEmail: string;
       /** user role code collection */
       userRoles: string[];
+      /** user role ID collection */
+      roleIds: number[];
     }>;
 
     /** user search params */

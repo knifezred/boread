@@ -6,11 +6,19 @@ import cloudWindow from '@ugreen-nas/core/cloudWindow'
 /** 整体超时（毫秒），防止非绿联环境一直加载 */
 const UGOS_INIT_TIMEOUT = 3000
 
+/** UGOS 初始化 Promise，login 页等需要确保 token 就绪的场景可 await 此值 */
+export let ugosReady: Promise<void> = Promise.resolve()
+
 /** Setup plugin UGOS
  *  整体超时不超过 3 秒：init + getThirdToken 共用一个 deadline，
  *  任一环节卡住均视为非 UGOS 环境，静默降级。
  */
-export async function setupUGOSCore() {
+export function setupUGOSCore() {
+    ugosReady = doInit()
+    return ugosReady
+}
+
+async function doInit() {
     try {
       const info = await Promise.race([
         initAndGetToken(),

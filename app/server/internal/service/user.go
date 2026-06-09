@@ -114,11 +114,12 @@ func (s *UserService) Page(ctx context.Context, req *dto.UserSearch) (*dto.PageR
 	if err != nil {
 		return nil, err
 	}
-	// 批量补 roles
+	// 批量补 roles + roleIds
 	vos := make([]dto.UserVO, 0, len(rows))
 	for _, u := range rows {
 		roles, _ := s.repo.GetRoleCodesByUserID(ctx, u.ID)
-		vos = append(vos, toUserVO(&u, roles))
+		roleIDs, _ := s.repo.GetRoleIDsByUserID(ctx, u.ID)
+		vos = append(vos, toUserVO(&u, roles, roleIDs))
 	}
 	return dto.NewPageResponse(vos, total, &req.PageRequest), nil
 }
@@ -138,9 +139,12 @@ func (s *UserService) ResetPassword(ctx context.Context, id uint64, newPwd strin
 	})
 }
 
-func toUserVO(u *model.SysUser, roles []string) dto.UserVO {
+func toUserVO(u *model.SysUser, roles []string, roleIDs []uint64) dto.UserVO {
 	if roles == nil {
 		roles = []string{}
+	}
+	if roleIDs == nil {
+		roleIDs = []uint64{}
 	}
 	return dto.UserVO{
 		ID:         u.ID,
@@ -153,5 +157,6 @@ func toUserVO(u *model.SysUser, roles []string) dto.UserVO {
 		Avatar:     u.Avatar,
 		Status:     u.Status,
 		UserRoles:  roles,
+		RoleIDs:    roleIDs,
 	}
 }

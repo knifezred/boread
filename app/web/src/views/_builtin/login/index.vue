@@ -5,9 +5,9 @@ import { getPaletteColorByNumber, mixColor } from "@sa/color"
 import { loginModuleRecord } from "@/constants/app"
 import { useAppStore } from "@/store/modules/app"
 import { useThemeStore } from "@/store/modules/theme"
-import { useAuthStore } from "@/store/modules/auth"
 import { $t } from "@/locales"
 import { localStg } from "@/utils/storage"
+import { ugosReady } from "@/plugins"
 import PwdLogin from "./modules/pwd-login.vue"
 import CodeLogin from "./modules/code-login.vue"
 import Register from "./modules/register.vue"
@@ -24,7 +24,7 @@ const props = defineProps<Props>();
 
 const appStore = useAppStore();
 const themeStore = useThemeStore();
-const isUgreenEnv = computed(() => localStg.get('ugreenToken') !== null);
+const isUgreenEnv = computed(() => localStg.get("ugreenToken") !== null);
 
 const envChecked = ref(false);
 const disableUgreen = ref(localStg.get("disableUgreen") ?? false);
@@ -66,14 +66,10 @@ const activeModuleName = computed(() => {
 
 const activeModule = computed(() => moduleMap[activeModuleName.value]);
 
-onMounted(() => {
+onMounted(async () => {
+  // 等待 UGOS SDK 初始化完成（main.ts 中已启动但未 await）
+  await ugosReady;
   envChecked.value = true;
-  // 已缓存绿联认证凭据时触发自动登录，由 auth store 内部处理跳转，避免死循环
-  const hasUgreenToken = localStg.get('ugreenToken');
-  const hasUgreenEnv = localStg.get('isUgreenEnv');
-  if (hasUgreenToken && hasUgreenEnv) {
-    useAuthStore().loginByUgreen();
-  }
 });
 
 const bgThemeColor = computed(() =>

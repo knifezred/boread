@@ -87,27 +87,31 @@ const rules: Record<RuleKey, App.Global.FormRule> = {
   },
 };
 
-/** the enabled role options */
-const roleOptions = ref<CommonType.Option<string>[]>([]);
+/** the enabled role options (value = numeric id, 与后端 roleIds 对齐) */
+const roleOptions = ref<CommonType.Option<number>[]>([]);
+
+/** 当前选中的角色 ID 列表 */
+const selectedRoleIds = ref<number[]>([]);
 
 async function getRoleOptions() {
   const { error, data } = await fetchGetAllRoles();
 
   if (!error) {
-    const options = data.map((item) => ({
+    roleOptions.value = data.map((item) => ({
       label: item.roleName,
-      value: item.roleCode,
+      value: item.id,
     }));
-
-    roleOptions.value = [...options];
   }
 }
 
 function handleInitModel() {
   model.value = createDefaultModel();
+  selectedRoleIds.value = [];
 
   if (props.operateType === "edit" && props.rowData) {
     Object.assign(model.value, jsonClone(props.rowData));
+    // 后端直接返回 roleIds，无需转换
+    selectedRoleIds.value = props.rowData.roleIds ?? [];
   }
 }
 
@@ -118,11 +122,15 @@ function closeDrawer() {
 async function handleSubmit() {
   await validate();
   // request
+  const payload = {
+    ...model.value,
+    roleIds: selectedRoleIds.value,
+  };
   let requestResult;
   if (props.operateType === "edit") {
-    requestResult = await fetchUpdateUser(model.value.id, { ...model.value });
+    requestResult = await fetchUpdateUser(model.value.id, payload);
   } else {
-    requestResult = await fetchCreateUser({ ...model.value });
+    requestResult = await fetchCreateUser(payload);
   }
   if (requestResult.error) {
     window.$message?.error(requestResult.error.message);
@@ -133,8 +141,8 @@ async function handleSubmit() {
 
 watch(visible, () => {
   if (visible.value) {
-    handleInitModel();
     restoreValidation();
+    handleInitModel();
     getRoleOptions();
   }
 });
@@ -217,7 +225,7 @@ watch(visible, () => {
         </NFormItem>
         <NFormItem :label="$t('page.admin.system.user.userRole')" path="roles">
           <NSelect
-            v-model:value="model.userRoles"
+            v-model:value="selectedRoleIds"
             multiple
             :options="roleOptions"
             :placeholder="$t('page.admin.system.user.form.userRole')"

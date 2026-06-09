@@ -61,4 +61,5 @@ type UserVO struct {
 	Avatar     *string            `json:"avatar"`
 	Status     model.EnableStatus `json:"status"`
 	UserRoles  []string           `json:"userRoles"`
+	RoleIDs    []uint64           `json:"roleIds"`
 }
