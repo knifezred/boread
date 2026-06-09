@@ -25,7 +25,8 @@ function handleSwitchToPwd() {
 
 async function handleConfirm() {
   confirming.value = true;
-  await authStore.loginByUgreen();
+  // 新用户确认后才允许创建账号
+  await authStore.loginByUgreen(true, true);
 }
 
 /** 获取绿联用户信息，失败时延迟重试一次（网关首次可能未就绪） */
@@ -35,8 +36,7 @@ async function loadProfile() {
 
   const { data, error } = await fetchUgreenProfile();
   if (!error && data) {
-    profile.value = data;
-    loading.value = false;
+    await handleProfileLoaded(data);
     return;
   }
 
@@ -44,14 +44,26 @@ async function loadProfile() {
   await new Promise((r) => setTimeout(r, 1500));
   const retry = await fetchUgreenProfile();
   if (!retry.error && retry.data) {
-    profile.value = retry.data;
-    loading.value = false;
+    await handleProfileLoaded(retry.data);
     return;
   }
 
   // 重试仍失败
   const err = retry.error ?? error;
   errorMsg.value = "获取用户信息失败: " + (err?.message ?? "请检查网络后重试");
+  loading.value = false;
+}
+
+/** profile 加载成功后根据是否新用户决定自动登录或显示确认 UI */
+async function handleProfileLoaded(data: Api.Ugreen.UgreenProfile) {
+  if (!data.isNew) {
+    // 已有绑定账户 → 自动登录，无需用户操作
+    profile.value = data;
+    await authStore.loginByUgreen(true, false);
+  } else {
+    // 新用户 → 显示确认 UI，用户手动授权后才创建账号
+    profile.value = data;
+  }
   loading.value = false;
 }
 
@@ -96,56 +108,55 @@ onMounted(() => {
       </div>
     </template>
 
-    <!-- 用户信息 + 确认登录 -->
+    <!-- 新用户：展示绿联用户信息 + 授权确认 -->
     <template v-else-if="profile">
-      <!-- 用户信息卡片 -->
       <NCard :bordered="true" size="small" class="w-full">
-        <NFlex vertical :size="8">
+        <NFlex vertical :size="12">
+          <!-- 用户头像 + 账号名 -->
           <div class="flex items-center gap-10px">
-            <span class="text-20px">
-              <SvgIcon icon="solar:user-linear"></SvgIcon>
-            </span>
-            <span class="text-16px font-500">{{
-              profile.userName || profile.userId
-            }}</span>
+            <div class="flex-center size-40px rounded-full bg-primary/10">
+              <SvgIcon icon="solar:user-linear" class="text-22px text-primary" />
+            </div>
+            <div class="flex-1">
+              <div class="text-16px font-500">{{ profile.userName || "绿联用户" }}</div>
+              <div class="text-12px text-#999">{{ profile.userType === "admin" ? "管理员" : "普通用户" }}</div>
+            </div>
           </div>
-          <div class="text-12px text-#999 flex items-center gap-4px">
-            <span>ID:</span>
-            <span class="font-mono">{{ profile.userId }}</span>
-            <span class="ml-auto">{{ profile.userType }}</span>
+
+          <!-- 用户 ID -->
+          <div class="rounded-6px bg-#f5f5f5 px-12px py-8px dark:bg-#ffffff10">
+            <div class="text-12px text-#999">绿联用户 ID</div>
+            <div class="mt-2px font-mono text-14px font-500">{{ profile.userId }}</div>
           </div>
-          <div v-if="profile.isNew" class="text-12px text-#faad14 mt-4px">
-            将为你自动创建新账号
+
+          <!-- 提示 -->
+          <div class="text-12px text-#faad14">
+            当前绿联账号尚未绑定本地账户，点击授权将自动创建并登录
           </div>
-          <div v-else class="text-12px text-#52c41a mt-4px">已有绑定账号</div>
         </NFlex>
       </NCard>
 
-      <!-- 确认登录按钮 -->
-      <div class="flex-y-center justify-between gap-12px">
-        <NButton
-          type="primary"
-          size="large"
-          round
-          block
-          :loading="confirming"
-          @click="handleConfirm"
-        >
-          {{ $t("common.ugreenConfirmLogin") }}
-        </NButton>
-      </div>
+      <!-- 授权按钮 -->
+      <NButton
+        type="primary"
+        size="large"
+        round
+        block
+        :loading="confirming"
+        @click="handleConfirm"
+      >
+        授权登录并创建账号
+      </NButton>
+
       <!-- 切换到密码登录 -->
-      <div class="flex-y-center justify-between gap-12px">
-        <NButton
-          class="flex-1"
-          round
-          block
-          type="success"
-          @click="handleSwitchToPwd"
-        >
-          切换到账号密码登录
-        </NButton>
-      </div>
+      <NButton
+        round
+        block
+        type="success"
+        @click="handleSwitchToPwd"
+      >
+        切换到账号密码登录
+      </NButton>
     </template>
   </div>
 </template>

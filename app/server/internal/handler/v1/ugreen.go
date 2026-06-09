@@ -78,6 +78,17 @@ func (h *UgreenHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// create=true 时允许自动创建新用户（确认登录按钮），否则仅允许已绑定用户登录（路由守卫自动登录）
+	allowCreate := c.Query("create") == "true"
+
+	if !allowCreate {
+		user, err := h.ugreenAuthService.FindByUgreenID(c.Request.Context(), ugreenUserID)
+		if err != nil || user == nil {
+			response.Error(c, code.UgreenNewUser, "new ugreen user, registration required")
+			return
+		}
+	}
+
 	resp, err := h.ugreenAuthService.LoginOrRegister(
 		c.Request.Context(), ugreenUserID, ugreenUserName, ugreenUserType,
 	)

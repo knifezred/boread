@@ -11,6 +11,7 @@ import { $t } from '@/locales'
 import { useRouteStore } from '../route'
 import { useTabStore } from '../tab'
 import { clearAuthStorage, getToken } from './shared'
+import { ugosReady } from '@/plugins'
 
 export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
   const route = useRoute();
@@ -175,28 +176,32 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     await loginByUgreen(false);
   }
 
-  /** 绿联NAS登录 (在 UGOS 环境下自动获取 token 完成认证) */
-  async function loginByUgreen(redirect = true) {
-    // setupUGOSCore 已在 main.ts 中提前运行并将 token 存入 localStorage,
-    // 这里直接从缓存读取，避免动态 import cloudWindow 在有些环境下失败
+  /** 绿联NAS登录 (在 UGOS 环境下自动获取 token 完成认证)
+   * @param redirect  登录后是否重定向到首页
+   * @param allowCreate  是否允许自动创建新用户（确认按钮传 true，路由守卫传 false）
+   */
+  async function loginByUgreen(redirect = true, allowCreate = false) {
+    // 确保 UGOS SDK 初始化完成（main.ts 中启动但未 await）
+    await ugosReady;
+
     const ugToken = localStg.get('ugreenToken') as string | null;
     if (!ugToken) return;
 
     try {
-      const { data: loginToken, error } = await fetchUgreenLogin();
+      const { data: loginToken, error } = await fetchUgreenLogin(allowCreate);
 
-      if (!error && loginToken) {
-        const pass = await loginByToken(loginToken);
+      if (error || !loginToken) return;
 
-        if (pass) {
-          const isClear = checkTabClear();
-          let needRedirect = redirect;
+      const pass = await loginByToken(loginToken);
 
-          if (isClear) {
-            needRedirect = false;
-          }
-          await redirectFromLogin(needRedirect);
+      if (pass) {
+        const isClear = checkTabClear();
+        let needRedirect = redirect;
+
+        if (isClear) {
+          needRedirect = false;
         }
+        await redirectFromLogin(needRedirect);
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);

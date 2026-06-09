@@ -24,7 +24,7 @@ const props = defineProps<Props>();
 
 const appStore = useAppStore();
 const themeStore = useThemeStore();
-const isUgreenEnv = computed(() => localStg.get("ugreenToken") !== null);
+const isUgreenEnv = ref(localStg.get("ugreenToken") !== null);
 
 const envChecked = ref(false);
 const disableUgreen = ref(localStg.get("disableUgreen") ?? false);
@@ -69,6 +69,7 @@ const activeModule = computed(() => moduleMap[activeModuleName.value]);
 onMounted(async () => {
   // 等待 UGOS SDK 初始化完成（main.ts 中已启动但未 await）
   await ugosReady;
+  isUgreenEnv.value = localStg.get("ugreenToken") !== null;
   envChecked.value = true;
 });
 
