@@ -1059,6 +1059,9 @@ declare namespace App {
               uploadFile: string
               fileFormat: string
               uploadSuccess: string
+              uploadTitlePlaceholder: string
+              uploadAuthorPlaceholder: string
+              matchExistingBook: string
               uploadTitle: string
               uploadAuthor: string
               confirmImport: string
@@ -1143,6 +1146,7 @@ declare namespace App {
                   title: string
                   sampleText: string
                   runTest: string
+                  fillPatternFirst: string
                   titleMatches: string
                   groupMatches: string
                   noMatch: string

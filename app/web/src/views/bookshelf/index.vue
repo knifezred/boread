@@ -11,7 +11,6 @@ import {
     NForm,
     NFormItem,
     NDropdown,
-    useMessage,
 } from "naive-ui"
 import { useBoolean } from "@sa/hooks"
 import {
@@ -23,9 +22,8 @@ import {
 import { $t } from "@/locales"
 
 const router = useRouter();
-const message = useMessage();
 
-/** 加载状态 */
+// ==================== 状态 ====================
 const loading = ref(false);
 /** 书架数据 */
 const bookshelfData = ref<Api.BookManage.BookshelfItem[]>([]);
@@ -118,11 +116,13 @@ function handleReset() {
   loadData();
 }
 
+// ==================== 操作 ====================
+
 /** 切换置顶 */
 async function handleToggleTop(item: Api.BookManage.BookshelfItem) {
   const { error } = await fetchUpdateBookshelf(item.bookId, { isTop: !item.isTop });
   if (!error) {
-    message.success($t("common.updateSuccess"));
+    window.$message?.success($t("common.updateSuccess"));
     loadData();
   }
 }
@@ -131,7 +131,7 @@ async function handleToggleTop(item: Api.BookManage.BookshelfItem) {
 async function handleRemove(item: Api.BookManage.BookshelfItem) {
   const { error } = await fetchRemoveFromBookshelf(item.bookId);
   if (!error) {
-    message.success($t("common.deleteSuccess"));
+    window.$message?.success($t("common.deleteSuccess"));
     loadData();
   }
 }
@@ -142,7 +142,7 @@ async function handleUpdateGroup() {
     groupName: editingGroupName.value,
   });
   if (!error) {
-    message.success($t("common.updateSuccess"));
+    window.$message?.success($t("common.updateSuccess"));
     closeModal();
     loadData();
     loadGroups();

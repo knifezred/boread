@@ -1,9 +1,21 @@
 <script setup lang="ts">
-import { ref } from "vue"
-import { NButton, NForm, NFormItem, NInput, NModal, NProgress, NSpace, NText, NUpload, NUploadDragger, NAlert } from "naive-ui"
-import { useFormRules, useNaiveForm } from "@/hooks/common/form"
-import { fetchUploadBookFile, fetchConfirmImport } from "@/service/api"
-import { $t } from "@/locales"
+import { ref } from "vue";
+import {
+  NButton,
+  NForm,
+  NFormItem,
+  NInput,
+  NModal,
+  NProgress,
+  NSpace,
+  NText,
+  NUpload,
+  NUploadDragger,
+  NAlert,
+} from "naive-ui";
+import { useFormRules, useNaiveForm } from "@/hooks/common/form";
+import { fetchUploadBookFile, fetchConfirmImport } from "@/service/api";
+import { $t } from "@/locales";
 
 defineOptions({ name: "BookUploadModal" });
 
@@ -27,12 +39,17 @@ async function handleUpload(file: File) {
   uploadResult.value = null;
   importResult.value = null;
   importError.value = "";
-  const { error, data } = await fetchUploadBookFile(file, (p) => { uploadProgress.value = p; });
+  const { error, data } = await fetchUploadBookFile(file, (p) => {
+    uploadProgress.value = p;
+  });
   if (error) {
     importError.value = error.message || $t("common.operateFail");
   } else {
     uploadResult.value = data;
-    confirmModel.value = { title: data.suggestedTitle, author: data.suggestedAuthor };
+    confirmModel.value = {
+      title: data.suggestedTitle,
+      author: data.suggestedAuthor,
+    };
     step.value = "confirm";
   }
   uploading.value = false;
@@ -60,7 +77,12 @@ async function handleConfirm() {
   }
   importResult.value = data;
   importing.value = false;
-  window.$message?.success($t("page.admin.library.book.importSuccess", { title: data.bookTitle, count: data.chapterCount }));
+  window.$message?.success(
+    $t("page.admin.library.book.importSuccess", {
+      title: data.bookTitle,
+      count: data.chapterCount,
+    }),
+  );
   emit("imported");
 }
 
@@ -82,48 +104,118 @@ function resetState() {
 </script>
 
 <template>
-  <NModal v-model:show="visible" :title="$t('page.admin.library.book.uploadFile')" preset="card" class="w-520px" @update:show="(val) => { if (!val) resetState(); }">
+  <NModal
+    v-model:show="visible"
+    :title="$t('page.admin.library.book.uploadFile')"
+    preset="card"
+    class="w-520px"
+    @update:show="
+      (val) => {
+        if (!val) resetState();
+      }
+    "
+  >
     <!-- Step 1: Upload -->
     <template v-if="step === 'upload'">
-      <NUpload :multiple="false" :show-file-list="false" :disabled="uploading" @change="handleFileSelect" accept=".txt,.epub,.mobi,.pdf">
+      <NUpload
+        :multiple="false"
+        :show-file-list="false"
+        :disabled="uploading"
+        accept=".txt,.epub,.mobi,.pdf"
+        @change="handleFileSelect"
+      >
         <NUploadDragger>
           <div class="flex flex-col items-center gap-8px py-24px">
-            <SvgIcon class="text-12 color-primary" icon="solar:upload-linear"></SvgIcon>
+            <SvgIcon
+              class="text-12 color-primary"
+              icon="solar:upload-linear"
+            ></SvgIcon>
             <NText>{{ $t("page.admin.library.book.selectFile") }}</NText>
-            <NText depth="3" class="text-12px">{{ $t("page.admin.library.book.fileFormat") }}</NText>
+            <NText depth="3" class="text-12px">
+              {{ $t("page.admin.library.book.fileFormat") }}
+            </NText>
           </div>
         </NUploadDragger>
       </NUpload>
       <div v-if="uploading" class="mt-16px">
-        <NProgress :percentage="uploadProgress" :height="20" :indicator-placement="'inside'" processing />
+        <NProgress
+          :percentage="uploadProgress"
+          :height="20"
+          ndicator-placement="inside"
+          processing
+        />
       </div>
-      <NAlert v-if="importError && !uploadResult" :type="'error'" class="mt-16px" closable>
+      <NAlert
+        v-if="importError && !uploadResult"
+        type="error"
+        class="mt-16px"
+        closable
+      >
         {{ importError }}
       </NAlert>
     </template>
 
     <!-- Step 2: Confirm -->
     <template v-if="step === 'confirm'">
-      <NAlert type="success" class="mb-16px">{{ $t("page.admin.library.book.uploadSuccess") }}</NAlert>
-      <NAlert v-if="uploadResult?.matchedBookId" type="warning" class="mb-16px" closable>
-        已匹配到已有小说「{{ uploadResult.matchedBookTitle }}」，确认入库后将追加为新的文件版本
+      <NAlert type="success" class="mb-16px">
+        {{ $t("page.admin.library.book.uploadSuccess") }}
       </NAlert>
-      <NForm ref="formRef" :model="confirmModel" :rules="{ title: defaultRequiredRule }" label-placement="left" :label-width="80">
-        <NFormItem :label="$t('page.admin.library.book.uploadTitle')" path="title">
-          <NInput v-model:value="confirmModel.title" placeholder="请输入书名" />
+      <NAlert
+        v-if="uploadResult?.matchedBookId"
+        type="warning"
+        class="mb-16px"
+        closable
+      >
+        {{
+          $t("page.admin.library.book.matchExistingBook", {
+            title: uploadResult.matchedBookTitle,
+          })
+        }}
+      </NAlert>
+      <NForm
+        ref="formRef"
+        :model="confirmModel"
+        :rules="{ title: defaultRequiredRule }"
+        label-placement="left"
+        :label-width="80"
+      >
+        <NFormItem
+          :label="$t('page.admin.library.book.uploadTitle')"
+          path="title"
+        >
+          <NInput
+            v-model:value="confirmModel.title"
+            :placeholder="$t('page.admin.library.book.uploadTitlePlaceholder')"
+          />
         </NFormItem>
-        <NFormItem :label="$t('page.admin.library.book.uploadAuthor')" path="author">
-          <NInput v-model:value="confirmModel.author" placeholder="请输入作者" />
+        <NFormItem
+          :label="$t('page.admin.library.book.uploadAuthor')"
+          path="author"
+        >
+          <NInput
+            v-model:value="confirmModel.author"
+            :placeholder="$t('page.admin.library.book.uploadAuthorPlaceholder')"
+          />
         </NFormItem>
       </NForm>
       <div v-if="importing" class="mb-16px">
-        <NProgress :percentage="100" :height="20" :indicator-placement="'inside'" processing />
+        <NProgress
+          :percentage="100"
+          :height="20"
+          indicator-placement="inside"
+          processing
+        />
       </div>
-      <NAlert v-if="importError" :type="'error'" class="mb-16px" closable>
+      <NAlert v-if="importError" type="error" class="mb-16px" closable>
         {{ importError }}
       </NAlert>
       <NAlert v-if="importResult" type="success" class="mb-16px">
-        {{ $t("page.admin.library.book.importSuccess", { title: importResult.bookTitle, count: importResult.chapterCount }) }}
+        {{
+          $t("page.admin.library.book.importSuccess", {
+            title: importResult.bookTitle,
+            count: importResult.chapterCount,
+          })
+        }}
       </NAlert>
     </template>
 
@@ -134,7 +226,14 @@ function resetState() {
         </template>
         <template v-if="step === 'confirm'">
           <NButton @click="closeModal">{{ $t("common.close") }}</NButton>
-          <NButton v-if="!importResult" type="primary" :loading="importing" @click="handleConfirm">{{ $t("page.admin.library.book.confirmImport") }}</NButton>
+          <NButton
+            v-if="!importResult"
+            type="primary"
+            :loading="importing"
+            @click="handleConfirm"
+          >
+            {{ $t("page.admin.library.book.confirmImport") }}
+          </NButton>
         </template>
       </NSpace>
     </template>

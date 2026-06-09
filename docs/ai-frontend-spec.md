@@ -587,7 +587,7 @@ if (error) {
 - **禁止** 使用 `any` 类型
 - **必须** 给 `.vue` 组件写 `defineOptions({ name: 'Xxx' })`
 - **必须** 用 `defineModel<boolean>('visible')` 控制弹窗/抽屉显隐
-- **禁止** 直接修改路由文件（elegant-router 自动生成，新建`.vue`需要重启 dev server）
+- **禁止** 直接修改路由文件（elegant-router 自动生成）
 - **新建业务模块** 必须遵循 `三文件结构`（index + search + operate-modal）
 - **新建 API 函数** 必须在 `src/service/api/index.ts` 中 re-export
 - **列渲染** 用 TSX（`lang="tsx"`），页面逻辑用 TS（`lang="ts"`）
@@ -595,3 +595,4 @@ if (error) {
 - **`.d.ts` 文件用 `declare namespace`**，全局生效，不需要 export
 - **i18n 新增字段**只改 `zh-cn.ts` + `en-us.ts` 里的 `Schema` 对象，不改 `app.d.ts` 类型
 - **后端请求失败**统一用 `error.message` 显示，不直接显示原始错误
+- **消息提示/通知/对话框** 必须用全局挂载的 `window.$message`、`window.$notification`、`window.$dialog`、`window.$loadingBar`（在 `app-provider.vue` 中注册），**禁止** import `useMessage`/`useNotification`/`useDialog`/`useLoadingBar` 从 naive-ui

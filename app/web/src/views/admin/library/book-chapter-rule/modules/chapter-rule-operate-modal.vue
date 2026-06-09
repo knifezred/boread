@@ -44,7 +44,7 @@ function runRegexTest() {
   const groupPattern = model.value.groupPattern;
 
   if (!titlePattern && !groupPattern) {
-    window.$message?.warning("请先填写正则表达式");
+    window.$message?.warning($t("page.admin.library.bookChapterRule.form.regexTest.fillPatternFirst"));
     return;
   }
   if (!sampleText.value.trim()) {
