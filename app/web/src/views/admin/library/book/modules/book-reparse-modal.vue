@@ -10,7 +10,6 @@ interface Props { bookId: number; bookTitle: string; }
 const props = defineProps<Props>();
 
 interface Emits {
-  (e: "close"): void;
   (e: "reparsed"): void;
 }
 const emit = defineEmits<Emits>();
@@ -29,13 +28,11 @@ watch(visible, (val) => {
 async function loadRules() {
   rulesLoading.value = true;
   try {
-    // 获取可用规则（系统规则 + 当前用户的规则）
     const { data: ruleData } = await fetchGetChapterRuleList({
       current: 1, size: 999, ruleName: null, ruleType: null, userId: null, status: "1",
     });
     ruleList.value = ruleData?.records || [];
 
-    // 获取当前绑定规则
     const { data: bound } = await fetchGetBoundChapterRule(props.bookId);
     if (bound) {
       selectedRuleId.value = bound.ruleId;
@@ -43,7 +40,7 @@ async function loadRules() {
       selectedRuleId.value = 0;
     }
   } catch {
-    // ignore
+    // 加载规则失败使用默认规则
   } finally {
     rulesLoading.value = false;
   }
@@ -52,7 +49,6 @@ async function loadRules() {
 async function handleReparse() {
   actionLoading.value = true;
   try {
-    // 如果有选中规则且与当前绑定不同，先绑定
     if (selectedRuleId.value > 0) {
       const { data: currentBound } = await fetchGetBoundChapterRule(props.bookId);
       if (!currentBound || currentBound.ruleId !== selectedRuleId.value) {
@@ -67,7 +63,7 @@ async function handleReparse() {
       emit("reparsed");
     }
   } catch {
-    // ignore
+    // 重新识别失败不阻断
   } finally {
     actionLoading.value = false;
   }
@@ -79,7 +75,7 @@ function closeModal() {
 </script>
 
 <template>
-  <NModal v-model:show="visible" preset="card" :title="$t('page.admin.library.bookChapterRule.form.reParse.title')" class="w-550px">
+  <NModal v-model:show="visible" preset="card" :title="$t('page.admin.library.bookChapterRule.form.reParse.title') + ' - ' + props.bookTitle" class="w-550px">
     <NScrollbar class="max-h-400px pr-12px">
       <div class="mb-16px">
         <NAlert type="info" closable>
@@ -125,7 +121,7 @@ function closeModal() {
           </NCard>
 
           <div v-if="!rulesLoading && ruleList.length === 0" class="text-center text-#999 py-16px">
-            暂无可用规则
+            {{ $t("page.admin.library.bookChapterRule.noAvailableRules") }}
           </div>
         </NSpace>
       </NRadioGroup>

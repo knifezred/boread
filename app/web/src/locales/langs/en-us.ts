@@ -40,6 +40,8 @@ const local: App.I18n.Schema = {
     disable: 'Disable',
     operateSuccess: 'Operation successful',
     operateFail: "Operation failed",
+    success: "Success",
+    fail: "Failed",
     createTime: 'Create Time',
     updateTime: 'Update Time',
     pleaseCheckValue: 'Please check whether the value is valid',
@@ -311,7 +313,8 @@ const local: App.I18n.Schema = {
         title: 'Bind WeChat'
       },
       ugreenLogin: {
-        title: 'UGREEN Authorization'
+        title: 'UGREEN Authorization',
+        profileError: 'Failed to get user info. Please check your network and retry.'
       }
     },
     home: {
@@ -457,7 +460,8 @@ const local: App.I18n.Schema = {
       groupPlaceholder: "Enter group name",
       addToBookshelf: "Add to Bookshelf",
       notRead: "Not Read",
-      finished: "Finished"
+      finished: "Finished",
+      defaultGroup: "Default"
     },
     admin: {
       system: {
@@ -826,7 +830,35 @@ const local: App.I18n.Schema = {
           startUpload: "",
           reScan: "",
           scanResult: "",
-          scanning: ""
+          scanning: "",
+          scanPathEmpty: "Please enter scan path",
+          scanLocalDir: "Scan Local Directory",
+          scanPathPlaceholder: "Please enter local directory path",
+          startScan: "Start Scan",
+          scanningHint: "Scanning and importing, please wait...",
+          scanResultText: "Scan complete: {total} files found, {imported} imported, {failed} failed",
+          volumeTitle: "Volume {no}",
+          mainText: "Main Text",
+          chapterDraft: "Draft",
+          chapterOffline: "Offline",
+          selectChaptersFirst: "Please select chapters first",
+          needTwoChapters: "Please select at least 2 chapters to merge",
+          selectTargetChapter: "Please select target chapter",
+          mergeSuccess: "Merge successful",
+          enterTitleTemplate: "Please enter title template",
+          formatSuccess: "Format successful",
+          searchChapterTitle: "Search chapter title",
+          totalChaptersCount: "Total {count} chapters",
+          noChapters: "No chapters",
+          chapterCount: "({count} chapters)",
+          formatNumbers: "Format Numbers",
+          mergeChapters: "Merge Chapters",
+          batchEditTitle: "Batch Edit Title",
+          mergeHint: "Select target chapter. Selected source chapters will be merged into it.",
+          chapterNum: "Chapter {no}",
+          sourceChapter: "Source Chapter",
+          confirmMerge: "Confirm Merge",
+          batchTitleHint: "Enter title template, {n} represents chapter number",
         },
         bookChapterRule: {
           title: "",
@@ -844,6 +876,7 @@ const local: App.I18n.Schema = {
           addRule: "",
           editRule: "",
           rulePreview: "",
+          noAvailableRules: "No rules available",
           form: {
             ruleName: "",
             titlePattern: "",

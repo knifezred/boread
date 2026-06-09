@@ -3,37 +3,28 @@ import { ref } from "vue";
 import { NButton, NForm, NFormItem, NInput, NModal } from "naive-ui";
 import { $t } from "@/locales";
 
-export interface BookshelfOperateModalProps {
-  visible: boolean;
-}
+defineOptions({ name: "BookshelfOperateModal" });
 
-const props = defineProps<BookshelfOperateModalProps>();
+const visible = defineModel<boolean>("visible", { default: false });
 const emit = defineEmits<{
-  "update:visible": [visible: boolean];
   submitted: [groupName: string];
 }>();
 
-const groupName = ref("默认");
-
-function handleClose() {
-  emit("update:visible", false);
-}
+const groupName = ref($t("page.bookshelf.defaultGroup"));
 
 function handleSubmit() {
   emit("submitted", groupName.value);
-  groupName.value = "默认";
-  handleClose();
+  groupName.value = $t("page.bookshelf.defaultGroup");
+  visible.value = false;
 }
 </script>
 
 <template>
   <NModal
-    :show="props.visible"
+    v-model:show="visible"
     :title="$t('page.bookshelf.addToBookshelf')"
     preset="card"
     class="w-360px"
-    @close="handleClose"
-    @update:show="(val: boolean) => !val && handleClose()"
   >
     <NForm>
       <NFormItem :label="$t('page.bookshelf.groupName')">
@@ -43,7 +34,7 @@ function handleSubmit() {
         />
       </NFormItem>
       <div class="flex justify-end gap-8px mt-16px">
-        <NButton @click="handleClose">{{ $t("common.cancel") }}</NButton>
+        <NButton @click="visible = false">{{ $t("common.cancel") }}</NButton>
         <NButton type="primary" @click="handleSubmit">{{ $t("common.confirm") }}</NButton>
       </div>
     </NForm>

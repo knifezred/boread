@@ -368,6 +368,8 @@ declare namespace App {
         disable: string
         operateSuccess: string
         operateFail: string
+        success: string
+        fail: string
         createTime: string
         updateTime: string
         pleaseCheckValue: string
@@ -563,6 +565,7 @@ declare namespace App {
           }
           ugreenLogin: {
             title: string
+            profileError: string
           }
         }
         home: {
@@ -708,6 +711,7 @@ declare namespace App {
           addToBookshelf: string
           notRead: string
           finished: string
+          defaultGroup: string
         }
         admin: {
           system: {
@@ -1077,6 +1081,34 @@ declare namespace App {
               reScan: string
               scanResult: string
               scanning: string
+              scanPathEmpty: string
+              scanLocalDir: string
+              scanPathPlaceholder: string
+              startScan: string
+              scanningHint: string
+              scanResultText: string
+              volumeTitle: string
+              mainText: string
+              chapterDraft: string
+              chapterOffline: string
+              selectChaptersFirst: string
+              needTwoChapters: string
+              selectTargetChapter: string
+              mergeSuccess: string
+              enterTitleTemplate: string
+              formatSuccess: string
+              searchChapterTitle: string
+              totalChaptersCount: string
+              noChapters: string
+              chapterCount: string
+              formatNumbers: string
+              mergeChapters: string
+              batchEditTitle: string
+              mergeHint: string
+              chapterNum: string
+              sourceChapter: string
+              confirmMerge: string
+              batchTitleHint: string
             }
             bookChapterRule: {
               title: string
@@ -1094,6 +1126,7 @@ declare namespace App {
               addRule: string
               editRule: string
               rulePreview: string
+              noAvailableRules: string
               form: {
                 ruleName: string
                 titlePattern: string

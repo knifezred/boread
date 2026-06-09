@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue"
-import { NButton, NInput, NModal, NProgress, NSpace, NText, NAlert, NTag } from "naive-ui"
+import { NButton, NInput, NModal, NProgress, NSpace, NText, NAlert, NTag, NScrollbar } from "naive-ui"
 import { fetchScanPath } from "@/service/api"
 import { $t } from "@/locales"
 
@@ -16,7 +16,7 @@ const scanError = ref("");
 
 async function handleScan() {
   if (!scanPath.value.trim()) {
-    scanError.value = "请输入扫描路径";
+    scanError.value = $t("page.admin.library.book.scanPathEmpty");
     return;
   }
   scanning.value = true;
@@ -41,15 +41,15 @@ function closeModal() {
 </script>
 
 <template>
-  <NModal v-model:show="visible" title="扫描本地目录" preset="card" class="w-560px" @update:show="(val) => { if (!val) closeModal(); }">
-    <NInput v-model:value="scanPath" placeholder="请输入本地目录路径，如 D:\books" :disabled="scanning" class="mb-16px" />
+  <NModal v-model:show="visible" :title="$t('page.admin.library.book.scanLocalDir')" preset="card" class="w-560px" @update:show="(val) => { if (!val) closeModal(); }">
+    <NInput v-model:value="scanPath" :placeholder="$t('page.admin.library.book.scanPathPlaceholder')" :disabled="scanning" class="mb-16px" />
     <NButton type="primary" :loading="scanning" :disabled="!scanPath.trim()" @click="handleScan" class="mb-16px">
-      开始扫描
+      {{ $t("page.admin.library.book.startScan") }}
     </NButton>
 
     <div v-if="scanning" class="mb-16px">
       <NProgress :percentage="100" :height="20" :indicator-placement="'inside'" processing />
-      <NText depth="3" class="text-12px">正在扫描并入库，请稍候...</NText>
+      <NText depth="3" class="text-12px">{{ $t("page.admin.library.book.scanningHint") }}</NText>
     </div>
 
     <NAlert v-if="scanError" type="error" class="mb-16px" closable>
@@ -58,12 +58,12 @@ function closeModal() {
 
     <template v-if="scanResult">
       <NAlert type="success" class="mb-16px">
-        扫描完成：共发现 {{ scanResult.total }} 个文件，成功入库 {{ scanResult.imported }} 个，失败 {{ scanResult.failed }} 个
+        {{ $t("page.admin.library.book.scanResultText", { total: scanResult.total, imported: scanResult.imported, failed: scanResult.failed }) }}
       </NAlert>
       <NScrollbar class="max-h-240px">
         <div v-for="r in scanResult.results" :key="r.uploadId" class="flex items-center gap-8px py-4px border-b border-gray-200">
           <NTag :type="r.parseStatus === '3' ? 'success' : 'error'" size="small">
-            {{ r.parseStatus === "3" ? "成功" : "失败" }}
+            {{ r.parseStatus === "3" ? $t("common.success") : $t("common.fail") }}
           </NTag>
           <NText class="text-13px truncate flex-1">{{ r.originalName }}</NText>
           <NText v-if="r.parseMessage" depth="3" class="text-12px">{{ r.parseMessage }}</NText>

@@ -525,7 +525,7 @@ const locale: App.I18n.Schema = {
 };
 ```
 
-**重要**：**不需要** 手写 `I18nKey` union type。`I18nKey` 由 `GetI18nKey<Schema>` 递归类型自动推导（见 [`app.d.ts`](file:///c:/Users/zhang/repos/boread/app/web/src/typings/app.d.ts#L1206-L1215)）。只需往 `Schema` 对象里加字段，类型系统自动补全。
+**重要**：**不需要** 手写 `I18nKey` union type。`I18nKey` 由 `GetI18nKey<Schema>` 递归类型自动推导（见 [`app.d.ts`](app/web/src/typings/app.d.ts#L1206-L1215)）。只需往 `Schema` 对象里加字段，类型系统自动补全。
 
 ---
 
@@ -550,7 +550,7 @@ export const enableStatusOptions = transformRecordToOption(enableStatusRecord);
 
 ## 12. 前端错误处理
 
-后端统一返回 `{ code, message, data }` 结构，前端 `request` 层自动处理（见 [`request/index.ts`](file:///c:/Users/zhang/repos/boread/app/web/src/service/request/index.ts)）：
+后端统一返回 `{ code, message, data }` 结构，前端 `request` 层自动处理（见 [`request/index.ts`](app/web/src/service/request/index.ts)）：
 
 ```ts
 // 后端响应格式
@@ -581,7 +581,7 @@ if (error) {
 
 ## 13. AI 编码约束
 
-- **必须遵守** [`project-development.md`](file:///c:/Users/zhang/repos/boread/docs/project-development.md) 中的通用注意事项
+- **必须遵守** [`project-development.md`](docs/project-development.md) 中的通用注意事项
 - **必须** 使用 `$t()` 引用所有展示文本
 - **必须** 用 `request<T>()` 调用 API，必须带泛型参数（返回 `{ data, error }` 结构）
 - **禁止** 使用 `any` 类型

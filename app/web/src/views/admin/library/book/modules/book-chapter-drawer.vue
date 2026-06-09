@@ -19,7 +19,6 @@ defineOptions({ name: "BookChapterDrawer" })
 interface Props { bookId: number; bookTitle: string }
 const props = defineProps<Props>()
 const visible = defineModel<boolean>("visible", { default: false })
-
 // ==================== 数据 ====================
 const allChapters = ref<Api.BookManage.BookChapter[]>([])
 const checkedRowKeys = ref<number[]>([])
@@ -31,7 +30,7 @@ interface VolumeGroup {
   chapters: Api.BookManage.BookChapter[]
 }
 
-/** 展开状态，默认全部展开 */
+/** 展开状态 */
 const expandedVolumes = ref<Set<number | string>>(new Set())
 
 function toggleVolume(volumeNo: number | null) {
@@ -48,6 +47,13 @@ function isVolumeExpanded(volumeNo: number | null): boolean {
 // ==================== 搜索 ====================
 const searchTitle = ref("")
 const searchStatus = ref("")
+
+const statusOptions = computed(() => [
+  { label: $t("common.all"), value: "" },
+  { label: $t("common.enable"), value: "1" },
+  { label: $t("page.admin.library.book.chapterDraft"), value: "2" },
+  { label: $t("page.admin.library.book.chapterOffline"), value: "3" },
+])
 
 const filteredChapters = computed(() => {
   let list = allChapters.value
@@ -69,7 +75,9 @@ const volumeGroups = computed<VolumeGroup[]>(() => {
     if (!currentGroup || currentGroup.volumeNo !== ch.volumeNo) {
       currentGroup = {
         volumeNo: ch.volumeNo,
-        volumeTitle: ch.volumeTitle || (ch.volumeNo ? `第${ch.volumeNo}卷` : "正文"),
+        volumeTitle: ch.volumeTitle || (ch.volumeNo
+          ? $t("page.admin.library.book.volumeTitle", { no: ch.volumeNo })
+          : $t("page.admin.library.book.mainText")),
         chapters: [],
       }
       groups.push(currentGroup)
@@ -120,26 +128,42 @@ const flattenedItems = computed<FlatItem[]>(() => {
   return items
 })
 
+function getVolumeChapters(volumeNo: number | null): Api.BookManage.BookChapter[] {
+  return flattenedItems.value
+    .filter(f => f._type === 'chapter' && f._volumeNo === volumeNo)
+    .map(f => f.data as Api.BookManage.BookChapter)
+}
+
+function isVolumeAllChecked(group: VolumeGroup): boolean {
+  return group.chapters.length > 0 && group.chapters.every(ch => checkedRowKeys.value.includes(ch.id))
+}
+
+function toggleVolumeCheck(volumeNo: number | null) {
+  const chs = getVolumeChapters(volumeNo)
+  const allChecked = chs.every(c => checkedRowKeys.value.includes(c.id))
+  for (const c of chs) {
+    const i = checkedRowKeys.value.indexOf(c.id)
+    if (allChecked && i >= 0) checkedRowKeys.value.splice(i, 1)
+    else if (!allChecked && i < 0) checkedRowKeys.value.push(c.id)
+  }
+}
+
+function getVolumeIndeterminate(volumeNo: number | null): boolean {
+  const chs = getVolumeChapters(volumeNo)
+  return chs.some(c => checkedRowKeys.value.includes(c.id)) && !chs.every(c => checkedRowKeys.value.includes(c.id))
+}
+
 async function loadAllChapters() {
   loading.value = true
   const { data } = await fetchChapterList(props.bookId)
   if (data) {
     allChapters.value = data
-    // 重置展开状态：全部展开
-    const groups: VolumeGroup[] = []
-    let currentGroup: VolumeGroup | null = null
+    // 重置展开状态
+    const seen = new Set<number | string>()
     for (const ch of data) {
-      if (!currentGroup || currentGroup.volumeNo !== ch.volumeNo) {
-        currentGroup = {
-          volumeNo: ch.volumeNo,
-          volumeTitle: ch.volumeTitle || (ch.volumeNo ? `第${ch.volumeNo}卷` : "正文"),
-          chapters: [],
-        }
-        groups.push(currentGroup)
-      }
-      currentGroup.chapters.push(ch)
+      seen.add(ch.volumeNo ?? "__main__")
     }
-    expandedVolumes.value = new Set(groups.map(g => g.volumeNo ?? "__main__"))
+    expandedVolumes.value = seen
   }
   loading.value = false
 }
@@ -158,21 +182,17 @@ function toggleCheck(chapterId: number) {
   }
 }
 
-function isVolumeAllChecked(group: VolumeGroup): boolean {
-  return group.chapters.length > 0 && group.chapters.every(ch => checkedRowKeys.value.includes(ch.id))
-}
-
 // ==================== 批量禁用/启用 ====================
 async function handleBatchStatus(status: string) {
   if (checkedRowKeys.value.length === 0) {
-    window.$message?.warning("请先选择章节")
+    window.$message?.warning($t("page.admin.library.book.selectChaptersFirst"))
     return
   }
   const { error } = await fetchUpdateChapterStatus({ ids: checkedRowKeys.value, status })
   if (!error) {
     window.$message?.success($t("common.updateSuccess"))
     for (const ch of allChapters.value) {
-      if (checkedRowKeys.value.includes(ch.id)) (ch as any).status = status
+      if (checkedRowKeys.value.includes(ch.id)) (ch as { status: string }).status = status
     }
     checkedRowKeys.value = []
   }
@@ -186,23 +206,22 @@ const merging = ref(false)
 
 async function openMerge() {
   if (checkedRowKeys.value.length < 2) {
-    window.$message?.warning("请至少选择2个章节进行合并")
+    window.$message?.warning($t("page.admin.library.book.needTwoChapters"))
     return
   }
   mergeTargetId.value = null
-  // 直接用现有数据，避免额外请求
   allChaptersForMerge.value = allChapters.value
   openMergeModal()
 }
 
 async function handleMerge() {
   if (!mergeTargetId.value) {
-    window.$message?.warning("请选择目标章节")
+    window.$message?.warning($t("page.admin.library.book.selectTargetChapter"))
     return
   }
   const sourceIds = checkedRowKeys.value.filter((id) => id !== mergeTargetId.value)
   if (sourceIds.length === 0) {
-    window.$message?.warning("请至少选择2个章节进行合并")
+    window.$message?.warning($t("page.admin.library.book.needTwoChapters"))
     return
   }
   merging.value = true
@@ -213,7 +232,7 @@ async function handleMerge() {
   })
   merging.value = false
   if (!error) {
-    window.$message?.success("合并成功")
+    window.$message?.success($t("page.admin.library.book.mergeSuccess"))
     checkedRowKeys.value = []
     closeMergeModal()
     loadAllChapters()
@@ -226,7 +245,7 @@ const batchTitleTemplate = ref("")
 
 function openBatchTitle() {
   if (checkedRowKeys.value.length === 0) {
-    window.$message?.warning("请先选择章节")
+    window.$message?.warning($t("page.admin.library.book.selectChaptersFirst"))
     return
   }
   batchTitleTemplate.value = ""
@@ -235,7 +254,7 @@ function openBatchTitle() {
 
 async function handleBatchTitle() {
   if (!batchTitleTemplate.value.trim()) {
-    window.$message?.warning("请输入标题模板")
+    window.$message?.warning($t("page.admin.library.book.enterTitleTemplate"))
     return
   }
   const { error } = await fetchBatchUpdateChapterTitle({
@@ -252,12 +271,12 @@ async function handleBatchTitle() {
 // ==================== 格式化编号 ====================
 async function handleFormatNumbers() {
   if (checkedRowKeys.value.length === 0) {
-    window.$message?.warning("请先选择章节")
+    window.$message?.warning($t("page.admin.library.book.selectChaptersFirst"))
     return
   }
   const { error } = await fetchFormatChapterNumbers({ ids: checkedRowKeys.value })
   if (!error) {
-    window.$message?.success("格式化成功")
+    window.$message?.success($t("page.admin.library.book.formatSuccess"))
     checkedRowKeys.value = []
     loadAllChapters()
   }
@@ -298,20 +317,15 @@ function closeDrawer() {
         <div class="flex items-center gap-12px mb-16px shrink-0">
           <NInput
             v-model:value="searchTitle"
-            placeholder="搜索章节标题"
+            :placeholder="$t('page.admin.library.book.searchChapterTitle')"
             clearable
             style="width: 240px"
             size="small"
           />
           <NSelect
             v-model:value="searchStatus"
-            placeholder="全部状态"
-            :options="[
-              { label: '全部', value: '' },
-              { label: '启用', value: '1' },
-              { label: '草稿', value: '2' },
-              { label: '下架', value: '3' },
-            ]"
+            :placeholder="$t('common.all')"
+            :options="statusOptions"
             clearable
             style="width: 130px"
             size="small"
@@ -323,26 +337,23 @@ function closeDrawer() {
             {{ $t("common.reset") }}
           </NButton>
           <span class="text-xs text-gray-400 ml-auto">
-            共 {{ allChapters.length }} 章
+            {{ $t("page.admin.library.book.totalChaptersCount", { count: allChapters.length }) }}
           </span>
         </div>
 
-        <!-- 章节列表（虚拟滚动 + 分卷树） -->
+        <!-- 章节列表 -->
         <div class="flex-1" style="position: relative; min-height: 0;">
-          <!-- 加载中 -->
           <div v-if="loading" class="flex items-center justify-center h-full">
             <NSpin />
           </div>
 
-          <!-- 空状态 -->
           <div
             v-else-if="allChapters.length === 0"
             class="flex items-center justify-center h-full text-sm text-gray-400"
           >
-            暂无章节
+            {{ $t("page.admin.library.book.noChapters") }}
           </div>
 
-          <!-- 虚拟列表 -->
           <NVirtualList
             v-else
             :items="flattenedItems"
@@ -351,53 +362,50 @@ function closeDrawer() {
             class="h-full"
           >
             <template #default="{ item }">
-              <template v-if="item._type === 'volume'">
-                <!-- @ts-ignore -->
-                <div
-                  class="flex items-center gap-2 px-3 py-2 cursor-pointer select-none text-xs font-medium uppercase tracking-wider bg-[#fafafa] dark:bg-[#1e1e1e] border-b border-[#f0f0f0] dark:border-[#333]"
+              <!-- 分卷标题行 -->
+              <div
+                v-if="item._type === 'volume'"
+                class="flex items-center gap-2 px-3 py-2 cursor-pointer select-none text-xs font-medium uppercase tracking-wider bg-[#fafafa] dark:bg-[#1e1e1e] border-b border-[#f0f0f0] dark:border-[#333]"
+              >
+                <NCheckbox
+                  :checked="isVolumeAllChecked({ volumeNo: item._volumeNo, volumeTitle: item._volumeTitle, chapters: getVolumeChapters(item._volumeNo) })"
+                  :indeterminate="getVolumeIndeterminate(item._volumeNo)"
+                  @update:checked="toggleVolumeCheck(item._volumeNo)"
+                />
+                <span
+                  class="text-[10px] transition-transform duration-200"
+                  :class="isVolumeExpanded(item._volumeNo) ? 'rotate-90' : ''"
+                  @click="toggleVolume(item._volumeNo)"
                 >
-                  <NCheckbox
-                    :checked="isVolumeAllChecked({ volumeNo: item._volumeNo, volumeTitle: item._volumeTitle, chapters: flattenedItems.filter(f => f._type === 'chapter' && f._volumeNo === item._volumeNo).map(f => (f as any).data) })"
-                    :indeterminate="(() => { const chs = flattenedItems.filter(f => f._type === 'chapter' && f._volumeNo === item._volumeNo).map(f => (f as any).data as Api.BookManage.BookChapter); return chs.some(c => checkedRowKeys.includes(c.id)) && !chs.every(c => checkedRowKeys.includes(c.id)) })()"
-                    @update:checked="() => { const chs = flattenedItems.filter(f => f._type === 'chapter' && f._volumeNo === item._volumeNo).map(f => (f as any).data as Api.BookManage.BookChapter); const allChecked = chs.every(c => checkedRowKeys.includes(c.id)); for (const c of chs) { const i = checkedRowKeys.indexOf(c.id); if (allChecked && i >= 0) checkedRowKeys.splice(i, 1); else if (!allChecked && i < 0) checkedRowKeys.push(c.id) } }"
-                  />
-                  <span
-                    class="text-[10px] transition-transform duration-200"
-                    :class="isVolumeExpanded(item._volumeNo) ? 'rotate-90' : ''"
-                    @click="toggleVolume(item._volumeNo)"
-                  >
-                    ▸
-                  </span>
-                  <span
-                    class="text-gray-500 dark:text-gray-400"
-                    :class="isVolumeExpanded(item._volumeNo) ? 'text-primary' : ''"
-                    @click="toggleVolume(item._volumeNo)"
-                  >
-                    {{ item._volumeTitle }}
-                  </span>
-                  <span class="text-[10px] opacity-50">({{ item._chapterCount }}章)</span>
-                </div>
-              </template>
-              <template v-else>
-                <!-- @ts-ignore -->
-                <div
-                  class="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors duration-200 text-sm border-b border-[#f5f5f5] dark:border-[#2a2a2a] hover:bg-[#fafafa] dark:hover:bg-[#252525]"
+                  ▸
+                </span>
+                <span
+                  class="text-gray-500 dark:text-gray-400"
+                  :class="isVolumeExpanded(item._volumeNo) ? 'text-primary' : ''"
+                  @click="toggleVolume(item._volumeNo)"
                 >
-                  <!-- @ts-ignore -->
-                  <NCheckbox
-                    :checked="isChecked((item.data as any).id)"
-                    @update:checked="toggleCheck((item.data as any).id)"
-                  />
-                  <!-- @ts-ignore -->
-                  <span class="text-xs shrink-0 w-8 text-right text-gray-400">
-                    {{ (item.data as any).chapterNo }}
-                  </span>
-                  <!-- @ts-ignore -->
-                  <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {{ (item.data as any).title }}
-                  </span>
-                </div>
-              </template>
+                  {{ item._volumeTitle }}
+                </span>
+                <span class="text-[10px] opacity-50">
+                  {{ $t("page.admin.library.book.chapterCount", { count: item._chapterCount }) }}
+                </span>
+              </div>
+              <!-- 章节行 -->
+              <div
+                v-else
+                class="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors duration-200 text-sm border-b border-[#f5f5f5] dark:border-[#2a2a2a] hover:bg-[#fafafa] dark:hover:bg-[#252525]"
+              >
+                <NCheckbox
+                  :checked="isChecked(item.data!.id)"
+                  @update:checked="toggleCheck(item.data!.id)"
+                />
+                <span class="text-xs shrink-0 w-8 text-right text-gray-400">
+                  {{ item.data!.chapterNo }}
+                </span>
+                <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                  {{ item.data!.title }}
+                </span>
+              </div>
             </template>
           </NVirtualList>
         </div>
@@ -407,19 +415,19 @@ function closeDrawer() {
       <template #footer>
         <div class="flex items-center gap-8px">
           <NButton size="tiny" :disabled="checkedRowKeys.length === 0" @click="handleFormatNumbers">
-            格式化编号
+            {{ $t("page.admin.library.book.formatNumbers") }}
           </NButton>
           <NButton size="tiny" :disabled="checkedRowKeys.length < 2" @click="openMerge">
-            合并章节
+            {{ $t("page.admin.library.book.mergeChapters") }}
           </NButton>
           <NButton size="tiny" :disabled="checkedRowKeys.length === 0" @click="openBatchTitle">
-            批量改标题
+            {{ $t("page.admin.library.book.batchEditTitle") }}
           </NButton>
           <NButton size="tiny" :disabled="checkedRowKeys.length === 0" @click="handleBatchStatus('1')">
-            启用
+            {{ $t("common.enable") }}
           </NButton>
           <NButton size="tiny" :disabled="checkedRowKeys.length === 0" @click="handleBatchStatus('3')">
-            禁用
+            {{ $t("common.disable") }}
           </NButton>
           <NButton size="tiny" ghost @click="reparseVisible = true">
             {{ $t("page.admin.library.bookChapterRule.form.reParse.title") }}
@@ -432,9 +440,9 @@ function closeDrawer() {
       </template>
 
       <!-- 合并弹窗 -->
-      <NModal v-model:show="mergeVisible" preset="card" title="合并章节" style="width: 560px" :bordered="false">
+      <NModal v-model:show="mergeVisible" preset="card" :title="$t('page.admin.library.book.mergeChapters')" style="width: 560px" :bordered="false">
         <div class="mb-12px text-14px">
-          请选择目标章节，选中的源章节将合并到目标章节中
+          {{ $t("page.admin.library.book.mergeHint") }}
         </div>
         <NScrollbar style="max-height: 360px">
           <div
@@ -448,11 +456,11 @@ function closeDrawer() {
               :class="mergeTargetId === ch.id ? 'border-[#2080f0] bg-[#2080f0]' : 'border-#ccc'"
             />
             <span class="font-mono text-12px w-80px text-right">
-              第{{ String(ch.chapterNo).padStart(3, "0") }}章
+              {{ $t("page.admin.library.book.chapterNum", { no: String(ch.chapterNo).padStart(3, "0") }) }}
             </span>
             <span class="flex-1 truncate">{{ ch.title }}</span>
             <NTag v-if="checkedRowKeys.includes(ch.id)" size="tiny" type="warning">
-              源章节
+              {{ $t("page.admin.library.book.sourceChapter") }}
             </NTag>
           </div>
         </NScrollbar>
@@ -460,18 +468,18 @@ function closeDrawer() {
           <NSpace justify="end">
             <NButton @click="closeMergeModal">{{ $t("common.cancel") }}</NButton>
             <NButton type="primary" :loading="merging" :disabled="!mergeTargetId" @click="handleMerge">
-              确认合并
+              {{ $t("page.admin.library.book.confirmMerge") }}
             </NButton>
           </NSpace>
         </template>
       </NModal>
 
       <!-- 批量改标题弹窗 -->
-      <NModal v-model:show="batchTitleVisible" preset="card" title="批量改标题" style="width: 480px" :bordered="false">
+      <NModal v-model:show="batchTitleVisible" preset="card" :title="$t('page.admin.library.book.batchEditTitle')" style="width: 480px" :bordered="false">
         <div class="mb-12px text-13px text-#999">
-          输入标题模板，{n} 表示章节序号，例如：第{n}章
+          {{ $t("page.admin.library.book.batchTitleHint") }}
         </div>
-        <NInput v-model:value="batchTitleTemplate" placeholder="请输入标题模板" />
+        <NInput v-model:value="batchTitleTemplate" :placeholder="$t('page.admin.library.book.enterTitleTemplate')" />
         <template #footer>
           <NSpace justify="end">
             <NButton @click="closeBatchTitleModal">{{ $t("common.cancel") }}</NButton>

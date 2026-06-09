@@ -335,7 +335,7 @@ manage.PUT("/xxx/:id", middleware.RequireButton(authSvc, "xxx:update"), xxxHandl
 manage.DELETE("/xxx/:id", middleware.RequireButton(authSvc, "xxx:delete"), xxxHandler.Delete)
 ```
 
-**路由分组约定**（见 [`router.go`](file:///c:/Users/zhang/repos/boread/app/server/internal/router/router.go)）：
+**路由分组约定**（见 [`router.go`](app/server/internal/router/router.go)）：
 - `/api/auth/*` — 公开或登录态（无需 manage）
 - `/api/manage/*` — 后台管理，写操作需 `middleware.RequireButton(authSvc, "模块:操作")`
 - `/api/book/*` — 电子书管理子分组，同样写操作需按钮权限
@@ -380,7 +380,7 @@ func MapServiceError(err error) int {
 
 ## 6. 数据权限
 
-项目内置 5 种数据范围，由 `scope` 包统一处理（见 [`scope/data_scope.go`](file:///c:/Users/zhang/repos/boread/app/server/internal/scope/data_scope.go)）：
+项目内置 5 种数据范围，由 `scope` 包统一处理（见 [`scope/data_scope.go`](app/server/internal/scope/data_scope.go)）：
 
 | 范围 | 代码 | 含义 |
 |------|------|------|
@@ -440,7 +440,7 @@ func (r *BookRepository) Page(ctx context.Context, query *gorm.DB, size, offset 
 
 ## 8. AI 编码约束
 
-- **必须遵守** [`project-development.md`](file:///c:/Users/zhang/repos/boread/docs/project-development.md) 中的通用注意事项
+- **必须遵守** [`project-development.md`](docs/project-development.md) 中的通用注意事项
 - **必须检查** `code/code.go` 中是否已有现成的 `MapServiceError` 映射，新 error 必须加 case
 - **禁止** 引入当前 `go.mod` 中没有的依赖
 - **禁止** 在 Handler 中写业务逻辑或直接调用 Repository

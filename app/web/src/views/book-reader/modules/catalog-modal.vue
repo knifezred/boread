@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue"
 import { NModal, NScrollbar } from "naive-ui"
 import { fetchChapterList } from "@/service/api"
+import { $t } from "@/locales"
 
 defineOptions({ name: "CatalogModal" });
 
@@ -38,7 +39,9 @@ const volumeGroups = computed<VolumeGroup[]>(() => {
     if (!currentGroup || currentGroup.volumeNo !== ch.volumeNo) {
       currentGroup = {
         volumeNo: ch.volumeNo,
-        volumeTitle: ch.volumeTitle || (ch.volumeNo ? `第${ch.volumeNo}卷` : "正文"),
+        volumeTitle: ch.volumeTitle || (ch.volumeNo
+          ? $t("page.admin.library.book.volumeTitle", { no: ch.volumeNo })
+          : $t("page.admin.library.book.mainText")),
         chapters: [],
       };
       groups.push(currentGroup);

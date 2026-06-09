@@ -50,7 +50,7 @@ async function loadProfile() {
 
   // 重试仍失败
   const err = retry.error ?? error;
-  errorMsg.value = "获取用户信息失败: " + (err?.message ?? "请检查网络后重试");
+  errorMsg.value = (err?.message ?? $t("page.login.ugreenLogin.profileError"));
   loading.value = false;
 }
 
