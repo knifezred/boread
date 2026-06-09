@@ -13,6 +13,7 @@ import (
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
+	"boread/pkg/utils"
 )
 
 // BookChapterService 章节管理服务
@@ -143,15 +144,8 @@ func (s *BookChapterService) ReParseChapters(ctx context.Context, req *dto.RePar
 		return nil, fmt.Errorf("读取内容文件失败: %w", err)
 	}
 
-	// 检测编码，非 UTF-8 自动转码，并将文件持久化为 UTF-8（修复已有 GBK 书籍）
-	originalLen := len(data)
-	data = decodeToUTF8(data)
-	if len(data) != originalLen {
-		// 编码已被转换，写回 UTF-8 以保持字节偏移一致
-		if err := os.WriteFile(*file.ContentPath, data, 0644); err != nil {
-			return nil, fmt.Errorf("写入 UTF-8 内容文件失败: %w", err)
-		}
-	}
+	// 检测编码，非 UTF-8 转码后解析章节（仅在内存中进行，不修改原始文件）
+	data = utils.TryDecodeToUTF8(data)
 
 	// 获取章节识别规则：优先使用请求中指定的规则，其次检查书籍绑定的规则，最后使用用户默认规则
 	var rules []model.BookChapterRule

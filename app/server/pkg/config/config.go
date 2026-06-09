@@ -12,7 +12,12 @@ type Config struct {
 	Database DatabaseConfig `yaml:"database"`
 	JWT      JWTConfig      `yaml:"jwt"`
 	Log      LogConfig      `yaml:"log"`
+	CORS     CORSConfig     `yaml:"cors"`
 	Meta     MetaConfig     `yaml:"meta"`
+}
+
+type CORSConfig struct {
+	AllowedOrigins []string `yaml:"allowed_origins"` // 为空则允许所有源 (*)
 }
 
 type MetaConfig struct {

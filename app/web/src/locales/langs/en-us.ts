@@ -651,6 +651,13 @@ const local: App.I18n.Schema = {
           module: 'Module',
           action: 'Action',
           clientIp: 'Client IP',
+          requestMethod: 'Method',
+          requestUrl: 'URL',
+          responseCode: 'Status',
+          costMs: 'Cost(ms)',
+          targetId: 'Target ID',
+          message: 'Message',
+          detail: 'Detail',
           startTime: 'Start Time',
           endTime: 'End Time',
           form: {

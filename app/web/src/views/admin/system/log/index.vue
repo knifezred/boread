@@ -1,10 +1,10 @@
 <script setup lang="tsx">
-import { ref } from 'vue';
-import { NButton } from 'naive-ui';
-import { fetchGetLoginLogList, fetchGetOperationLogList } from '@/service/api';
-import { useAppStore } from '@/store/modules/app';
-import { defaultTransform, useNaivePaginatedTable } from '@/hooks/common/table';
-import { $t } from '@/locales';
+import { ref } from 'vue'
+import { NButton, NTag } from 'naive-ui'
+import { fetchGetLoginLogList, fetchGetOperationLogList } from '@/service/api'
+import { useAppStore } from '@/store/modules/app'
+import { defaultTransform, useNaivePaginatedTable } from '@/hooks/common/table'
+import { $t } from '@/locales'
 
 const appStore = useAppStore();
 
@@ -69,13 +69,36 @@ const {
       key: 'loginType',
       title: $t('page.admin.system.log.loginType'),
       align: 'center',
-      width: 100
+      width: 100,
+      render: row => {
+        const typeMap: Record<string, { label: string; type: 'default' | 'info' }> = {
+          '1': { label: '登录', type: 'info' },
+          '2': { label: '登出', type: 'default' }
+        };
+        const item = typeMap[row.loginType] || { label: row.loginType, type: 'default' };
+        return <NTag size="small" type={item.type}>{item.label}</NTag>;
+      }
     },
     {
       key: 'loginResult',
       title: $t('page.admin.system.log.loginResult'),
       align: 'center',
-      width: 100
+      width: 100,
+      render: row => {
+        const resultMap: Record<string, { label: string; type: 'success' | 'error' }> = {
+          '1': { label: '成功', type: 'success' },
+          '2': { label: '失败', type: 'error' }
+        };
+        const item = resultMap[row.loginResult] || { label: row.loginResult, type: 'error' };
+        return <NTag size="small" type={item.type}>{item.label}</NTag>;
+      }
+    },
+    {
+      key: 'message',
+      title: $t('page.admin.system.log.message'),
+      align: 'center',
+      minWidth: 160,
+      ellipsis: { tooltip: true }
     },
     {
       key: 'loginTime',
@@ -114,22 +137,64 @@ const {
       minWidth: 100
     },
     {
+      key: 'requestMethod',
+      title: $t('page.admin.system.log.requestMethod'),
+      align: 'center',
+      width: 90,
+      render: row => {
+        const methodMap: Record<string, 'success' | 'warning' | 'error' | 'info'> = {
+          POST: 'success',
+          PUT: 'warning',
+          DELETE: 'error',
+          PATCH: 'info'
+        };
+        const method = row.requestMethod || '';
+        return <NTag size="small" type={methodMap[method] || 'default'}>{method}</NTag>;
+      }
+    },
+    {
+      key: 'requestUrl',
+      title: $t('page.admin.system.log.requestUrl'),
+      align: 'left',
+      minWidth: 200,
+      ellipsis: { tooltip: true }
+    },
+    {
       key: 'module',
       title: $t('page.admin.system.log.module'),
       align: 'center',
-      width: 120
+      width: 100
     },
     {
       key: 'action',
       title: $t('page.admin.system.log.action'),
       align: 'center',
-      width: 120
+      width: 100
+    },
+    {
+      key: 'responseCode',
+      title: $t('page.admin.system.log.responseCode'),
+      align: 'center',
+      width: 90,
+      render: row => {
+        const code = row.responseCode;
+        if (code === null || code === undefined) return '-';
+        const type = code >= 200 && code < 300 ? 'success' : code >= 400 ? 'error' : 'warning';
+        return <NTag size="small" type={type}>{code}</NTag>;
+      }
+    },
+    {
+      key: 'costMs',
+      title: $t('page.admin.system.log.costMs'),
+      align: 'right',
+      width: 90,
+      render: row => `${row.costMs || 0}ms`
     },
     {
       key: 'clientIp',
       title: $t('page.admin.system.log.clientIp'),
       align: 'center',
-      width: 140
+      width: 130
     },
     {
       key: 'operateTime',
@@ -162,7 +227,7 @@ const {
         :data="loginData"
         size="small"
         :flex-height="!appStore.isMobile"
-        :scroll-x="962"
+        :scroll-x="1200"
         :loading="loginLoading"
         remote
         :row-key="row => row.id"
@@ -183,7 +248,7 @@ const {
         :data="operationData"
         size="small"
         :flex-height="!appStore.isMobile"
-        :scroll-x="962"
+        :scroll-x="1400"
         :loading="operationLoading"
         remote
         :row-key="row => row.id"

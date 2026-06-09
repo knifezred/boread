@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -10,6 +9,7 @@ import (
 	"boread/internal/dto"
 	"boread/internal/service"
 	"boread/pkg/response"
+	"boread/pkg/utils"
 )
 
 // AuthHandler 认证处理器
@@ -47,6 +47,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			response.Error(c, code.UserDisabled, "账号已禁用")
 		case errors.Is(err, code.ErrUserLocked):
 			response.Error(c, code.UserLocked, "账号已锁定, 请稍后再试")
+		case errors.Is(err, code.ErrUgreenPasswordLogin):
+			response.Error(c, code.UgreenPwdLogin, "绿联用户请通过网关登录")
 		default:
 			response.Error(c, code.ServerError, "登录失败")
 		}
@@ -64,7 +66,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Success   200  {object}  response.Response{data=dto.UserInfoResponse}
 // @Router    /api/auth/userInfo [get]
 func (h *AuthHandler) GetUserInfo(c *gin.Context) {
-	userID := getUserID(c)
+	userID := utils.GetUserID(c)
 	if userID == 0 {
 		response.Error(c, code.AuthFailed, "unauthorized")
 		return
@@ -86,7 +88,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 // @Success   200  {object}  response.Response{data=dto.MenuResponse}
 // @Router    /api/auth/menu [get]
 func (h *AuthHandler) GetUserMenu(c *gin.Context) {
-	userID := getUserID(c)
+	userID := utils.GetUserID(c)
 	if userID == 0 {
 		response.Error(c, code.AuthFailed, "unauthorized")
 		return
@@ -108,7 +110,7 @@ func (h *AuthHandler) GetUserMenu(c *gin.Context) {
 // @Success   200  {object}  response.Response{data=[]string}
 // @Router    /api/auth/buttons [get]
 func (h *AuthHandler) GetButtons(c *gin.Context) {
-	userID := getUserID(c)
+	userID := utils.GetUserID(c)
 	if userID == 0 {
 		response.Error(c, code.AuthFailed, "unauthorized")
 		return
@@ -120,23 +122,4 @@ func (h *AuthHandler) GetButtons(c *gin.Context) {
 		return
 	}
 	response.Success(c, codes)
-}
-
-func getUserID(c *gin.Context) uint64 {
-	v, ok := c.Get("user_id")
-	if !ok {
-		return 0
-	}
-	switch x := v.(type) {
-	case uint64:
-		return x
-	case uint:
-		return uint64(x)
-	case int64:
-		return uint64(x)
-	case string:
-		id, _ := strconv.ParseUint(x, 10, 64)
-		return id
-	}
-	return 0
 }

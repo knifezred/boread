@@ -91,6 +91,7 @@ func (h *UgreenHandler) Login(c *gin.Context) {
 
 	resp, err := h.ugreenAuthService.LoginOrRegister(
 		c.Request.Context(), ugreenUserID, ugreenUserName, ugreenUserType,
+		c.ClientIP(), c.Request.UserAgent(),
 	)
 	if err != nil {
 		if errors.Is(err, code.ErrUgreenAuthFailed) {

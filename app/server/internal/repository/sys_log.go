@@ -80,3 +80,8 @@ func (r *SysLogRepository) PageOperation(ctx context.Context, s *dto.OperationLo
 	}
 	return rows, total, nil
 }
+
+// CreateOperationLog 写入操作日志
+func (r *SysLogRepository) CreateOperationLog(log *model.SysOperationLog) error {
+	return r.db.Create(log).Error
+}

@@ -1,4 +1,4 @@
-import { request } from "../request";
+import { request } from "../request"
 
 // =====================================================================
 // 后端: boread (Go + Gin)
@@ -293,7 +293,7 @@ export function fetchGetDeptTree(params?: {
 
 /** 部门分页列表 */
 export function fetchGetDeptList(params?: Api.SystemManage.DeptSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Dept>>({
+  return request<Api.SystemManage.DeptList>({
     url: "/manage/dept/page",
     method: "post",
     data: params,
@@ -309,7 +309,7 @@ export function fetchGetDept(id: string | number) {
 }
 
 /** 新增部门 */
-export function fetchCreateDept(data: Record<string, any>) {
+export function fetchCreateDept(data: Partial<Api.SystemManage.Dept>) {
   return request<Api.SystemManage.Dept>({
     url: "/manage/dept",
     method: "post",
@@ -320,7 +320,7 @@ export function fetchCreateDept(data: Record<string, any>) {
 /** 编辑部门 */
 export function fetchUpdateDept(
   id: string | number,
-  data: Record<string, any>,
+  data: Partial<Api.SystemManage.Dept>,
 ) {
   return request<Api.SystemManage.Dept>({
     url: `/manage/dept/${id}`,
@@ -341,7 +341,7 @@ export function fetchDeleteDept(id: string | number) {
 
 /** 字典分页 */
 export function fetchGetDictList(params?: Api.SystemManage.DictSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Dict>>({
+  return request<Api.SystemManage.DictList>({
     url: "/manage/dict/page",
     method: "post",
     data: params,
@@ -357,7 +357,7 @@ export function fetchGetDict(id: string | number) {
 }
 
 /** 新增字典 */
-export function fetchCreateDict(data: Record<string, any>) {
+export function fetchCreateDict(data: Partial<Api.SystemManage.Dict>) {
   return request<Api.SystemManage.Dict>({
     url: "/manage/dict",
     method: "post",
@@ -368,7 +368,7 @@ export function fetchCreateDict(data: Record<string, any>) {
 /** 编辑字典 */
 export function fetchUpdateDict(
   id: string | number,
-  data: Record<string, any>,
+  data: Partial<Api.SystemManage.Dict>,
 ) {
   return request<Api.SystemManage.Dict>({
     url: `/manage/dict/${id}`,
@@ -448,7 +448,7 @@ export function fetchDeleteDictItem(id: string | number) {
 
 /** 登录日志分页 */
 export function fetchGetLoginLogList(params?: Api.SystemManage.LoginLogSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<any>>({
+  return request<Api.SystemManage.LoginLogList>({
     url: "/manage/log/login/page",
     method: "post",
     data: params,
@@ -457,7 +457,7 @@ export function fetchGetLoginLogList(params?: Api.SystemManage.LoginLogSearchPar
 
 /** 操作日志分页 */
 export function fetchGetOperationLogList(params?: Api.SystemManage.OperationLogSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<any>>({
+  return request<Api.SystemManage.OperationLogList>({
     url: "/manage/log/operation/page",
     method: "post",
     data: params,
@@ -468,7 +468,7 @@ export function fetchGetOperationLogList(params?: Api.SystemManage.OperationLogS
 
 /** 系统配置分页 */
 export function fetchGetSettingList(params?: Api.SystemManage.SettingSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<Api.SystemManage.Setting>>({
+  return request<Api.SystemManage.SettingList>({
     url: "/manage/setting/page",
     method: "post",
     data: params,

@@ -1,4 +1,4 @@
-import { request } from "../request";
+import { request } from "../request"
 
 // =====================================================================
 // 书籍章节管理 API
@@ -6,7 +6,7 @@ import { request } from "../request";
 
 /** 章节分页 */
 export function fetchGetChapterList(params?: Api.BookManage.ChapterSearchParams) {
-  return request<Api.Common.PaginatingQueryRecord<Api.BookManage.BookChapter>>({
+  return request<Api.BookManage.BookChapterList>({
     url: "/book/chapter/page",
     method: "post",
     data: params,

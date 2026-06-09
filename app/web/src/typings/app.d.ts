@@ -901,6 +901,13 @@ declare namespace App {
               module: string
               action: string
               clientIp: string
+              requestMethod: string
+              requestUrl: string
+              responseCode: string
+              costMs: string
+              targetId: string
+              message: string
+              detail: string
               startTime: string
               endTime: string
               form: {

@@ -24,6 +24,7 @@ const (
 	PermissionDenied = 2005 // 权限不足
 	UgreenAuthFailed = 2006 // 绿联认证失败
 	UgreenNewUser    = 2007 // 绿联新用户，需手动确认注册
+	UgreenPwdLogin   = 2008 // 绿联用户禁止密码登录
 
 	// ========== 业务 - 通用资源 ==========
 	ResourceConflict  = 3001 // 资源不存在/已存在/业务冲突
@@ -164,8 +165,9 @@ var (
 	ErrSettingSystem      = errors.New("系统内置配置不可删除")
 
 	// ---- ugreen ----
-	ErrUgreenAuthFailed = errors.New("ugreen auth failed")
-	ErrUgreenNewUser    = errors.New("new ugreen user, registration required")
+	ErrUgreenAuthFailed    = errors.New("ugreen auth failed")
+	ErrUgreenNewUser       = errors.New("new ugreen user, registration required")
+	ErrUgreenPasswordLogin = errors.New("ugreen user cannot login with password")
 )
 
 // Text 根据错误码返回中文消息
@@ -187,6 +189,7 @@ var errMsgMap = map[int]string{
 	PermissionDenied:        "权限不足",
 	UgreenAuthFailed:        "绿联认证失败",
 	UgreenNewUser:           "绿联新用户，需确认后注册",
+	UgreenPwdLogin:          "绿联用户禁止密码登录",
 	ResourceConflict:        "资源冲突或不存在",
 	ResourceProtected:       "系统内置资源不可操作",
 	HasBoundRef:             "仍有绑定关系不可删除",
@@ -221,6 +224,8 @@ func MapServiceError(err error) int {
 		return UgreenAuthFailed
 	case errors.Is(err, ErrUgreenNewUser):
 		return UgreenNewUser
+	case errors.Is(err, ErrUgreenPasswordLogin):
+		return UgreenPwdLogin
 	case errors.Is(err, ErrUserDisabled):
 		return UserDisabled
 	case errors.Is(err, ErrUserLocked):

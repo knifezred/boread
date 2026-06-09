@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"boread/pkg/config"
+	"boread/pkg/utils"
 )
 
 // MetaExtractor 元数据提取器
@@ -113,7 +114,7 @@ func NewMetaExtractor(rules ...config.MetaExtractRule) *MetaExtractor {
 // Extract 从文件名和内容提取书名和作者
 // 策略：先按优先级匹配文件名规则 → 匹配到书名后再匹配内容规则补充作者 → 匹配不到书名再从内容规则提取
 func (ex *MetaExtractor) Extract(data []byte, filename string) (title, author string) {
-	data = tryDecodeToUTF8(data)
+	data = utils.TryDecodeToUTF8(data)
 	base := strings.TrimSuffix(filename, filepath.Ext(filename))
 
 	// 1. 文件名规则提取

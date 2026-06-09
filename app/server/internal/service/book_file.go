@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"crypto/md5"
 	"errors"
@@ -10,16 +9,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"unicode/utf8"
 
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 	"gorm.io/gorm"
 
 	"boread/internal/code"
 	"boread/internal/dto"
 	"boread/internal/model"
 	"boread/internal/repository"
+	"boread/pkg/utils"
 )
 
 const (
@@ -159,7 +156,7 @@ func (s *BookFileService) ConfirmImport(ctx context.Context, req *dto.ConfirmImp
 	}
 
 	// 检测编码，非 UTF-8 自动转码
-	data = decodeToUTF8(data)
+	data = utils.TryDecodeToUTF8(data)
 
 	// 获取章节识别规则（全局默认规则，扫描任务不使用用户ID）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0)
@@ -524,7 +521,7 @@ func (s *BookFileService) scanSingle(ctx context.Context, up *model.BookUpload) 
 	}
 
 	// 检测编码，非 UTF-8 自动转码
-	data = decodeToUTF8(data)
+	data = utils.TryDecodeToUTF8(data)
 
 	// 获取章节识别规则（系统默认规则）
 	rules, _ := s.chapterRuleRepo.ListEffective(ctx, 0) // bookID=0 取系统默认规则
@@ -746,19 +743,6 @@ func (s *BookFileService) PageFile(ctx context.Context, req *dto.FileSearch) (*d
 }
 
 // ==================== 辅助函数 ====================
-
-// tryDecodeToUTF8 尝试将 GBK 编码数据转为 UTF-8，检测失败则返回原数据
-func tryDecodeToUTF8(data []byte) []byte {
-	// 如果已经是有效 UTF-8，直接返回
-	if utf8.Valid(data) {
-		return data
-	}
-	decoded, err := io.ReadAll(transform.NewReader(bytes.NewReader(data), simplifiedchinese.GBK.NewDecoder()))
-	if err != nil {
-		return data
-	}
-	return decoded
-}
 
 func sumWords(chapters []ChapterSegment) uint32 {
 	var total uint32

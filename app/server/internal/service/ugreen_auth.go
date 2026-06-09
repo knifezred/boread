@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -30,7 +32,8 @@ func NewUgreenAuthService(userRepo *repository.SysUserRepository, roleRepo *repo
 // ugreenUserID: 绿联平台用户ID
 // ugreenUserName: 绿联平台用户名
 // ugreenUserType: 绿联平台用户类型 (admin/users)
-func (s *UgreenAuthService) LoginOrRegister(ctx context.Context, ugreenUserID, ugreenUserName, ugreenUserType string) (*dto.UgreenLoginResponse, error) {
+// ip, ua: 客户端 IP 和 User-Agent，用于登录日志
+func (s *UgreenAuthService) LoginOrRegister(ctx context.Context, ugreenUserID, ugreenUserName, ugreenUserType, ip, ua string) (*dto.UgreenLoginResponse, error) {
 	if ugreenUserID == "" {
 		return nil, code.ErrUgreenAuthFailed
 	}
@@ -38,6 +41,7 @@ func (s *UgreenAuthService) LoginOrRegister(ctx context.Context, ugreenUserID, u
 	// 1. 按 ugreen_user_id 查找已有映射用户
 	user, err := s.FindByUgreenID(ctx, ugreenUserID)
 	if err != nil && err != gorm.ErrRecordNotFound {
+		s.writeLoginLog(ctx, nil, ugreenUserName, ip, ua, model.LoginResultFail, "query failed: "+err.Error())
 		return nil, err
 	}
 
@@ -45,6 +49,7 @@ func (s *UgreenAuthService) LoginOrRegister(ctx context.Context, ugreenUserID, u
 	if user == nil {
 		user, err = s.createUgreenUser(ctx, ugreenUserID, ugreenUserName, ugreenUserType)
 		if err != nil {
+			s.writeLoginLog(ctx, nil, ugreenUserName, ip, ua, model.LoginResultFail, "create user failed: "+err.Error())
 			return nil, err
 		}
 	}
@@ -55,12 +60,16 @@ func (s *UgreenAuthService) LoginOrRegister(ctx context.Context, ugreenUserID, u
 
 	token, expiresAt, err := jwtPkg.GenerateToken(user.ID, user.UserName)
 	if err != nil {
+		s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultFail, "generate token failed")
 		return nil, err
 	}
 	refreshToken, refreshExpiresAt, err := jwtPkg.GenerateRefreshToken(user.ID, user.UserName)
 	if err != nil {
+		s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultFail, "generate refresh token failed")
 		return nil, err
 	}
+
+	s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultSuccess, "ugreen login")
 
 	return &dto.UgreenLoginResponse{
 		Token:            token,
@@ -96,13 +105,15 @@ func (s *UgreenAuthService) createUgreenUser(ctx context.Context, ugreenUserID, 
 			nickName = "绿联用户"
 		}
 
-		hashed, err := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+		// 绿联用户只能通过网关授权登录，设置随机不可猜测密码禁用密码登录
+		randomPwd := generateRandomPassword(32)
+		hashed, err := bcrypt.GenerateFromPassword([]byte(randomPwd), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
 		user = model.SysUser{
 			UserName:     userName,
-			Password:     string(hashed), // 绿联用户密码默认123456
+			Password:     string(hashed), // 随机密码，无人知晓
 			NickName:     nickName,
 			UgreenUserID: &ugreenUserID,
 			Status:       model.StatusEnabled,
@@ -136,4 +147,26 @@ func (s *UgreenAuthService) createUgreenUser(ctx context.Context, ugreenUserID, 
 		return nil, err
 	}
 	return &user, nil
+}
+
+// writeLoginLog 写绿联登录日志，失败不影响主流程
+func (s *UgreenAuthService) writeLoginLog(ctx context.Context, userID *uint64, userName, ip, ua string, result model.LoginResult, msg string) {
+	log := &model.SysLoginLog{
+		UserType:    model.LoginUserTypeAdmin,
+		UserID:      userID,
+		UserName:    userName,
+		LoginIP:     &ip,
+		UserAgent:   &ua,
+		LoginType:   model.LoginTypeLogin,
+		LoginResult: result,
+		Message:     &msg,
+	}
+	_ = s.db.WithContext(ctx).Create(log).Error
+}
+
+// generateRandomPassword 生成指定长度的随机十六进制密码
+func generateRandomPassword(length int) string {
+	buf := make([]byte, (length+1)/2)
+	_, _ = rand.Read(buf)
+	return hex.EncodeToString(buf)[:length]
 }

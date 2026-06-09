@@ -28,6 +28,9 @@ declare namespace Api {
       Pick<BookCategory, "categoryName" | "categoryCode" | "parentId" | "status" | "isHot"> & CommonSearchParams
     >;
 
+    /** category list */
+    type BookCategoryList = Common.PaginatingQueryRecord<BookCategory>;
+
     /** hot category item */
     type HotCategoryItem = {
       id: number;
@@ -49,6 +52,9 @@ declare namespace Api {
     type TagSearchParams = CommonType.RecordNullable<
       { tagName: string } & CommonSearchParams
     >;
+
+    /** tag list */
+    type BookTagList = Common.PaginatingQueryRecord<BookTag>;
 
     // ==================== Book (Novel) ====================
 
@@ -101,6 +107,9 @@ declare namespace Api {
         updateTimeTo: string | null;
       } & CommonSearchParams
     >;
+
+    /** book list */
+    type BookList = Common.PaginatingQueryRecord<Book>;
 
     /** book create/update request */
     type BookRequest = {
@@ -193,6 +202,9 @@ declare namespace Api {
       { originalName: string; parseStatus: string; bookId: number | null } & CommonSearchParams
     >;
 
+    /** upload list */
+    type BookUploadList = Common.PaginatingQueryRecord<BookUpload>;
+
     /** book file record */
     type BookFile = Common.CommonRecord<{
       bookId: number;
@@ -216,6 +228,9 @@ declare namespace Api {
       { bookId: number | null; fileStatus: string; sourceType: string } & CommonSearchParams
     >;
 
+    /** file list */
+    type BookFileList = Common.PaginatingQueryRecord<BookFile>;
+
     /** book chapter */
     type BookChapter = Common.CommonRecord<{
       bookId: number;
@@ -235,6 +250,9 @@ declare namespace Api {
     type ChapterSearchParams = CommonType.RecordNullable<
       { bookId: number | null; fileId: number | null; chapterNo: number | null; title: string; status: string } & CommonSearchParams
     >;
+
+    /** chapter list */
+    type BookChapterList = Common.PaginatingQueryRecord<BookChapter>;
 
     /** chapter content response */
     type ChapterContentResponse = BookChapter & {
@@ -325,6 +343,9 @@ declare namespace Api {
       { ruleName: string; ruleType: string; userId: number | null; status: string } & CommonSearchParams
     >;
 
+    /** chapter rule list */
+    type BookChapterRuleList = Common.PaginatingQueryRecord<BookChapterRule>;
+
     // ==================== Book Chapter Rule Binding ====================
 
     /** chapter rule bind request */
@@ -378,6 +399,9 @@ declare namespace Api {
       { ruleName: string; applyStage: string; category: string; status: string } & CommonSearchParams
     >;
 
+    /** filter rule list */
+    type BookContentFilterRuleList = Common.PaginatingQueryRecord<BookContentFilterRule>;
+
     // ==================== Book Card Component Types ====================
 
     /** BookFilter 筛选条件值 */
@@ -423,6 +447,9 @@ declare namespace Api {
         keyword: string;
       } & CommonSearchParams
     >;
+
+    /** 书架列表 */
+    type BookshelfItemList = Common.PaginatingQueryRecord<BookshelfItem>;
 
     /** 添加到书架请求 */
     type BookshelfRequest = {

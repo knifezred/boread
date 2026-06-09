@@ -38,7 +38,7 @@ func main() {
 	portFlag := flag.Int("port", 0, "覆盖配置文件的 server.port (0=使用配置值)")
 	flag.Parse()
 
-	// 硬编码 JWT 默认值（配置文件不可用时保持默认）
+	// 初始化 JWT 默认值（仅作为配置不可用时的兜底）
 	jwtPkg.Init("boread-secret", 7200)
 
 	// 尝试加载配置文件
@@ -48,6 +48,17 @@ func main() {
 			log.Printf("WARN: 配置文件读取失败, 将使用默认值: %v", err)
 			config.Cfg = nil
 			cfgExists = false
+		}
+	}
+
+	// 配置文件中的 JWT 设置覆盖默认值
+	if cfgExists && config.Cfg != nil {
+		if config.Cfg.JWT.Secret != "" {
+			expire := config.Cfg.JWT.Expire
+			if expire <= 0 {
+				expire = 7200
+			}
+			jwtPkg.Init(config.Cfg.JWT.Secret, expire)
 		}
 	}
 
@@ -99,7 +110,7 @@ func startFullServer(seedFlag bool, portFlag int) {
 		return
 	}
 
-	r := router.SetupRouter(db)
+	r := router.SetupRouter(db, cfg.CORS.AllowedOrigins...)
 
 	port := cfg.Server.Port
 	if portFlag > 0 {
@@ -119,8 +130,14 @@ func runSetupMode(portFlag int) {
 	logger.Init("info", "logs/boread.log")
 	defer logger.Log.Sync()
 
+	// Setup 模式也读取 CORS 配置（如果有的话）
+	var corsOrigins []string
+	if config.Cfg != nil {
+		corsOrigins = config.Cfg.CORS.AllowedOrigins
+	}
+
 	r := gin.New()
-	r.Use(middleware.Cors())
+	r.Use(middleware.Cors(corsOrigins...))
 	r.Use(middleware.RequestLogger())
 	r.Use(gin.Recovery())
 
@@ -170,6 +187,15 @@ func runSetupMode(portFlag int) {
 	// 重新加载配置（SaveConfig 已写入 configs/config.yaml）
 	if err := config.Load("configs/config.yaml"); err != nil {
 		log.Fatalf("Failed to reload config after save: %v", err)
+	}
+
+	// 重启后用配置中的 JWT 设置
+	if config.Cfg.JWT.Secret != "" {
+		expire := config.Cfg.JWT.Expire
+		if expire <= 0 {
+			expire = 7200
+		}
+		jwtPkg.Init(config.Cfg.JWT.Secret, expire)
 	}
 
 	// 启动完整模式（不执行 seed）

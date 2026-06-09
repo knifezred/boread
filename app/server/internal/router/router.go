@@ -17,9 +17,9 @@ import (
 //   - 所有写操作受 button-level 鉴权保护
 //   - 只读接口仅要求登录, 不做 button 校验
 //   - /api/auth/* 是公开或登录态接口, 不参与 manage 模块的按钮鉴权
-func SetupRouter(db *gorm.DB) *gin.Engine {
+func SetupRouter(db *gorm.DB, corsOrigins ...string) *gin.Engine {
 	r := gin.New()
-	r.Use(middleware.Cors())
+	r.Use(middleware.Cors(corsOrigins...))
 	r.Use(middleware.RequestLogger())
 	r.Use(gin.Recovery())
 
@@ -118,6 +118,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	bookChapterRuleHandler := v1.NewBookChapterRuleHandler(bookChapterRuleSvc)
 
 	api := r.Group("/api")
+	api.Use(middleware.OperationLog(logRepo))
 	{
 		// 公开
 		api.POST("/auth/login", authHandler.Login)

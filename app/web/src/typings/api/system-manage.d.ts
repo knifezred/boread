@@ -239,6 +239,48 @@ declare namespace Api {
         CommonSearchParams
     >;
 
+    /** dict list */
+    type DictList = Common.PaginatingQueryRecord<Dict>;
+
+    /** login log row */
+    type LoginLog = {
+      id: number;
+      userType: string;
+      userId: number | null;
+      userName: string;
+      loginIp: string | null;
+      userAgent: string | null;
+      loginType: string;
+      loginResult: string;
+      message: string | null;
+      loginTime: string;
+    };
+
+    /** operation log row */
+    type OperationLog = {
+      id: number;
+      userId: number;
+      userName: string;
+      module: string;
+      action: string;
+      targetId: number | null;
+      targetName: string | null;
+      requestUrl: string | null;
+      requestMethod: string | null;
+      requestBody: string | null;
+      responseCode: number | null;
+      clientIp: string | null;
+      userAgent: string | null;
+      costMs: number;
+      operateTime: string;
+    };
+
+    /** login log list */
+    type LoginLogList = Common.PaginatingQueryRecord<LoginLog>;
+
+    /** operation log list */
+    type OperationLogList = Common.PaginatingQueryRecord<OperationLog>;
+
     /** login log search params */
     type LoginLogSearchParams = CommonType.RecordNullable<
       {
@@ -277,6 +319,9 @@ declare namespace Api {
       editable: boolean;
       isSystem: boolean;
     }>;
+
+    /** setting list */
+    type SettingList = Common.PaginatingQueryRecord<Setting>;
 
     /** setting search params */
     type SettingSearchParams = CommonType.RecordNullable<

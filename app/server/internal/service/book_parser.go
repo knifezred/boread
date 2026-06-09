@@ -12,8 +12,6 @@ import (
 	"unicode/utf8"
 
 	"boread/internal/model"
-
-	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 // =====================================================================
@@ -711,21 +709,6 @@ func compactWhitespace(s string) string {
 	return buf.String()
 }
 
-// decodeToUTF8 检测并转换非 UTF-8 编码（如 GBK/GB2312）到 UTF-8
-func decodeToUTF8(data []byte) []byte {
-	// 已经是有效 UTF-8，直接返回
-	if utf8.Valid(data) {
-		return data
-	}
-	// 尝试 GBK 解码
-	decoder := simplifiedchinese.GBK.NewDecoder()
-	utf8Data, err := decoder.Bytes(data)
-	if err == nil {
-		return utf8Data
-	}
-	// 解码失败，返回原始数据
-	return data
-}
 func countWords(data []byte) uint32 {
 	if len(data) == 0 {
 		return 0

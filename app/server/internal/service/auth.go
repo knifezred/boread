@@ -54,6 +54,12 @@ func (s *AuthService) Login(ctx context.Context, req *dto.LoginRequest, ip, ua s
 		return nil, code.ErrUserLocked
 	}
 
+	// 绿联映射用户禁止密码登录，必须通过网关授权
+	if user.UgreenUserID != nil {
+		s.writeLoginLog(ctx, &user.ID, user.UserName, ip, ua, model.LoginResultFail, "ugreen user cannot login with password")
+		return nil, code.ErrUgreenPasswordLogin
+	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		_ = s.userRepo.IncrErrorCount(ctx, user.ID)
 		if user.PwdErrorCount+1 >= maxPwdErrorCount {

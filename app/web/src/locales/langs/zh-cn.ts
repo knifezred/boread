@@ -652,6 +652,13 @@ const local: App.I18n.Schema = {
           module: "模块",
           action: "动作",
           clientIp: "客户端IP",
+          requestMethod: "请求方式",
+          requestUrl: "请求路径",
+          responseCode: "响应状态",
+          costMs: "耗时(ms)",
+          targetId: "目标ID",
+          message: "结果消息",
+          detail: "详情",
           startTime: "开始时间",
           endTime: "结束时间",
           form: {
