@@ -13,3 +13,4 @@ app/server/configs/config.yaml
 app/server/storage/
 app/web/pnpm-lock.yaml
 app/web/yarn.lock
+.trae/documents/*
