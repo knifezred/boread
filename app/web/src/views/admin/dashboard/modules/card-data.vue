@@ -1,115 +1,68 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { createReusableTemplate } from '@vueuse/core';
-import { useThemeStore } from '@/store/modules/theme';
-import { $t } from '@/locales';
-defineOptions({
-  name: 'CardData'
-});
+import { computed } from 'vue'
+import { $t } from '@/locales'
+import { useThemeStore } from '@/store/modules/theme'
 
-interface CardData {
-  key: string;
-  title: string;
-  value: number;
-  unit: string;
-  color: {
-    start: string;
-    end: string;
-  };
-  icon: string;
+defineOptions({ name: 'CardData' })
+
+const themeStore = useThemeStore()
+const dark = computed(() => themeStore.darkMode)
+
+interface CardItem {
+  key: string
+  label: string
+  value: number
+  unit: string
+  icon: string
+  accent: string
 }
 
-const cardData = computed<CardData[]>(() => [
-  {
-    key: 'visitCount',
-    title: $t('page.home.visitCount'),
-    value: 9725,
-    unit: '',
-    color: {
-      start: '#ec4786',
-      end: '#b955a4'
-    },
-    icon: 'ant-design:bar-chart-outlined'
-  },
-  {
-    key: 'turnover',
-    title: $t('page.home.turnover'),
-    value: 1026,
-    unit: '$',
-    color: {
-      start: '#865ec0',
-      end: '#5144b4'
-    },
-    icon: 'ant-design:money-collect-outlined'
-  },
-  {
-    key: 'downloadCount',
-    title: $t('page.home.downloadCount'),
-    value: 970925,
-    unit: '',
-    color: {
-      start: '#56cdf3',
-      end: '#719de3'
-    },
-    icon: 'carbon:document-download'
-  },
-  {
-    key: 'dealCount',
-    title: $t('page.home.dealCount'),
-    value: 9527,
-    unit: '',
-    color: {
-      start: '#fcbc25',
-      end: '#f68057'
-    },
-    icon: 'ant-design:trademark-circle-outlined'
-  }
-]);
+const cards = computed<CardItem[]>(() => [
+  { key: 'books', label: $t('page.home.totalBooks'), value: 12586, unit: '', icon: '📚', accent: '#d4a76a' },
+  { key: 'words', label: $t('page.home.totalWordCount'), value: 25680, unit: 'w', icon: '📝', accent: '#b8863d' },
+  { key: 'authors', label: $t('page.home.authorCount'), value: 156, unit: '', icon: '✍️', accent: '#8b5e2b' },
+  { key: 'tags', label: $t('page.home.tagCount'), value: 86, unit: '', icon: '🏷️', accent: '#a0763a' },
+  { key: 'rate', label: $t('page.home.completionRate'), value: 68, unit: '%', icon: '🎯', accent: '#6b4f28' },
+  { key: 'weekly', label: $t('page.home.weeklyNew'), value: 47, unit: '', icon: '✨', accent: '#b8863d' },
+  { key: 'reading', label: $t('page.home.totalReadingHours'), value: 2580, unit: $t('page.home.readingUnit'), icon: '⏱', accent: '#d4a76a' },
+  { key: 'readWords', label: $t('page.home.totalReadingWordCount'), value: 12580, unit: 'w', icon: '📖', accent: '#8b5e2b' },
+])
 
-interface GradientBgProps {
-  gradientColor: string;
-}
-
-const [DefineGradientBg, GradientBg] = createReusableTemplate<GradientBgProps>();
-
-const themeStore = useThemeStore();
-
-function getGradientColor(color: CardData['color']) {
-  return `linear-gradient(to bottom right, ${color.start}, ${color.end})`;
+function fmt(n: number): string {
+  if (n >= 10000) return (n / 10000).toFixed(1) + 'w'
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+  return String(n)
 }
 </script>
 
 <template>
-  <NCard :bordered="false" size="small" class="card-wrapper">
-    <!-- define component start: GradientBg -->
-    <DefineGradientBg v-slot="{ $slots, gradientColor }">
+  <NCard :bordered="false" size="small" class="!rd-10px">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
       <div
-        class="px-16px pb-4px pt-8px text-white"
-        :style="{ backgroundImage: gradientColor, borderRadius: themeStore.themeRadius + 'px' }"
+        v-for="c in cards"
+        :key="c.key"
+        class="flex items-center gap-3 rd-8px p-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+        :class="[dark ? 'bg-[#292929] hover:bg-[#323232] border border-[#383838]' : 'bg-white hover:bg-[#faf8f5] border border-[#efefef]']"
+        :style="{ '--accent': c.accent }"
       >
-        <component :is="$slots.default" />
+        <div
+          class="flex items-center justify-center w-10 h-10 rd-8px shrink-0 text-xl"
+          :style="{ background: `color-mix(in srgb, ${c.accent} 14%, transparent)` }"
+        >
+          {{ c.icon }}
+        </div>
+        <div class="flex flex-col gap-0.5 min-w-0">
+          <span
+            class="text-base font-bold leading-tight"
+            :class="dark ? 'text-[#e0dcd6]' : 'text-[#3a3028]'"
+          >
+            {{ fmt(c.value) }}<small v-if="c.unit" class="text-xs font-normal ml-0.5" :class="dark ? 'text-[#777]' : 'text-[#aaa]'">{{ c.unit }}</small>
+          </span>
+          <span class="text-xs truncate" :class="dark ? 'text-[#888]' : 'text-[#999]'">
+            {{ c.label }}
+          </span>
+        </div>
       </div>
-    </DefineGradientBg>
-    <!-- define component end: GradientBg -->
-
-    <NGrid cols="s:1 m:2 l:4" responsive="screen" :x-gap="16" :y-gap="16">
-      <NGi v-for="item in cardData" :key="item.key">
-        <GradientBg :gradient-color="getGradientColor(item.color)" class="flex-1">
-          <h3 class="text-16px">{{ item.title }}</h3>
-          <div class="flex justify-between pt-12px">
-            <SvgIcon :icon="item.icon" class="text-32px" />
-            <CountTo
-              :prefix="item.unit"
-              :start-value="1"
-              :end-value="item.value"
-              class="text-30px text-white dark:text-dark"
-            />
-          </div>
-        </GradientBg>
-      </NGi>
-    </NGrid>
+    </div>
   </NCard>
 </template>
-
-<style scoped></style>
-

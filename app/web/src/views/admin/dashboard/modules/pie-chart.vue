@@ -3,47 +3,45 @@ import { watch } from 'vue';
 import { useAppStore } from '@/store/modules/app';
 import { useEcharts } from '@/hooks/common/echarts';
 import { $t } from '@/locales';
-defineOptions({
-  name: 'PieChart'
-});
+defineOptions({ name: 'PieChart' });
 
 const appStore = useAppStore();
 
 const { domRef, updateOptions } = useEcharts(() => ({
-  tooltip: {
-    trigger: 'item'
-  },
+  tooltip: { trigger: 'item' },
   legend: {
     bottom: '1%',
     left: 'center',
-    itemStyle: {
-      borderWidth: 0
-    }
+    itemStyle: { borderWidth: 0 }
   },
   series: [
     {
-      color: ['#5da8ff', '#8e9dff', '#fedc69', '#26deca'],
-      name: $t('page.home.schedule'),
+      color: ['#d4a76a', '#b8863d', '#8b5e2b', '#a0763a', '#6b4f28'],
       type: 'pie',
       radius: ['45%', '75%'],
       avoidLabelOverlap: false,
       itemStyle: {
-        borderRadius: 10,
+        borderRadius: 6,
         borderColor: '#fff',
-        borderWidth: 1
+        borderWidth: 2
       },
       label: {
-        show: false,
-        position: 'center'
+        show: true,
+        formatter: '{b}\n{d}%',
+        fontSize: 11,
+        color: 'var(--n-text-color)',
+        lineHeight: 16
       },
       emphasis: {
-        label: {
-          show: true,
-          fontSize: '12'
+        label: { show: true, fontSize: 13, fontWeight: 'bold' },
+        itemStyle: {
+          shadowBlur: 10,
+          shadowColor: 'rgba(180, 140, 80, 0.3)'
         }
       },
       labelLine: {
-        show: false
+        show: true,
+        lineStyle: { color: 'rgba(180, 140, 80, 0.3)' }
       },
       data: [] as { name: string; value: number }[]
     }
@@ -51,59 +49,30 @@ const { domRef, updateOptions } = useEcharts(() => ({
 }));
 
 async function mockData() {
-  await new Promise(resolve => {
-    setTimeout(resolve, 1000);
-  });
-
+  await new Promise(r => setTimeout(r, 800));
   updateOptions(opts => {
     opts.series[0].data = [
-      { name: $t('page.home.study'), value: 20 },
-      { name: $t('page.home.entertainment'), value: 10 },
-      { name: $t('page.home.work'), value: 40 },
-      { name: $t('page.home.rest'), value: 30 }
+      { name: '玄幻奇幻', value: 35 },
+      { name: '言情', value: 25 },
+      { name: '科幻', value: 15 },
+      { name: '悬疑', value: 15 },
+      { name: '历史', value: 10 }
     ];
-
     return opts;
   });
 }
 
-function updateLocale() {
-  updateOptions((opts, factory) => {
-    const originOpts = factory();
+async function init() { mockData(); }
 
-    opts.series[0].name = originOpts.series[0].name;
-
-    opts.series[0].data = [
-      { name: $t('page.home.study'), value: 20 },
-      { name: $t('page.home.entertainment'), value: 10 },
-      { name: $t('page.home.work'), value: 40 },
-      { name: $t('page.home.rest'), value: 30 }
-    ];
-
-    return opts;
-  });
-}
-
-async function init() {
-  mockData();
-}
-
-watch(
-  () => appStore.locale,
-  () => {
-    updateLocale();
-  }
-);
-
-// init
+watch(() => appStore.locale, () => { init(); });
 init();
 </script>
 
 <template>
-  <NCard :bordered="false" class="card-wrapper">
-    <div ref="domRef" class="h-360px overflow-hidden"></div>
+  <NCard :bordered="false" class="card-wrapper" size="small">
+    <template #header>{{ $t('page.home.categoryDist') }}</template>
+    <div ref="domRef" class="h-300px overflow-hidden"></div>
   </NCard>
 </template>
 
 <style scoped></style>
-

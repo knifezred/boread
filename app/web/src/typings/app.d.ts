@@ -569,23 +569,62 @@ declare namespace App {
           }
         }
         home: {
-          branchDesc: string
           greeting: string
           weatherDesc: string
-          projectCount: string
-          todo: string
-          message: string
-          downloadCount: string
-          registerCount: string
-          schedule: string
-          study: string
-          work: string
-          rest: string
-          entertainment: string
-          visitCount: string
-          turnover: string
-          dealCount: string
-          projectNews: {
+          totalBooks: string
+          totalWordCount: string
+          totalReadingWordCount: string
+          tagCount: string
+          totalChapters: string
+          totalReadingHours: string
+          readingUnit: string
+          weeklyNew: string
+          bookCategories: string
+          bookTags: string
+          bookCharacters: string
+          recentImport: string
+          importTrend: string
+          readingCalendar: string
+          readingPreferences: string
+          readingHours: string
+          completionRate: string
+          completion: string
+          libraryTrend: string
+          monthlyNew: string
+          cumulativeTotal: string
+          weeklyPattern: string
+          topAuthors: string
+          readingStreak: string
+          currentStreak: string
+          longestStreak: string
+          totalSessions: string
+          categoryDist: string
+          readingTimeTop: string
+          tagDist: string
+          recentImports: string
+          authorCount: string
+          wordCountDist: string
+          short: string
+          medium: string
+          long: string
+          extraLong: string
+          recentlyEdited: string
+          editType: string
+          pendingBooks: string
+          goEdit: string
+          missingIntro: string
+          missingCategory: string
+          missingTags: string
+          randomRecommend: string
+          refresh: string
+          recommendReason: string
+          ratingDist: string
+          rating: string
+          favorites: string
+          readingByCategory: string
+          readingByTag: string
+          delete: string
+          recentActivity: {
             title: string
             moreNews: string
             desc1: string
@@ -593,8 +632,17 @@ declare namespace App {
             desc3: string
             desc4: string
             desc5: string
+            desc6: string
+            desc7: string
+            desc8: string
           }
-          creativity: string
+          activity: {
+            newBook: string
+            editBook: string
+            newCategory: string
+            newTag: string
+            newCharacter: string
+          }
         }
         book: {
           filter: {

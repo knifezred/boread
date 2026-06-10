@@ -1,34 +1,51 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { $t } from '@/locales';
-defineOptions({
-  name: 'ProjectNews'
-});
+import { computed } from 'vue'
+import { $t } from '@/locales'
 
-interface NewsItem {
-  id: number;
-  content: string;
-  time: string;
+defineOptions({ name: 'ProjectNews' })
+
+interface ActivityItem {
+  id: number
+  type: string
+  content: string
+  time: string
 }
 
-const newses = computed<NewsItem[]>(() => [
-  { id: 1, content: $t('page.home.projectNews.desc1'), time: '2021-05-28 22:22:22' },
-  { id: 2, content: $t('page.home.projectNews.desc2'), time: '2021-10-27 10:24:54' },
-  { id: 3, content: $t('page.home.projectNews.desc3'), time: '2021-10-31 22:43:12' },
-  { id: 4, content: $t('page.home.projectNews.desc4'), time: '2021-11-03 20:33:31' },
-  { id: 5, content: $t('page.home.projectNews.desc5'), time: '2021-11-07 22:45:32' }
-]);
+const activities = computed<ActivityItem[]>(() => [
+  { id: 1, type: $t('page.home.activity.newBook'), content: $t('page.home.recentActivity.desc1'), time: '2026-06-10 14:22' },
+  { id: 2, type: $t('page.home.activity.newCategory'), content: $t('page.home.recentActivity.desc2'), time: '2026-06-09 10:24' },
+  { id: 3, type: $t('page.home.activity.newTag'), content: $t('page.home.recentActivity.desc3'), time: '2026-06-08 22:43' },
+  { id: 4, type: $t('page.home.activity.newCharacter'), content: $t('page.home.recentActivity.desc4'), time: '2026-06-07 20:33' },
+  { id: 5, type: $t('page.home.activity.editBook'), content: $t('page.home.recentActivity.desc5'), time: '2026-06-06 22:45' },
+  { id: 6, type: $t('page.home.activity.newCategory'), content: $t('page.home.recentActivity.desc6'), time: '2026-06-05 15:12' },
+  { id: 7, type: $t('page.home.activity.newTag'), content: $t('page.home.recentActivity.desc7'), time: '2026-06-04 09:33' },
+  { id: 8, type: $t('page.home.delete'), content: '删除小说《仙王的日常生活》', time: '2026-06-03 11:45' },
+])
+
+function dotClass(type: string): string {
+  const map: Record<string, string> = {
+    [$t('page.home.activity.newBook')]: 'dot-book',
+    [$t('page.home.activity.editBook')]: 'dot-edit',
+    [$t('page.home.activity.newCategory')]: 'dot-cat',
+    [$t('page.home.activity.newTag')]: 'dot-tag',
+    [$t('page.home.activity.newCharacter')]: 'dot-char',
+  }
+  return map[type] || 'dot-edit'
+}
 </script>
 
 <template>
-  <NCard :title="$t('page.home.projectNews.title')" :bordered="false" size="small" segmented class="card-wrapper">
-    <template #header-extra>
-      <a class="text-primary" href="javascript:;">{{ $t('page.home.projectNews.moreNews') }}</a>
+  <NCard :bordered="false" size="small" class="!rd-10px">
+    <template #header>
+      <div class="flex items-center justify-between w-full">
+        <span>{{ $t('page.home.recentActivity.title') }}</span>
+        <a href="javascript:;" class="text-[#b8863d] text-xs no-underline hover:underline">{{ $t('page.home.recentActivity.moreNews') }}</a>
+      </div>
     </template>
     <NList>
-      <NListItem v-for="item in newses" :key="item.id">
+      <NListItem v-for="item in activities" :key="item.id">
         <template #prefix>
-          <SoybeanAvatar class="size-48px!" />
+          <span class="block w-2 h-2 rd-1/2" :class="dotClass(item.type)" />
         </template>
         <NThing :title="item.content" :description="item.time" />
       </NListItem>
@@ -36,5 +53,10 @@ const newses = computed<NewsItem[]>(() => [
   </NCard>
 </template>
 
-<style scoped></style>
-
+<style scoped>
+.dot-book { background: #d4a76a; }
+.dot-edit { background: #a0763a; }
+.dot-cat { background: #b8863d; }
+.dot-tag { background: #8b5e2b; }
+.dot-char { background: #e9bb7e; }
+</style>
